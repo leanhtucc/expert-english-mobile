@@ -10,7 +10,7 @@ import { Collapsible } from '@/components/ui/collapsible';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
 
-export default function TabTwoScreen() {
+export default function ExploreScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -37,12 +37,13 @@ export default function TabTwoScreen() {
       <Collapsible title="File-based routing">
         <ThemedText>
           This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+          <ThemedText type="defaultSemiBold">screens/home.screen.tsx</ThemedText> and{' '}
+          <ThemedText type="defaultSemiBold">screens/explore.screen.tsx</ThemedText>
         </ThemedText>
         <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
+          The navigation file in{' '}
+          <ThemedText type="defaultSemiBold">navigation/bottom-tab.navigator.tsx</ThemedText> sets
+          up the tab navigator.
         </ThemedText>
         <ExternalLink href="https://docs.expo.dev/router/introduction">
           <ThemedText type="link">Learn more</ThemedText>
@@ -102,14 +103,14 @@ export default function TabTwoScreen() {
 }
 
 const styles = StyleSheet.create({
+  titleContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   headerImage: {
     color: '#808080',
     bottom: -90,
     left: -35,
     position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
   },
 });

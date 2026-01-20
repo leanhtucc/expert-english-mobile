@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
-import { authApi } from '@/services';
-import type { User } from '@/types';
+import { authApi } from '@/api';
+import { User } from '@/types/entities';
 import { logger } from '@/utils/logger';
 
 /**
@@ -81,7 +81,7 @@ export const useAuthStore = create<AuthState>(set => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await authApi.register({ email, password, name });
+      const response = await authApi.register({ email, password, name, acceptTerms: true });
 
       set({
         user: response.user,

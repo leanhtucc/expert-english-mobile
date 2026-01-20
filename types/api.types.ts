@@ -1,4 +1,8 @@
 /**
+ * Generic API Types
+ */
+
+/**
  * Generic API State Interface
  */
 export interface ApiState<T> {
@@ -8,16 +12,27 @@ export interface ApiState<T> {
 }
 
 /**
- * API Response Wrapper
+ * Generic API Response Wrapper
  */
 export interface ApiResponse<T> {
   data: T;
   message?: string;
   success: boolean;
+  statusCode?: number;
 }
 
 /**
- * Pagination
+ * API Error Response
+ */
+export interface ApiErrorResponse {
+  message: string;
+  error?: string;
+  statusCode: number;
+  timestamp?: string;
+}
+
+/**
+ * Pagination Parameters
  */
 export interface PaginationParams {
   page?: number;
@@ -26,6 +41,9 @@ export interface PaginationParams {
   order?: 'asc' | 'desc';
 }
 
+/**
+ * Paginated Response
+ */
 export interface PaginatedResponse<T> {
   data: T[];
   pagination: {
@@ -33,5 +51,16 @@ export interface PaginatedResponse<T> {
     page: number;
     limit: number;
     totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
   };
+}
+
+/**
+ * API Request Config
+ */
+export interface ApiRequestConfig {
+  headers?: Record<string, string>;
+  params?: Record<string, string | number>;
+  timeout?: number;
 }

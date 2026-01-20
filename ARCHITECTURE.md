@@ -54,13 +54,13 @@ import type { Lesson, LoginRequest, User } from '@/types';
 - ✅ Export qua `types/index.ts`
 - ✅ Sử dụng `type` imports để tránh circular dependencies
 
-### 2️⃣ Services Layer (`services/`)
+### 2️⃣ API Layer (`api/`)
 
 **Mục đích**: Xử lý tất cả API calls
 
 ```typescript
-// Import services
-import { authApi, lessonsApi } from '@/services';
+// Import API
+import { authApi, lessonsApi } from '@/api';
 
 // Sử dụng
 const user = await authApi.login({ email, password });
@@ -159,7 +159,7 @@ export const usersApi = {
 ```typescript
 import { create } from 'zustand';
 
-import { usersApi } from '@/services';
+import { usersApi } from '@/api';
 import type { ApiState, User } from '@/types';
 
 interface UsersState extends ApiState<User[]> {
@@ -214,7 +214,7 @@ export default function UsersScreen() {
 ```typescript
 // ✅ Import từ central exports
 import { User, Lesson } from '@/types';
-import { authApi, lessonsApi } from '@/services';
+import { authApi, lessonsApi } from '@/api';
 import { useAuthStore } from '@/stores';
 
 // ✅ Sử dụng type imports

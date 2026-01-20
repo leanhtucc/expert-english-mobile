@@ -1,50 +1,261 @@
-# Welcome to your Expo app 👋
+# ExpertEnglish 📚
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+English learning mobile app built with React Native, Expo, and TypeScript.
 
-## Get started
+## 🚀 Quick Start
 
-1. Install dependencies
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+
+# Run on specific platform
+npm run android   # Android emulator/device
+npm run ios       # iOS simulator (macOS only)
+npm run web       # Web browser
+```
+
+## 📖 Documentation
+
+- **[Development Guide](./docs/DEVELOPMENT.md)** - Complete setup & development workflow
+- **[API Guide](./docs/API_GUIDE.md)** - API development guide với interceptors
+- **[Architecture](./ARCHITECTURE.md)** - Project architecture & best practices
+- **[Theme Guide](./docs/THEME.md)** - Theme customization
+- **[Security](./SECURITY.md)** - Security guidelines
+- **[Environment Setup](./README.ENV.md)** - Environment variables config
+
+## ✨ Features
+
+- 🔐 **Authentication** - Secure login/register với JWT tokens
+- 📱 **Bottom Tab Navigation** - Clean navigation structure
+- 🎨 **Dark Mode Support** - Complete theme system
+- 🌍 **i18n** - Multi-language support (English/Vietnamese)
+- 📊 **State Management** - Zustand stores
+- 🔧 **Type-Safe API** - Full TypeScript support + Auto-complete
+- 🛡️ **API Interceptors** - Auto auth token, error handling, logging
+- 💾 **Secure Storage** - Encrypted data storage với expo-secure-store
+
+## 🏗️ Tech Stack
+
+- **React Native** 0.81.5 - Mobile framework
+- **Expo** ~54.0 - Development platform
+- **TypeScript** 5.9 - Type safety
+- **Expo Router** 6.0 - File-based routing
+- **Zustand** 5.0 - State management
+- **TailwindCSS** (NativeWind) - Utility-first styling
+- **React Navigation** 7.x - Navigation library
+
+## 📁 Project Structure
+
+```
+ExpertEnglish/
+├── api/                  # API layer
+│   ├── client.ts        # API client với interceptors
+│   ├── endpoints/       # API endpoints (auth, lessons)
+│   ├── interceptors/    # Auth, Error, Logging interceptors
+│   └── config/          # API configuration
+├── app/                 # Expo Router app directory
+│   ├── _layout.tsx     # Root layout
+│   ├── index.tsx       # Entry point
+│   └── modal.tsx       # Modal screen
+├── screens/             # Screen components
+│   ├── home.screen.tsx
+│   └── explore.screen.tsx
+├── navigation/          # Navigation configuration
+│   ├── bottom-tab.navigator.tsx
+│   └── navigation.service.ts
+├── components/          # Reusable UI components
+├── stores/              # Zustand state stores
+│   ├── auth.store.ts
+│   ├── lessons.store.ts
+│   └── app.store.ts
+├── types/               # TypeScript types
+│   ├── api/            # API request/response types
+│   ├── entities/       # Domain models
+│   └── api.types.ts    # Generic API types
+├── utils/               # Utility functions
+├── hooks/               # Custom React hooks
+├── constants/           # App constants
+├── translations/        # i18n translations (en, vi)
+└── docs/                # Documentation
+```
+
+## 🎯 Getting Started
+
+### Prerequisites
+
+- **Node.js** v18 or higher
+- **npm** v9 or higher
+- **Expo CLI** (installed automatically)
+
+### Installation
+
+1. **Clone & Install**
 
    ```bash
+   git clone <repo-url>
+   cd ExpertEnglish
    npm install
    ```
 
-2. Start the app
+2. **Setup Environment**
 
    ```bash
-   npx expo start
+   cp .env.example .env
+   # Edit .env với your API URL
    ```
 
-In the output, you'll find options to open the app in a
+3. **Start Development**
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   ```bash
+   npm start
+   ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+4. **Run on Device**
+   - Press `a` for Android
+   - Press `i` for iOS
+   - Press `w` for Web
+   - Scan QR code with Expo Go app
 
-## Get a fresh project
-
-When you're ready, run:
+## 🔧 Development Scripts
 
 ```bash
-npm run reset-project
+# Development
+npm start              # Start Expo dev server
+npm run android        # Run on Android
+npm run ios            # Run on iOS
+npm run web            # Run on Web
+
+# Code Quality
+npm run lint           # Check code quality
+npm run lint:fix       # Auto-fix lint issues
+npm run format         # Format code with Prettier
+npm run format:check   # Check formatting
+npm run type-check     # TypeScript type checking
+npm run validate       # Run all checks (type + lint + format)
+
+# Utilities
+npm run generate-icons # Generate app icons
+npm run reset-project  # Reset to fresh project
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 📱 Building for Production
 
-## Learn more
+### Development Build
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+# Install EAS CLI globally
+npm install -g eas-cli
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# Login to Expo account
+eas login
 
-## Join the community
+# Create development build
+eas build --profile development --platform android
+eas build --profile development --platform ios
+```
 
-Join our community of developers creating universal apps.
+### Production Build
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+eas build --profile production --platform all
+```
+
+## 💻 Code Examples
+
+### Making API Calls
+
+```typescript
+import { authApi } from '@/api';
+
+const handleLogin = async () => {
+  try {
+    const response = await authApi.login({ email, password });
+    // ✅ Token tự động saved
+    // ✅ Error tự động handled
+    console.log('User:', response.user);
+  } catch (error) {
+    console.error('Login failed:', error.message);
+  }
+};
+```
+
+### Using Zustand Stores
+
+```typescript
+import { useAuthStore } from '@/stores';
+
+function LoginScreen() {
+  const { login, user, isLoading, error } = useAuthStore();
+
+  const handleSubmit = async () => {
+    await login(email, password);
+    // State tự động sync across all components
+  };
+
+  return (
+    <View>
+      <Text>{user?.name}</Text>
+      {isLoading && <ActivityIndicator />}
+      {error && <Text>{error}</Text>}
+    </View>
+  );
+}
+```
+
+### Navigation
+
+```typescript
+import { goBack, navigate } from '@/navigation';
+
+// Navigate to screen
+navigate('Home');
+
+// Go back
+goBack();
+
+// Reset navigation
+resetRoot('Main');
+```
+
+## 🧪 Testing & Validation
+
+```bash
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+
+# Format checking
+npm run format:check
+
+# Run all validations
+npm run validate
+```
+
+## 🤝 Contributing
+
+1. Create feature branch: `git checkout -b feature/amazing-feature`
+2. Make your changes
+3. Run validation: `npm run validate`
+4. Commit: `git commit -m 'feat: add amazing feature'`
+5. Push: `git push origin feature/amazing-feature`
+6. Create Pull Request
+
+See [COMMIT_CONVENTION.md](./docs/COMMIT_CONVENTION.md) for commit guidelines.
+
+## 📄 License
+
+This project is private and proprietary.
+
+## 👥 Team
+
+Maintained by the ExpertEnglish development team.
+
+---
+
+**Version:** 1.0.0  
+**Last Updated:** January 2026

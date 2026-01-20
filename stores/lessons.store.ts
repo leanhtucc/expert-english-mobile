@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
-import { lessonsApi } from '@/services';
-import type { ApiState, CreateLessonRequest, Lesson, UpdateLessonRequest } from '@/types';
+import { lessonsApi } from '@/api';
+import { ApiState, CreateLessonRequest, Lesson, UpdateLessonRequest } from '@/types/api';
 import { logger } from '@/utils/logger';
 
 /**

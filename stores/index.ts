@@ -8,4 +8,4 @@ export { useLessonsStore } from './lessons.store';
 /**
  * Re-export types from centralized types folder
  */
-export type { Language, Lesson, Theme, User } from '@/types';
+export type { Language, Theme } from '@/types';

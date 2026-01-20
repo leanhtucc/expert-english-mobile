@@ -11,6 +11,7 @@ const config: ExpoConfig = {
   newArchEnabled: true,
   ios: {
     supportsTablet: true,
+    bundleIdentifier: 'com.expertenglish.app',
   },
   android: {
     adaptiveIcon: {
@@ -19,6 +20,7 @@ const config: ExpoConfig = {
       backgroundImage: './assets/images/android-icon-background.png',
       monochromeImage: './assets/images/android-icon-monochrome.png',
     },
+    package: 'com.expertenglish.app',
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
   },
@@ -44,6 +46,11 @@ const config: ExpoConfig = {
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
+  },
+  extra: {
+    eas: {
+      projectId: '2f9d8f26-3a62-4986-bf9c-4b8077e0694c',
+    },
   },
 };
 
