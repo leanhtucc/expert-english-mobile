@@ -7,10 +7,25 @@ import { useThemeColors } from '@/hooks/use-theme';
 /**
  * Themed Text Component
  */
-export function Text({ style, ...props }: TextProps) {
+export function Text({ style, type, ...props }: TextProps & { type?: string }) {
   const colors = useThemeColors();
 
-  return <RNText style={[{ color: colors.text.primary }, style]} {...props} />;
+  const getTextStyle = () => {
+    switch (type) {
+      case 'title':
+        return { fontSize: 24, fontWeight: 'bold' as const };
+      case 'subtitle':
+        return { fontSize: 18, fontWeight: '600' as const };
+      case 'defaultSemiBold':
+        return { fontWeight: '600' as const };
+      case 'link':
+        return { color: colors.primary, textDecorationLine: 'underline' as const };
+      default:
+        return {};
+    }
+  };
+
+  return <RNText style={[{ color: colors.text.primary }, getTextStyle(), style]} {...props} />;
 }
 
 /**
