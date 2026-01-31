@@ -1,9 +1,9 @@
 import * as Sentry from '@sentry/react-native';
 
-import { ActivityIndicator, View } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
-import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Colors } from '@/constants/theme';
@@ -32,16 +32,18 @@ function App() {
 
   if (!isLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].tint} />
       </View>
     );
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView className="flex-1">
       <SafeAreaProvider>
         <KeyboardProvider>
+          {/* Tailwind test: should appear large and red if NativeWind is active */}
+          <Text className="text-center text-2xl text-red-500">TAILWIND TEST</Text>
           <RootStack />
         </KeyboardProvider>
       </SafeAreaProvider>

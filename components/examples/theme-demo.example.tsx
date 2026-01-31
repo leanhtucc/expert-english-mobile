@@ -19,18 +19,18 @@ export default function ThemeDemo() {
       <View className="p-6">
         {/* Header */}
         <Text
-          className="mb-2 text-h2"
+          className="text-h2 mb-2"
           style={{ color: themeColors.text.primary, ...typography.fontSize.h2 }}
         >
           Theme System
         </Text>
-        <Text className="mb-6 text-body-sm" style={{ color: themeColors.text.secondary }}>
+        <Text className="text-body-sm mb-6" style={{ color: themeColors.text.secondary }}>
           Current mode: {isDark ? 'Dark' : 'Light'}
         </Text>
 
         {/* Theme Toggle */}
         <View className="mb-8">
-          <Text className="mb-3 text-h5" style={{ color: themeColors.text.primary }}>
+          <Text className="text-h5 mb-3" style={{ color: themeColors.text.primary }}>
             Theme Modes
           </Text>
           <View className="flex-row gap-2">
@@ -58,7 +58,7 @@ export default function ThemeDemo() {
 
         {/* Colors */}
         <View className="mb-8">
-          <Text className="mb-3 text-h5" style={{ color: themeColors.text.primary }}>
+          <Text className="text-h5 mb-3" style={{ color: themeColors.text.primary }}>
             Brand Colors
           </Text>
           <View className="flex-row flex-wrap gap-3">
@@ -72,7 +72,7 @@ export default function ThemeDemo() {
 
         {/* Typography */}
         <View className="mb-8">
-          <Text className="mb-3 text-h5" style={{ color: themeColors.text.primary }}>
+          <Text className="text-h5 mb-3" style={{ color: themeColors.text.primary }}>
             Typography
           </Text>
           <View className="gap-3">
@@ -99,7 +99,7 @@ export default function ThemeDemo() {
 
         {/* Buttons */}
         <View className="mb-8">
-          <Text className="mb-3 text-h5" style={{ color: themeColors.text.primary }}>
+          <Text className="text-h5 mb-3" style={{ color: themeColors.text.primary }}>
             Buttons
           </Text>
           <View className="gap-3">
@@ -136,7 +136,7 @@ export default function ThemeDemo() {
 
         {/* Cards */}
         <View className="mb-8">
-          <Text className="mb-3 text-h5" style={{ color: themeColors.text.primary }}>
+          <Text className="text-h5 mb-3" style={{ color: themeColors.text.primary }}>
             Cards
           </Text>
           <View
@@ -148,7 +148,7 @@ export default function ThemeDemo() {
               ...shadows.sm,
             }}
           >
-            <Text className="mb-1 text-h6" style={{ color: themeColors.text.primary }}>
+            <Text className="text-h6 mb-1" style={{ color: themeColors.text.primary }}>
               Card Title
             </Text>
             <Text style={{ color: themeColors.text.secondary }}>
@@ -165,7 +165,7 @@ export default function ThemeDemo() {
               ...shadows.md,
             }}
           >
-            <Text className="mb-1 text-h6" style={{ color: themeColors.text.primary }}>
+            <Text className="text-h6 mb-1" style={{ color: themeColors.text.primary }}>
               Card with Shadow
             </Text>
             <Text style={{ color: themeColors.text.secondary }}>
@@ -176,7 +176,7 @@ export default function ThemeDemo() {
 
         {/* Spacing */}
         <View className="mb-8">
-          <Text className="mb-3 text-h5" style={{ color: themeColors.text.primary }}>
+          <Text className="text-h5 mb-3" style={{ color: themeColors.text.primary }}>
             Spacing System
           </Text>
           <View className="gap-2">

@@ -245,7 +245,7 @@ import { Card, Surface, Text, View } from '@/components/themed';
 
 ```tsx
 <TextInput
-  className="rounded-lg border border-neutral-300 bg-white px-4 py-3 text-body dark:border-neutral-700 dark:bg-neutral-900"
+  className="text-body rounded-lg border border-neutral-300 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900"
   placeholderTextColor="#A3A3A3"
 />
 ```
@@ -272,11 +272,11 @@ export default function ProfileCard() {
         ...shadows.md,
       }}
     >
-      <Text className="mb-2 text-h4" style={{ color: themeColors.text.primary }}>
+      <Text className="text-h4 mb-2" style={{ color: themeColors.text.primary }}>
         John Doe
       </Text>
 
-      <Text className="mb-4 text-body-sm" style={{ color: themeColors.text.secondary }}>
+      <Text className="text-body-sm mb-4" style={{ color: themeColors.text.secondary }}>
         john@example.com
       </Text>
 
