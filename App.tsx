@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native';
 
 import React from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -42,8 +42,6 @@ function App() {
     <GestureHandlerRootView className="flex-1">
       <SafeAreaProvider>
         <KeyboardProvider>
-          {/* Tailwind test: should appear large and red if NativeWind is active */}
-          <Text className="text-center text-2xl text-red-500">TAILWIND TEST</Text>
           <RootStack />
         </KeyboardProvider>
       </SafeAreaProvider>
