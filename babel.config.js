@@ -4,7 +4,7 @@ module.exports = function (api) {
     presets: ['babel-preset-expo'],
     plugins: [
       'nativewind/babel',
-      'react-native-reanimated/plugin', // nên có
+      'react-native-reanimated/plugin', // Luôn để cuối cùng
     ],
   };
 };
