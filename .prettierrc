@@ -7,7 +7,10 @@
   "bracketSpacing": true,
   "arrowParens": "avoid",
   "endOfLine": "auto",
+
   "importOrder": [
+    "^react-native-reanimated$",
+    "^nativewind$",
     "^react",
     "^react-native",
     "^expo",
@@ -17,8 +20,6 @@
   ],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
-  "plugins": [
-    "@trivago/prettier-plugin-sort-imports",
-    "prettier-plugin-tailwindcss"
-  ]
+
+  "plugins": ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"]
 }
