@@ -20,7 +20,11 @@
     "build:dev:ios": "eas build --profile development --platform ios",
     "build:dev:all": "eas build --profile development --platform all",
     "build:preview": "eas build --profile preview --platform all",
-    "build:prod": "eas build --profile production --platform all"
+    "build:prod": "eas build --profile production --platform all",
+    "prebuild": "expo prebuild",
+    "prebuild:dev": "cross-env ENVFILE=.env.dev expo prebuild",
+    "prebuild:prod": "cross-env ENVFILE=.env.production expo prebuild",
+    "svgr": "svgr ./assets/svgs --out-dir ./assets/svgs/output --icon --typescript --native"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -70,6 +74,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.3.1",
     "@commitlint/config-conventional": "^20.3.1",
+    "@svgr/cli": "^8.1.0",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
