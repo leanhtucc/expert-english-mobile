@@ -9,6 +9,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { OnboardingScreen } from '@/screens/onboarding';
 import { useAuthStore } from '@/stores';
 
 import InitialNavigator from './InitialNavigator';
@@ -22,6 +23,9 @@ export type TabNavigatorParamList = {
 
 // Root Stack Param List
 export type RootStackParamList = {
+  // Onboarding
+  Onboarding: undefined;
+
   // Auth flow
   Start: { step?: number } | undefined;
   Login: undefined;
@@ -73,43 +77,31 @@ export default function RootStack() {
 
   return (
     <NavigationContainer ref={navigationRef}>
-      {isLoggedIn ? (
-        <Stack.Navigator
-          initialRouteName="InitialNavigator"
-          screenOptions={{
-            gestureEnabled: false,
-          }}
-        >
-          <Stack.Screen
-            name="InitialNavigator"
-            component={InitialNavigator}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="TabNavigator"
-            component={TabNavigator}
-            options={{ headerShown: false }}
-          />
+      <Stack.Navigator
+        initialRouteName="Onboarding"
+        screenOptions={{
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
+        }}
+      >
+        <Stack.Screen
+          name="Onboarding"
+          component={OnboardingScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="InitialNavigator"
+          component={InitialNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="TabNavigator"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
 
-          {/* Add more authenticated screens here as needed */}
-        </Stack.Navigator>
-      ) : (
-        <Stack.Navigator
-          initialRouteName="TabNavigator"
-          screenOptions={{
-            gestureEnabled: true,
-            gestureDirection: 'horizontal',
-          }}
-        >
-          <Stack.Screen
-            name="TabNavigator"
-            component={TabNavigator}
-            options={{ headerShown: false }}
-          />
-
-          {/* Add more unauthenticated screens here as needed */}
-        </Stack.Navigator>
-      )}
+        {/* Add more screens here as needed */}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
