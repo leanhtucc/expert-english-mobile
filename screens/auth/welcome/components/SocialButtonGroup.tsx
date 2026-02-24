@@ -18,17 +18,33 @@ export const SocialButtonGroup: React.FC<SocialButtonGroupProps> = ({
   onFacebookPress,
 }) => {
   return (
-    <View className="gap-4 px-6">
-      <SocialButton icon="G" label="Tiếp tục với Google" onPress={onGooglePress} variant="google" />
+    <View className="px-6">
+      <View className="mb-4">
+        <SocialButton
+          iconName="google"
+          label="Tiếp tục với Google"
+          onPress={onGooglePress}
+          variant="google"
+        />
+      </View>
 
-      <SocialButton icon="✉" label="Tiếp tục với Email" onPress={onEmailPress} variant="email" />
+      <View className="mb-4">
+        <SocialButton
+          iconName="email"
+          label="Tiếp tục với Email"
+          onPress={onEmailPress}
+          variant="email"
+        />
+      </View>
 
-      <SocialButton
-        icon="f"
-        label="Tiếp tục với Facebook"
-        onPress={onFacebookPress}
-        variant="facebook"
-      />
+      <View>
+        <SocialButton
+          iconName="facebook"
+          label="Tiếp tục Facebook"
+          onPress={onFacebookPress}
+          variant="facebook"
+        />
+      </View>
     </View>
   );
 };

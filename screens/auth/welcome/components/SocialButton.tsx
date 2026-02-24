@@ -1,8 +1,12 @@
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
+type IconName = 'google' | 'email' | 'facebook';
+
 interface SocialButtonProps {
-  icon?: string;
+  iconName?: IconName;
   label: string;
   onPress: () => void;
   variant?: 'google' | 'email' | 'facebook';
@@ -12,7 +16,7 @@ interface SocialButtonProps {
  * Component button đăng nhập với các mạng xã hội
  */
 export const SocialButton: React.FC<SocialButtonProps> = ({
-  icon,
+  iconName,
   label,
   onPress,
   variant = 'google',
@@ -42,18 +46,32 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
     }
   };
 
+  const renderIcon = () => {
+    const iconColor = variant === 'google' ? '#4285F4' : '#FFFFFF';
+    const iconSize = 22;
+
+    switch (iconName) {
+      case 'google':
+        return <AntDesign name="google" size={iconSize} color={iconColor} />;
+      case 'email':
+        return <MaterialCommunityIcons name="email-outline" size={iconSize} color={iconColor} />;
+      case 'facebook':
+        return <AntDesign name="facebook" size={iconSize} color={iconColor} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <TouchableOpacity
-      className={`flex-row items-center justify-center rounded-xl px-6 py-4 ${getButtonStyles()}`}
+      className={`flex-row items-center justify-center rounded-xl px-6 py-4 shadow-sm ${getButtonStyles()}`}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      {icon && (
-        <View className="mr-3">
-          <Text className="text-xl">{icon}</Text>
-        </View>
-      )}
-      <Text className={`text-base font-semibold ${getTextStyles()}`}>{label}</Text>
+      {iconName && <View className="mr-3">{renderIcon()}</View>}
+      <Text className={`text-base font-semibold ${getTextStyles()}`} numberOfLines={1}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 };

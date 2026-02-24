@@ -1,16 +1,21 @@
 import React from 'react';
 import { SafeAreaView, ScrollView, StatusBar, View } from 'react-native';
 
-// import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+
+import type { RootStackParamList } from '@/navigation';
 
 import { SocialButtonGroup, WelcomeFooter, WelcomeHeader, WelcomeIcon } from './components';
 import { WELCOME_CONTENT } from './welcome.constants';
+
+type WelcomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Welcome'>;
 
 /**
  * Màn hình Welcome/Login - Đăng nhập bằng các phương thức khác nhau
  */
 export const WelcomeScreen: React.FC = () => {
-  // const navigation = useNavigation();
+  const navigation = useNavigation<WelcomeScreenNavigationProp>();
 
   const handleGoogleLogin = () => {
     // TODO: Implement Google login
@@ -18,9 +23,7 @@ export const WelcomeScreen: React.FC = () => {
   };
 
   const handleEmailLogin = () => {
-    // TODO: Navigate to email login screen
-    console.log('Email login pressed');
-    // navigation.navigate('EmailLogin');
+    navigation.navigate('Login');
   };
 
   const handleFacebookLogin = () => {

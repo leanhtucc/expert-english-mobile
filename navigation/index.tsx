@@ -9,6 +9,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { LoginScreen } from '@/screens/auth/login';
+import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { WelcomeScreen } from '@/screens/auth/welcome';
 import { OnboardingScreen } from '@/screens/onboarding';
 import { useAuthStore } from '@/stores';
@@ -34,6 +36,7 @@ export type RootStackParamList = {
   SignUp: undefined;
   ForgotPassword: undefined;
   OTP: { email: string; isRegister?: boolean; userData?: any };
+  VerifyOTP: { email: string };
   ResetPassword: undefined;
 
   // Main flow
@@ -92,6 +95,13 @@ export default function RootStack() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="VerifyOTP"
+          component={VerifyOTPScreen}
+          options={{ headerShown: false }}
+        />
+
         <Stack.Screen
           name="InitialNavigator"
           component={InitialNavigator}
@@ -102,8 +112,6 @@ export default function RootStack() {
           component={TabNavigator}
           options={{ headerShown: false }}
         />
-
-        {/* Add more screens here as needed */}
       </Stack.Navigator>
     </NavigationContainer>
   );
