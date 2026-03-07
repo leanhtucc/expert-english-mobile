@@ -1,0 +1,9 @@
+export { default as IconCommunity } from './IconCommunity';
+export { default as IconEmail } from './IconEmail';
+export { default as IconGoogle } from './IconGoogle';
+export { default as IconLegal } from './IconLegal';
+export { default as IconLogoStart } from './IconLogoStart';
+export { default as IconMedical } from './IconMedical';
+export { default as IconNextButton } from './IconNextButton';
+export { default as IconRobot } from './IconRobot';
+export { default as SplashAndWelcomeScreen } from './SplashAndWelcomeScreen';
