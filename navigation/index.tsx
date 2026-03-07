@@ -12,6 +12,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LoginScreen } from '@/screens/auth/login';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
+import { SurveyScreen } from '@/screens/survey';
 import { useAuthStore } from '@/stores';
 
 import InitialNavigator from './InitialNavigator';
@@ -36,6 +37,9 @@ export type RootStackParamList = {
   OTP: { email: string; isRegister?: boolean; userData?: any };
   VerifyOTP: { email: string };
   ResetPassword: undefined;
+
+  // Survey flow
+  Survey: undefined;
 
   // Main flow
   InitialNavigator: undefined;
@@ -98,6 +102,7 @@ export default function RootStack() {
           component={VerifyOTPScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen name="Survey" component={SurveyScreen} options={{ headerShown: false }} />
 
         <Stack.Screen
           name="InitialNavigator"

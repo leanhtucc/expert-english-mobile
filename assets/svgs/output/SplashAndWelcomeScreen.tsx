@@ -1,6 +1,6 @@
 import * as React from 'react';
-import type { SvgProps } from 'react-native-svg';
 import Svg, { ClipPath, Defs, G, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
+import type { SvgProps } from 'react-native-svg';
 
 const SvgSplashAndWelcomeScreen = (props: SvgProps) => (
   <Svg width={24} height={24} fill="none" viewBox="0 0 390 884" {...props}>
