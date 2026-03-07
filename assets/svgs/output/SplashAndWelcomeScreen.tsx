@@ -1,17 +1,17 @@
 import * as React from 'react';
-import Svg, { ClipPath, Defs, G, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 import type { SvgProps } from 'react-native-svg';
+import Svg, { ClipPath, Defs, G, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 const SvgSplashAndWelcomeScreen = (props: SvgProps) => (
   <Svg width={24} height={24} fill="none" viewBox="0 0 390 884" {...props}>
     <Path fill="#F8F6F6" d="M0 0h390v884H0z" />
-    <G clipPath="url(#Splash_and_Welcome_Screen_svg__a)">
+    <G clipPath="url(#a)">
       <G opacity={0.9}>
         <Path fill="#C6102E" d="M0 0h390v884H0z" />
-        <Path fill="url(#Splash_and_Welcome_Screen_svg__b)" d="M0 0h390v884H0z" />
-        <Path fill="url(#Splash_and_Welcome_Screen_svg__c)" d="M0 0h390v884H0z" />
-        <Path fill="url(#Splash_and_Welcome_Screen_svg__d)" d="M0 0h390v884H0z" />
-        <Path fill="url(#Splash_and_Welcome_Screen_svg__e)" d="M0 0h390v884H0z" />
+        <Path fill="url(#b)" d="M0 0h390v884H0z" />
+        <Path fill="url(#c)" d="M0 0h390v884H0z" />
+        <Path fill="url(#d)" d="M0 0h390v884H0z" />
+        <Path fill="url(#e)" d="M0 0h390v884H0z" />
       </G>
       <G stroke="#fff" opacity={0.1}>
         <Rect width={124} height={124} x={42} y={42} strokeWidth={4} rx={62} />
@@ -21,7 +21,7 @@ const SvgSplashAndWelcomeScreen = (props: SvgProps) => (
     </G>
     <Defs>
       <RadialGradient
-        id="Splash_and_Welcome_Screen_svg__b"
+        id="b"
         cx={0}
         cy={0}
         r={1}
@@ -32,7 +32,7 @@ const SvgSplashAndWelcomeScreen = (props: SvgProps) => (
         <Stop offset={0.5} stopColor="#E63946" stopOpacity={0} />
       </RadialGradient>
       <RadialGradient
-        id="Splash_and_Welcome_Screen_svg__c"
+        id="c"
         cx={0}
         cy={0}
         r={1}
@@ -43,7 +43,7 @@ const SvgSplashAndWelcomeScreen = (props: SvgProps) => (
         <Stop offset={0.5} stopColor="#8B0000" stopOpacity={0} />
       </RadialGradient>
       <RadialGradient
-        id="Splash_and_Welcome_Screen_svg__d"
+        id="d"
         cx={0}
         cy={0}
         r={1}
@@ -54,7 +54,7 @@ const SvgSplashAndWelcomeScreen = (props: SvgProps) => (
         <Stop offset={0.5} stopColor="#C6102E" stopOpacity={0} />
       </RadialGradient>
       <RadialGradient
-        id="Splash_and_Welcome_Screen_svg__e"
+        id="e"
         cx={0}
         cy={0}
         r={1}
@@ -64,7 +64,7 @@ const SvgSplashAndWelcomeScreen = (props: SvgProps) => (
         <Stop stopColor="#FF4D6D" />
         <Stop offset={0.5} stopColor="#FF4D6D" stopOpacity={0} />
       </RadialGradient>
-      <ClipPath id="Splash_and_Welcome_Screen_svg__a">
+      <ClipPath id="a">
         <Path fill="#fff" d="M0 0h390v884H0z" />
       </ClipPath>
     </Defs>

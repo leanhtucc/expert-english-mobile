@@ -3,13 +3,13 @@ import {
   Animated,
   Dimensions,
   Easing,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -69,9 +69,9 @@ export const OnboardingScreen: React.FC = () => {
   };
 
   const handleGetStarted = () => animateToStep(1);
-  const handleLogin = () => navigation.navigate('Welcome');
   const handleGoogleLogin = () => console.log('Google login');
   const handleEmailLogin = () => navigation.navigate('Login');
+  const handleLogin = () => navigation.navigate('Login');
 
   return (
     <View style={{ flex: 1 }}>
@@ -123,9 +123,9 @@ export const OnboardingScreen: React.FC = () => {
                 <OnboardingActions
                   step={step}
                   onGetStarted={handleGetStarted}
-                  onLogin={handleLogin}
                   onGoogleLogin={handleGoogleLogin}
                   onEmailLogin={handleEmailLogin}
+                  onLogin={handleLogin}
                   getStartedText={ONBOARDING_CONTENT.getStartedButton}
                   loginText={ONBOARDING_CONTENT.loginLink}
                   termsText={ONBOARDING_CONTENT.termsText}

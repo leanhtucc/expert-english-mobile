@@ -95,9 +95,7 @@ export const OnboardingActions: React.FC<OnboardingActionsProps> = ({
       <Text className="text-center text-xs leading-5 text-white/50">{termsText}</Text>
 
       {/* Bottom indicator */}
-      <View style={{ paddingBottom: Math.max(insets.bottom, 16) }} className="mt-10 items-center">
-        <View className="h-1 w-32 rounded-full bg-white/40" />
-      </View>
+      <View style={{ paddingBottom: Math.max(insets.bottom, 16) }} className="items-center"></View>
     </View>
   );
 };

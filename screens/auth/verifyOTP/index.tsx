@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { RouteProp } from '@react-navigation/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -17,14 +18,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 
 import type { RootStackParamList } from '@/navigation';
 
-import {
-  EmailDisplay,
-  InfoBox,
-  OTPInput,
-  ResendTimer,
-  VerifyHeader,
-  VerifyIcon,
-} from './components';
+import { OTPInput, ResendTimer, VerifyHeader, VerifyIcon } from './components';
 
 type VerifyOTPScreenNavigationProp = StackNavigationProp<RootStackParamList, 'VerifyOTP'>;
 type VerifyOTPScreenRouteProp = RouteProp<RootStackParamList, 'VerifyOTP'>;
@@ -38,7 +32,7 @@ export const VerifyOTPScreen: React.FC = () => {
   const route = useRoute<VerifyOTPScreenRouteProp>();
   const { email = 'hghoa2005@gmail.com' } = route.params || {};
 
-  const [, setOtp] = useState('');
+  const [otp, setOtp] = useState('');
   const [, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -86,19 +80,15 @@ export const VerifyOTPScreen: React.FC = () => {
   };
 
   // Handle change email
-  const handleChangeEmail = () => {
-    navigation.goBack();
-  };
-
-  // Handle back button
   const handleBack = () => {
     navigation.goBack();
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         <ScrollView
@@ -106,40 +96,71 @@ export const VerifyOTPScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="flex-1 px-6 pt-4">
+          <View className="flex-1 px-6">
             {/* Back Button */}
             <TouchableOpacity
               onPress={handleBack}
-              className="mb-6 h-10 w-10 items-center justify-center"
+              className="mt-4 h-10 w-10 items-center justify-center rounded-full bg-gray-100"
               activeOpacity={0.7}
             >
-              <Ionicons name="chevron-back" size={24} color="#1F2937" />
+              <Ionicons name="chevron-back" size={20} color="#1F2937" />
             </TouchableOpacity>
 
-            {/* Icon */}
-            <VerifyIcon />
+            <View className="mt-10 flex-1">
+              {/* Icon */}
+              <VerifyIcon />
 
-            {/* Header */}
-            <VerifyHeader title="Xác thực Email" />
+              {/* Header */}
+              <VerifyHeader
+                title="Verify your Email"
+                subtitle={`We've sent a 6-digit verification code to ${email}`}
+              />
 
-            {/* Email Display */}
-            <EmailDisplay email={email} onChangeEmail={handleChangeEmail} />
+              {/* OTP Input */}
+              <OTPInput length={6} onComplete={handleOTPComplete} onChangeOTP={setOtp} />
 
-            {/* OTP Input */}
-            <OTPInput length={6} onComplete={handleOTPComplete} onChangeOTP={setOtp} />
+              {/* Resend Timer */}
+              <ResendTimer initialSeconds={59} onResend={handleResendOTP} />
 
-            {/* Error Message */}
-            {error && (
-              <View className="mb-4">
-                <Text className="text-center text-sm text-red-500">{error}</Text>
-              </View>
-            )}
+              {/* Error Message */}
+              {error && (
+                <View className="mb-4">
+                  <Text className="text-center text-sm text-red-500">{error}</Text>
+                </View>
+              )}
 
-            {/* Resend Timer */}
-            <ResendTimer initialSeconds={59} onResend={handleResendOTP} />
-
-            {/* Info Box */}
-            <InfoBox demoCode={DEMO_OTP} />
+              {/* Verify Button */}
+              <TouchableOpacity
+                className={`rounded-2xl px-6 py-[18px] ${otp.length === 6 ? 'bg-[#C6102E]' : 'bg-gray-200'}`}
+                style={
+                  otp.length === 6
+                    ? {
+                        shadowColor: '#C6102E',
+                        shadowOpacity: 0.35,
+                        shadowRadius: 12,
+                        shadowOffset: { width: 0, height: 6 },
+                        elevation: 6,
+                      }
+                    : undefined
+                }
+                onPress={() => handleOTPComplete(otp)}
+                disabled={otp.length < 6}
+                activeOpacity={0.85}
+              >
+                <View className="flex-row items-center justify-center gap-2">
+                  <Text
+                    className={`text-base font-semibold tracking-wide ${otp.length === 6 ? 'text-white' : 'text-gray-400'}`}
+                  >
+                    Verify Account
+                  </Text>
+                  <Ionicons
+                    name="arrow-forward"
+                    size={18}
+                    color={otp.length === 6 ? '#FFFFFF' : '#9CA3AF'}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

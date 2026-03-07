@@ -1,6 +1,6 @@
 import * as React from 'react';
-import Svg, { Defs, Image, Path, Pattern, Use } from 'react-native-svg';
 import type { SvgProps } from 'react-native-svg';
+import Svg, { Defs, Image, Path, Pattern, Use } from 'react-native-svg';
 
 const SvgIconRobot = (props: SvgProps) => (
   <Svg width={24} height={24} fill="none" viewBox="0 0 224 226" {...props}>

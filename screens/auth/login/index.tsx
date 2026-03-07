@@ -6,6 +6,7 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -15,7 +16,7 @@ import type { StackNavigationProp } from '@react-navigation/stack';
 
 import type { RootStackParamList } from '@/navigation';
 
-import { EmailInput, InfoBox, LoginHeader, LoginIcon, SubmitButton } from './components';
+import { EmailInput, LoginHeader, LoginIcon, SubmitButton } from './components';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -76,8 +77,9 @@ export const LoginScreen: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         <ScrollView
@@ -85,33 +87,33 @@ export const LoginScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="flex-1 px-6 pt-4">
+          <View className="flex-1 px-6">
             {/* Back Button */}
             <TouchableOpacity
               onPress={handleBack}
-              className="mb-6 h-10 w-10 items-center justify-center"
+              className="mt-10 h-10 w-10 items-center justify-center"
               activeOpacity={0.7}
             >
-              <Ionicons name="chevron-back" size={24} color="#1F2937" />
+              <Ionicons name="chevron-back" size={30} color="#1F2937" />
             </TouchableOpacity>
 
-            {/* Icon */}
-            <LoginIcon />
+            {/* Centered content block */}
+            <View className="mt-12 flex flex-1">
+              {/* Icon */}
+              <LoginIcon />
 
-            {/* Header */}
-            <LoginHeader
-              title="Đăng nhập với Email"
-              subtitle="Chúng tôi sẽ gửi mã OTP để xác thực tài khoản của bạn"
-            />
+              {/* Header */}
+              <LoginHeader
+                title="Your Email"
+                subtitle="Please enter your email address to recover your password."
+              />
 
-            {/* Email Input */}
-            <EmailInput value={email} onChangeText={setEmail} error={error} />
+              {/* Email Input */}
+              <EmailInput value={email} onChangeText={setEmail} error={error} />
 
-            {/* Submit Button */}
-            <SubmitButton onPress={handleSubmit} disabled={!email.trim()} loading={loading} />
-
-            {/* Info Box */}
-            <InfoBox message="Email của bạn sẽ được tạo mật tự động đối. Chúng tôi không chia sẻ thông tin của bạn với bên thứ ba." />
+              {/* Submit Button */}
+              <SubmitButton onPress={handleSubmit} disabled={!email.trim()} loading={loading} />
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

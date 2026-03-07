@@ -35,14 +35,19 @@ export const ResendTimer: React.FC<ResendTimerProps> = ({ initialSeconds = 59, o
   };
 
   return (
-    <View className="mb-6 items-center">
-      {canResend ? (
-        <TouchableOpacity onPress={handleResend} activeOpacity={0.7}>
-          <Text className="text-sm font-medium text-orange-500">Gửi lại mã</Text>
+    <View className="mb-8 items-center gap-1">
+      <View className="flex-row items-center gap-1">
+        <Text className="text-sm text-gray-400">{"Didn't receive the code?"}</Text>
+        <TouchableOpacity onPress={handleResend} disabled={!canResend} activeOpacity={0.7}>
+          <Text className={`text-sm font-bold ${canResend ? 'text-[#C6102E]' : 'text-gray-300'}`}>
+            Resend Code
+          </Text>
         </TouchableOpacity>
-      ) : (
-        <Text className="text-sm text-gray-600">
-          Gửi lại mã sau <Text className="font-semibold text-orange-500">{seconds}s</Text>
+      </View>
+      {!canResend && (
+        <Text className="text-xs text-gray-400">
+          Wait {String(Math.floor(seconds / 60)).padStart(2, '0')}:
+          {String(seconds % 60).padStart(2, '0')}
         </Text>
       )}
     </View>

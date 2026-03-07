@@ -52,7 +52,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({ length = 6, onComplete, onCh
   };
 
   return (
-    <View className="mb-6 flex-row justify-center gap-2">
+    <View className="mb-8 flex-row justify-between gap-2">
       {Array(length)
         .fill(0)
         .map((_, index) => (
@@ -61,10 +61,10 @@ export const OTPInput: React.FC<OTPInputProps> = ({ length = 6, onComplete, onCh
             ref={ref => {
               inputRefs.current[index] = ref;
             }}
-            className={`h-14 w-12 rounded-xl border-2 text-center text-xl font-semibold ${
+            className={`h-16 flex-1 rounded-2xl border text-center text-2xl font-bold ${
               otp[index]
-                ? 'border-orange-500 bg-orange-50 text-gray-900'
-                : 'border-gray-200 bg-gray-50 text-gray-400'
+                ? 'border-[#C6102E] bg-rose-50 text-gray-900'
+                : 'border-gray-200 bg-gray-50 text-gray-900'
             }`}
             value={otp[index]}
             onChangeText={text => handleChangeText(text, index)}

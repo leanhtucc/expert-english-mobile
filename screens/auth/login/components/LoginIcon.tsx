@@ -8,9 +8,18 @@ import { View } from 'react-native';
  */
 export const LoginIcon: React.FC = () => {
   return (
-    <View className="mb-6 items-center">
-      <View className="h-24 w-24 items-center justify-center rounded-full bg-orange-100">
-        <MaterialCommunityIcons name="email-outline" size={48} color="#F97316" />
+    <View className="mb-10">
+      <View
+        className="h-20 w-20 items-center justify-center rounded-3xl bg-rose-50"
+        style={{
+          shadowColor: '#C6102E',
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: 4 },
+          elevation: 4,
+        }}
+      >
+        <MaterialCommunityIcons name="email-outline" size={38} color="#C6102E" />
       </View>
     </View>
   );

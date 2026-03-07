@@ -11,7 +11,6 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LoginScreen } from '@/screens/auth/login';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
-import { WelcomeScreen } from '@/screens/auth/welcome';
 import { OnboardingScreen } from '@/screens/onboarding';
 import { useAuthStore } from '@/stores';
 
@@ -28,7 +27,6 @@ export type TabNavigatorParamList = {
 export type RootStackParamList = {
   // Onboarding
   Onboarding: undefined;
-  Welcome: undefined;
 
   // Auth flow
   Start: { step?: number } | undefined;
@@ -94,7 +92,6 @@ export default function RootStack() {
           component={OnboardingScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen
           name="VerifyOTP"

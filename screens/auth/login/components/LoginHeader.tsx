@@ -11,9 +11,9 @@ interface LoginHeaderProps {
  */
 export const LoginHeader: React.FC<LoginHeaderProps> = ({ title, subtitle }) => {
   return (
-    <View className="mb-6">
-      <Text className="mb-3 text-center text-2xl font-bold text-gray-900">{title}</Text>
-      <Text className="text-center text-sm leading-5 text-gray-600">{subtitle}</Text>
+    <View className="mb-8">
+      <Text className="mb-3 text-3xl font-bold tracking-tight text-gray-900">{title}</Text>
+      <Text className="text-base leading-7 text-gray-400">{subtitle}</Text>
     </View>
   );
 };

@@ -13,11 +13,17 @@ interface EmailInputProps {
 export const EmailInput: React.FC<EmailInputProps> = ({ value, onChangeText, error }) => {
   return (
     <View className="mb-6">
-      <Text className="mb-2 text-sm font-medium text-gray-700">Email</Text>
       <TextInput
-        className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4 text-base text-gray-900"
-        placeholder="example@email.com"
-        placeholderTextColor="#9CA3AF"
+        className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4 text-base text-gray-900"
+        style={{
+          shadowColor: '#000',
+          shadowOpacity: 0.04,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 2 },
+          elevation: 1,
+        }}
+        placeholder="Enter your email"
+        placeholderTextColor="#C0C0C0"
         value={value}
         onChangeText={onChangeText}
         keyboardType="email-address"
@@ -25,7 +31,7 @@ export const EmailInput: React.FC<EmailInputProps> = ({ value, onChangeText, err
         autoComplete="email"
         autoCorrect={false}
       />
-      {error && <Text className="mt-2 text-sm text-red-500">{error}</Text>}
+      {error && <Text className="mt-2 px-1 text-xs text-red-500">{error}</Text>}
     </View>
   );
 };
