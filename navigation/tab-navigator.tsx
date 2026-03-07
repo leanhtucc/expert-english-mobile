@@ -10,7 +10,7 @@ import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { ExploreScreen, HomeScreen } from '@/screens';
+import { ExploreScreen, HomeScreen, ProfileScreen } from '@/screens';
 
 const Tab = createBottomTabNavigator();
 
@@ -42,6 +42,8 @@ function CustomTabBar({
         return <IconSymbol name="house.fill" {...iconProps} />;
       case 'Explore':
         return <IconSymbol name="paperplane.fill" {...iconProps} />;
+      case 'Profile':
+        return <IconSymbol name="person.fill" {...iconProps} />;
       default:
         return null;
     }
@@ -53,6 +55,8 @@ function CustomTabBar({
         return 'Home';
       case 'Explore':
         return 'Explore';
+      case 'Profile':
+        return 'Profile';
       default:
         return routeName;
     }
@@ -154,6 +158,13 @@ export default function TabNavigator() {
         <Tab.Screen
           name="Explore"
           component={ExploreScreen}
+          options={{
+            tabBarStyle: { display: 'flex' },
+          }}
+        />
+        <Tab.Screen
+          name="Profile"
+          component={ProfileScreen}
           options={{
             tabBarStyle: { display: 'flex' },
           }}
