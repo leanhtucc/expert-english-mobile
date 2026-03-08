@@ -8,6 +8,7 @@ import { IconHome, IconProfile, IconUserProfile } from '@/components/icon';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { HomeScreen, ProfileScreen } from '@/screens';
+import { PracticeSetupScreen } from '@/screens/speakingSession';
 
 const Tab = createBottomTabNavigator();
 
@@ -28,9 +29,15 @@ function CustomTabBar({
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
+  // Ẩn tab bar khi đang ở màn hình speaking session
+  const currentRoute = state.routes[state.index];
+  if (currentRoute.name === 'speakingSession') {
+    return null;
+  }
+
   const getIcon = (routeName: string, focused: boolean) => {
     const iconColor = focused ? colors.tint : colors.tabIconDefault;
-    const size = 22;
+    const size = 40;
 
     switch (routeName) {
       case 'Home':
@@ -118,6 +125,13 @@ export default function TabNavigator() {
           component={HomeScreen}
           options={{
             tabBarStyle: { display: 'flex' },
+          }}
+        />
+        <Tab.Screen
+          name="speakingSession"
+          component={PracticeSetupScreen}
+          options={{
+            tabBarStyle: { display: 'none' },
           }}
         />
         <Tab.Screen

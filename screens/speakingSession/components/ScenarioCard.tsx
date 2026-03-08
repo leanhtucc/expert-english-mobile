@@ -1,41 +1,47 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
-import { ScenarioPreview } from '@/types/speaking.types';
+import { PracticeMode, ScenarioPreview } from '@/types/speaking.types';
 
-import { ProgressBar } from './ProgressBar';
+import { ChatBubbleAI } from './ChatBubbleAI';
+import { ChatBubbleUser } from './ChatBubbleUser';
 
 interface ScenarioCardProps {
   scenario: ScenarioPreview;
+  mode: PracticeMode;
 }
 
-export const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario }) => {
+export const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario, mode }) => {
   return (
-    <View className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      {/* Header */}
-      <View className="mb-4 flex-row items-center">
-        <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-red-100">
-          <Text className="text-sm font-bold text-red-600">PM</Text>
-        </View>
-        <View className="flex-1">
-          <Text className="text-xs uppercase tracking-wide text-gray-500">{scenario.role}</Text>
-        </View>
-      </View>
-
+    <View>
       {/* AI Question */}
-      <View className="mb-4 rounded-xl bg-gray-50 p-4">
-        <Text className="text-base leading-6 text-gray-800">&ldquo;{scenario.question}&rdquo;</Text>
-      </View>
+      <ChatBubbleAI
+        message={{
+          id: '1',
+          role: 'ai',
+          text: scenario.question,
+          translation: scenario.translation,
+          timestamp: Date.now(),
+          score: scenario.progress,
+        }}
+        role={scenario.role}
+        showAvatar={true}
+        mode={mode}
+      />
 
-      {/* Progress */}
-      <View className="mb-4">
-        <ProgressBar progress={scenario.progress} showLabel={false} />
-      </View>
-
-      {/* Example Answer */}
-      <View className="rounded-xl bg-red-500 p-4">
-        <Text className="text-sm leading-6 text-white">{scenario.exampleAnswer}</Text>
-      </View>
+      {/* User Example Answer */}
+      <ChatBubbleUser
+        message={{
+          id: '2',
+          role: 'user',
+          text: scenario.exampleAnswer,
+          translation: scenario.exampleAnswerTranslation,
+          timestamp: Date.now(),
+        }}
+        role="YOUR RESPONSE"
+        showAvatar={true}
+        mode={mode}
+      />
     </View>
   );
 };

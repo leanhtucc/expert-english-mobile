@@ -8,29 +8,39 @@ interface ModeSelectorProps {
   onModeChange: (mode: PracticeMode) => void;
 }
 
-const modes: { value: PracticeMode; label: string }[] = [
-  { value: 'dual-explorer', label: 'Dual Explorer' },
-  { value: 'english-master', label: 'English Master' },
-  { value: 'translation-hero', label: 'Translation Hero' },
+const modes: { value: PracticeMode; label: string; subtitle: string }[] = [
+  { value: 'dual-explorer', label: 'Dual Explorer', subtitle: 'EN & VN' },
+  { value: 'english-master', label: 'English Master', subtitle: 'Only EN' },
+  { value: 'translation-hero', label: 'Translation Hero', subtitle: 'Only VN' },
 ];
 
 export const ModeSelector: React.FC<ModeSelectorProps> = ({ selectedMode, onModeChange }) => {
   return (
-    <View className="mb-6 flex-row rounded-full bg-gray-100 p-1">
+    <View className="mb-6 flex-row rounded-3xl border-2 border-gray-300 bg-white p-2">
       {modes.map(mode => (
         <TouchableOpacity
           key={mode.value}
           onPress={() => onModeChange(mode.value)}
-          className={`flex-1 items-center rounded-full py-3 ${
-            selectedMode === mode.value ? 'bg-white shadow-sm' : ''
+          className={`mx-1 flex-1 items-center justify-center rounded-2xl py-5 ${
+            selectedMode === mode.value ? 'border-2 border-red-600 bg-white' : 'bg-gray-50'
           }`}
         >
           <Text
-            className={`text-sm font-semibold ${
-              selectedMode === mode.value ? 'text-red-600' : 'text-gray-600'
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            className={`mb-1 text-[10px] font-bold ${
+              selectedMode === mode.value ? 'text-red-600' : 'text-gray-400'
             }`}
           >
             {mode.label}
+          </Text>
+          <Text
+            numberOfLines={1}
+            className={`text-[10px] font-medium ${
+              selectedMode === mode.value ? 'text-gray-600' : 'text-gray-400'
+            }`}
+          >
+            {mode.subtitle}
           </Text>
         </TouchableOpacity>
       ))}

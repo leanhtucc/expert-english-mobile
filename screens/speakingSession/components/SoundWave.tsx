@@ -8,25 +8,31 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import React, { useEffect, useRef } from 'react';
-import { Dimensions, View } from 'react-native';
+import { Dimensions, StyleProp, ViewStyle } from 'react-native';
 
 const BAR_COUNT = 40;
 const BAR_WIDTH = 3;
 const BAR_SPACING = 1;
 const BAR_MIN_HEIGHT = 4;
 
-interface WaveformBarProps {
+interface SoundWaveBarProps {
   amplitude: number;
-  isRecording: boolean;
+  isActive: boolean;
+  barColor: string;
   barMaxHeight: number;
 }
 
-const WaveformBar: React.FC<WaveformBarProps> = ({ amplitude, isRecording, barMaxHeight }) => {
+const SoundWaveBar: React.FC<SoundWaveBarProps> = ({
+  amplitude,
+  isActive,
+  barColor,
+  barMaxHeight,
+}) => {
   const heightValue = useSharedValue(BAR_MIN_HEIGHT);
   const opacityValue = useSharedValue(0.2);
 
   useEffect(() => {
-    if (isRecording) {
+    if (isActive) {
       const processedAmplitude = Math.pow(amplitude, 0.7);
       const baseHeight = BAR_MIN_HEIGHT;
       const maxHeight = barMaxHeight;
@@ -60,7 +66,7 @@ const WaveformBar: React.FC<WaveformBarProps> = ({ amplitude, isRecording, barMa
         duration: 200,
       });
     }
-  }, [amplitude, isRecording, barMaxHeight, heightValue, opacityValue]);
+  }, [amplitude, isActive, barMaxHeight, heightValue, opacityValue]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -68,7 +74,7 @@ const WaveformBar: React.FC<WaveformBarProps> = ({ amplitude, isRecording, barMa
       opacity: opacityValue.value,
       transform: [
         {
-          scaleY: isRecording ? 1 : 0.3,
+          scaleY: isActive ? 1 : 0.3,
         },
       ],
     };
@@ -82,7 +88,7 @@ const WaveformBar: React.FC<WaveformBarProps> = ({ amplitude, isRecording, barMa
           marginHorizontal: BAR_SPACING / 2,
           borderRadius: BAR_WIDTH / 2,
           alignSelf: 'center',
-          backgroundColor: '#EF4444',
+          backgroundColor: barColor,
         },
         animatedStyle,
       ]}
@@ -90,28 +96,36 @@ const WaveformBar: React.FC<WaveformBarProps> = ({ amplitude, isRecording, barMa
   );
 };
 
-interface WaveformAnimationProps {
-  isRecording: boolean;
-  barCount?: number;
+interface SoundWaveProps {
   amplitudes?: number[];
+  isActive?: boolean;
+  isPlayback?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
+  barCount?: number;
 }
 
-export const WaveformAnimation: React.FC<WaveformAnimationProps> = ({
-  isRecording,
-  barCount,
+export const SoundWave: React.FC<SoundWaveProps> = ({
   amplitudes = [],
+  isActive = true,
+  isPlayback = false,
+  containerStyle,
+  barCount,
 }) => {
+  const barColor = isPlayback ? '#1F2937' : '#EF4444';
+  const barMaxHeight = isPlayback ? 30 : 80;
+
   const windowWidth = Dimensions.get('window').width;
   const totalBarWidth = BAR_WIDTH + BAR_SPACING;
-  const maxBars = Math.floor((windowWidth - 40) / totalBarWidth);
-  const actualBarCount = barCount || Math.min(maxBars, BAR_COUNT);
-  const barMaxHeight = 40;
+  const maxBars = Math.floor((windowWidth - 20) / totalBarWidth);
+
+  const actualBarCount =
+    barCount || (isPlayback ? Math.min(maxBars, 30) : Math.min(maxBars, BAR_COUNT));
 
   const waveDataRef = useRef<number[]>(new Array(actualBarCount).fill(0));
   const [displayData, setDisplayData] = React.useState<number[]>(new Array(actualBarCount).fill(0));
 
   useEffect(() => {
-    if (!isRecording) {
+    if (!isActive) {
       waveDataRef.current = new Array(actualBarCount).fill(0);
       setDisplayData(new Array(actualBarCount).fill(0));
       return;
@@ -121,7 +135,7 @@ export const WaveformAnimation: React.FC<WaveformAnimationProps> = ({
       const newWaveData = [...waveDataRef.current];
       newWaveData.pop();
 
-      const latestAmplitude = amplitudes[amplitudes.length - 1] || Math.random();
+      const latestAmplitude = amplitudes[amplitudes.length - 1] || 0;
       const baseAmplitude = latestAmplitude;
       const randomVariation = (Math.random() - 0.5) * 0.3;
       const finalAmplitude = Math.max(0, Math.min(1, baseAmplitude + randomVariation));
@@ -133,27 +147,32 @@ export const WaveformAnimation: React.FC<WaveformAnimationProps> = ({
     }, 50);
 
     return () => clearInterval(interval);
-  }, [amplitudes, isRecording, actualBarCount]);
+  }, [amplitudes, isActive, actualBarCount]);
 
   return (
-    <View
-      style={{
-        height: barMaxHeight + 10,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        paddingHorizontal: 10,
-      }}
+    <Animated.View
+      style={[
+        {
+          height: barMaxHeight + 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          paddingHorizontal: 10,
+          backgroundColor: 'transparent',
+        },
+        containerStyle,
+      ]}
     >
       {displayData.map((amp, idx) => (
-        <WaveformBar
+        <SoundWaveBar
           key={idx}
           amplitude={amp}
-          isRecording={isRecording}
+          isActive={isActive}
+          barColor={barColor}
           barMaxHeight={barMaxHeight}
         />
       ))}
-    </View>
+    </Animated.View>
   );
 };

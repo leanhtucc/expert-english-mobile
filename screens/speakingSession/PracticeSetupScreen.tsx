@@ -4,42 +4,63 @@ import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-na
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
+import { IconBackButton } from '@/assets/svgs/output';
+import { IconCupGoat, IconPLay, IconVoiceBlack } from '@/components/icon';
 import { RootStackParamList } from '@/navigation';
 import { PracticeMode, ScenarioPreview } from '@/types/speaking.types';
 
 import { ModeSelector } from './components/ModeSelector';
 import { ScenarioCard } from './components/ScenarioCard';
+import { WaveformAnimation } from './components/WaveformAnimation';
 
 type PracticeSetupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PracticeSetup'>;
 
 const mockScenario: ScenarioPreview = {
   role: 'PROJECT MANAGER',
   question: 'Could you walk me through the Q3 financial projections for the manufacturing sector?',
+  translation: 'Bạn có thể giải thích cho tôi về dự báo tài chính Q3 cho lĩnh vực sản xuất không?',
   progress: 85,
   exampleAnswer:
     '"Sure, I\'ve prepared a deck highlighting key projections like revenue growth and risk mitigation strategies."',
+  exampleAnswerTranslation:
+    '"Chắc chắn rồi, tôi đã chuẩn bị một bản trình bày nêu bật các dự báo chính như tăng trưởng doanh thu và các chiến lược giảm thiểu rủi ro."',
 };
 
 export const PracticeSetupScreen: React.FC = () => {
   const navigation = useNavigation<PracticeSetupScreenNavigationProp>();
   const [selectedMode, setSelectedMode] = useState<PracticeMode>('dual-explorer');
+  const [isRecording, setIsRecording] = useState(false);
 
   const handleStartSpeaking = () => {
-    navigation.navigate('SpeakingConversation', { mode: selectedMode });
+    if (!isRecording) {
+      setIsRecording(true);
+    } else {
+      setIsRecording(false);
+      // Navigate to feedback screen after recording stops
+      setTimeout(() => {
+        navigation.navigate('AIFeedback', {
+          userAnswer: 'Mock recorded answer from user',
+          mode: selectedMode,
+        });
+      }, 500);
+    }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
-      <View className="border-b border-gray-200 px-5 py-4">
-        <View className="flex-row items-center">
+      <View className="mt-5 border-b border-gray-200 px-4 py-4">
+        <View className="flex-row items-center justify-between">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            className="mr-3 h-10 w-10 items-center justify-center"
+            className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
           >
-            <Text className="text-2xl text-gray-700">←</Text>
+            <IconBackButton width={15} height={15} color="#000" />
           </TouchableOpacity>
-          <Text className="flex-1 text-xl font-bold text-gray-800">Practice Setup</Text>
+          <Text className="text-xl font-bold text-gray-900">Practice Setup</Text>
+          <View className="h-12 w-12 items-center justify-center rounded-full bg-red-50">
+            <IconCupGoat width={20} height={20} />
+          </View>
         </View>
       </View>
 
@@ -50,38 +71,43 @@ export const PracticeSetupScreen: React.FC = () => {
       >
         {/* Mode Selector */}
         <View className="mb-6">
-          <Text className="mb-3 text-sm font-semibold text-gray-700">Select Practice Mode</Text>
+          <View className="mb-4 flex-row items-center justify-center">
+            <View className="h-1 w-16 bg-red-500" />
+            <Text className="mx-3 text-sm font-bold tracking-wider text-red-600">QUEST MODE</Text>
+            <View className="h-1 w-16 bg-red-500" />
+          </View>
           <ModeSelector selectedMode={selectedMode} onModeChange={setSelectedMode} />
         </View>
 
         {/* Scenario Preview */}
         <View className="mb-6">
-          <Text className="mb-3 text-sm font-semibold text-gray-700">Scenario Preview</Text>
-          <ScenarioCard scenario={mockScenario} />
-        </View>
-
-        {/* Mode Description */}
-        <View className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <Text className="text-sm leading-6 text-blue-800">
-            {selectedMode === 'dual-explorer' &&
-              'Practice speaking in both languages with real-time translations.'}
-            {selectedMode === 'english-master' &&
-              'Focus on improving your English pronunciation and fluency.'}
-            {selectedMode === 'translation-hero' &&
-              'Master translating between English and Vietnamese.'}
-          </Text>
+          <ScenarioCard scenario={mockScenario} mode={selectedMode} />
         </View>
       </ScrollView>
 
       {/* Bottom CTA */}
-      <View className="border-t border-gray-200 bg-white px-5 py-4">
-        <TouchableOpacity
-          onPress={handleStartSpeaking}
-          className="items-center rounded-full bg-red-500 py-4 shadow-lg"
-          activeOpacity={0.8}
-        >
-          <Text className="text-lg font-bold text-white">Start Speaking</Text>
-        </TouchableOpacity>
+      <View className="bg-white px-5 pb-8 pt-6">
+        {/* Waveform Animation */}
+        {isRecording && (
+          <View className="mb-4 items-center">
+            <WaveformAnimation isRecording={isRecording} />
+          </View>
+        )}
+
+        {/* Voice Recorder Button */}
+        <View className="items-center pb-4">
+          <TouchableOpacity
+            onPress={handleStartSpeaking}
+            className="h-20 w-20 items-center justify-center rounded-full bg-red-500 shadow-lg"
+            activeOpacity={0.8}
+          >
+            {isRecording ? (
+              <IconVoiceBlack width={32} height={32} color="white" />
+            ) : (
+              <IconPLay width={20} height={20} color="white" />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );

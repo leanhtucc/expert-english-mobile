@@ -9,25 +9,31 @@ interface ScoreBadgeProps {
 
 export const ScoreBadge: React.FC<ScoreBadgeProps> = ({ label, score }) => {
   const getScoreColor = () => {
-    if (score >= 85) return 'text-green-600';
-    if (score >= 70) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 85) return '#10B981';
+    if (score >= 70) return '#F59E0B';
+    return '#EF4444';
   };
 
-  const getBackgroundColor = () => {
-    if (score >= 85) return 'bg-green-100';
-    if (score >= 70) return 'bg-yellow-100';
-    return 'bg-red-100';
+  const getStatusText = () => {
+    if (score >= 85) return 'Excellent';
+    if (score >= 70) return 'Good';
+    return 'Checking...';
   };
+
+  const scoreColor = getScoreColor();
+  const statusText = getStatusText();
 
   return (
-    <View className="items-center">
-      <View
-        className={`h-20 w-20 rounded-full ${getBackgroundColor()} mb-2 items-center justify-center`}
-      >
-        <Text className={`text-2xl font-bold ${getScoreColor()}`}>{score}%</Text>
+    <View className="flex-1 rounded-full border border-gray-200 bg-white px-4 py-2">
+      <Text className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+        {label.toUpperCase()}
+      </Text>
+      <View className="flex-row items-baseline gap-2">
+        <Text className="text-2xl font-bold text-gray-900">{score}%</Text>
+        <Text className="text-sm font-semibold" style={{ color: scoreColor }}>
+          {statusText}
+        </Text>
       </View>
-      <Text className="text-sm font-medium text-gray-600">{label}</Text>
     </View>
   );
 };

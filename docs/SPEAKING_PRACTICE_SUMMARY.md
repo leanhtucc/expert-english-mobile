@@ -98,7 +98,7 @@ I've built a production-ready AI Voice Speaking Practice Flow with 24 files orga
 ```bash
 npm install expo-av
 # or
-yarn add expo-av
+yarn add expo-audio
 ```
 
 ### 2. Test the Flow
@@ -271,7 +271,7 @@ const feedback = await yourFeedbackAPI(userAnswer);
 
 ### Required
 
-1. ✅ Install `expo-av`: `npm install expo-av`
+1. ✅ Install `expo-audio`: `npm install expo-audio`
 2. ✅ Add microphone permissions to `app.json`
 3. ⚠️ Replace mock data with real API calls
 
@@ -289,11 +289,11 @@ const feedback = await yourFeedbackAPI(userAnswer);
 
 ## 🐛 Known Issues
 
-1. **expo-av not installed** - Expected, needs manual install
+1. **expo-audio not installed** - Expected, needs manual install
 2. **Mock data** - Replace with real API endpoints
 3. **Audio permissions** - Add to app.json
 
-All TypeScript errors are resolved except for the expected `expo-av` module error.
+All TypeScript errors are resolved except for the expected `expo-audio` module error.
 
 ---
 
@@ -317,7 +317,7 @@ All TypeScript errors are resolved except for the expected `expo-av` module erro
 **Screens**: 3 main screens
 **Components**: 17 reusable components
 **Hooks**: 2 custom hooks
-**Time to Test**: < 5 minutes after installing expo-av
+**Time to Test**: < 5 minutes after installing expo-audio
 
 The implementation is **production-ready** and follows React Native best practices. All files are properly organized, typed, and documented.
 

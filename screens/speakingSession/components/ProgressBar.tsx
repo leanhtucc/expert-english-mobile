@@ -33,11 +33,13 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   }));
 
   return (
-    <View className="w-full">
-      <View className="w-full overflow-hidden rounded-full bg-gray-200" style={{ height }}>
+    <View className="w-full flex-row items-center gap-2">
+      <View className="flex-1 overflow-hidden rounded-full bg-gray-200" style={{ height }}>
         <Animated.View className="h-full rounded-full bg-green-500" style={animatedStyle} />
       </View>
-      {showLabel && <Text className="mt-1 text-xs text-gray-500">{Math.round(progress)}%</Text>}
+      {showLabel && (
+        <Text className="text-sm font-semibold text-green-600">{Math.round(progress)}%</Text>
+      )}
     </View>
   );
 };

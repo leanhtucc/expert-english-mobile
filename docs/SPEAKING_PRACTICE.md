@@ -40,9 +40,9 @@ types/
 ### 1. Install Dependencies
 
 ```bash
-npm install expo-av react-native-reanimated
+npm install expo-audio react-native-reanimated
 # or
-yarn add expo-av react-native-reanimated
+yarn add expo-audio react-native-reanimated
 ```
 
 ### 2. Navigate to Practice Setup
@@ -289,13 +289,13 @@ function MyScreen() {
 
 ## 🚨 Known Issues
 
-- `expo-av` must be installed: `npm install expo-av`
+- `expo-audio` must be installed: `npm install expo-audio`
 - Reanimated shared values in dependency arrays (safe to ignore warnings)
 - Mock data needs to be replaced with real API calls
 
 ## 📚 Next Steps
 
-1. Install `expo-av` if not already installed
+1. Install `expo-audio` if not already installed
 2. Configure audio permissions in `app.json`
 3. Replace mock data with API endpoints
 4. Customize colors and branding

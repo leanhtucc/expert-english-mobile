@@ -8,11 +8,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { LoginScreen } from '@/screens/auth/login';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
-import {
-  AIFeedbackScreen,
-  PracticeSetupScreen,
-  SpeakingConversationScreen,
-} from '@/screens/speakingSession';
+import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
 
 import InitialNavigator from './InitialNavigator';
@@ -51,7 +47,7 @@ export type RootStackParamList = {
 
   // Speaking Practice flow
   PracticeSetup: undefined;
-  SpeakingConversation: { mode: 'dual-explorer' | 'english-master' | 'translation-hero' };
+  // SpeakingConversation: { mode: 'dual-explorer' | 'english-master' | 'translation-hero' }; // Removed
   AIFeedback: { userAnswer: string; mode: string };
 };
 
@@ -126,11 +122,11 @@ export default function RootStack() {
           component={PracticeSetupScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="SpeakingConversation"
           component={SpeakingConversationScreen}
           options={{ headerShown: false }}
-        />
+        /> */}
         <Stack.Screen
           name="AIFeedback"
           component={AIFeedbackScreen}

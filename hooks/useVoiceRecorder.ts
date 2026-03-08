@@ -1,22 +1,27 @@
 import { useCallback, useState } from 'react';
 
-import { Audio } from 'expo-av';
+import {
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from 'expo-audio';
 
 import { RecordingState } from '@/types/speaking.types';
 
 export const useVoiceRecorder = () => {
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(recorder);
 
   const stopRecording = useCallback(async () => {
-    if (!recording) return;
+    if (!recorder || !recorderState.isRecording) return;
 
     try {
       setRecordingState('processing');
-      await recording.stopAndUnloadAsync();
-      // const uri = recording.getURI(); // Available for future use
-      setRecording(null);
-
+      await recorder.stop();
+      // const uri = recorder.uri; // Available for future use
       // Simulate speech-to-text processing
       return new Promise<string>(resolve => {
         setTimeout(() => {
@@ -29,34 +34,30 @@ export const useVoiceRecorder = () => {
       setRecordingState('idle');
       return null;
     }
-  }, [recording]);
+  }, [recorder, recorderState.isRecording]);
 
   const startRecording = useCallback(async () => {
     try {
       // Request permissions
-      const { status } = await Audio.requestPermissionsAsync();
+      const { status } = await requestRecordingPermissionsAsync();
       if (status !== 'granted') {
         console.warn('Audio permission not granted');
         return;
       }
 
       // Configure audio mode
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
+      await setAudioModeAsync({
+        allowsRecording: true,
       });
 
       setRecordingState('recording');
 
-      // Create recording
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecording(newRecording);
+      // Start recording
+      await recorder.record();
 
       // Auto-stop after 5 seconds (simulated)
       setTimeout(() => {
-        if (newRecording) {
+        if (recorderState.isRecording) {
           stopRecording();
         }
       }, 5000);
@@ -64,11 +65,10 @@ export const useVoiceRecorder = () => {
       console.error('Failed to start recording:', error);
       setRecordingState('idle');
     }
-  }, [stopRecording]);
+  }, [recorder, recorderState.isRecording, stopRecording]);
 
   const reset = useCallback(() => {
     setRecordingState('idle');
-    setRecording(null);
   }, []);
 
   return {

@@ -17,8 +17,10 @@ export interface ChatMessage {
 export interface ScenarioPreview {
   role: string;
   question: string;
+  translation?: string;
   progress: number;
   exampleAnswer: string;
+  exampleAnswerTranslation?: string;
 }
 
 export interface AIFeedback {
@@ -32,6 +34,7 @@ export interface AIFeedback {
 
 export interface HighlightedText {
   text: string;
+  correction?: string;
   isCorrect: boolean;
 }
 
