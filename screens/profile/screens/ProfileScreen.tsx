@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Platform,
   ScrollView,
@@ -14,91 +14,29 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Image } from 'expo-image';
 
+import { useNavigation } from '@react-navigation/native';
+
 import {
   formatXP,
   mockCertificates,
   mockLearningGoal,
   mockLearningStats,
-  mockProfileData,
   mockUserProfile,
 } from '@/data/mock-data';
 import { useTheme } from '@/hooks/use-theme';
+import { useAppStore } from '@/stores';
 
-// ─────────────────────────────────────────────
-// Constants
-// ─────────────────────────────────────────────
+import { MenuRow, StatCard } from '../components';
+import { ACCENT, BLUE, GOLD, ORANGE } from '../constants';
 
-const ACCENT = '#E8445A';
-const GOLD = '#F5A623';
-const BLUE = '#4A90D9';
-const ORANGE = '#F76E2E';
-const CARD_BG_LIGHT = '#F8F9FC';
-const CARD_BG_DARK = '#1E2028';
-
-// ─────────────────────────────────────────────
-// Sub-components
-// ─────────────────────────────────────────────
-
-function StatCard({
-  value,
-  label,
-  icon,
-  isDark,
-}: {
-  value: string;
-  label: string;
-  icon: React.ReactNode;
-  isDark: boolean;
-}) {
-  return (
-    <View style={[styles.statCard, { backgroundColor: isDark ? CARD_BG_DARK : CARD_BG_LIGHT }]}>
-      {icon}
-      <Text style={[styles.statValue, { color: isDark ? '#FFF' : '#1A1A2E' }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
-function MenuRow({
-  icon,
-  label,
-  subtitle,
-  right,
-  isDark,
-  onPress,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  subtitle?: string;
-  right?: React.ReactNode;
-  isDark: boolean;
-  onPress?: () => void;
-}) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.7}
-      style={[styles.menuRow, { backgroundColor: isDark ? CARD_BG_DARK : '#FFFFFF' }]}
-    >
-      <View style={styles.menuIconWrap}>{icon}</View>
-      <View style={styles.menuTextWrap}>
-        <Text style={[styles.menuLabel, { color: isDark ? '#FFF' : '#1A1A2E' }]}>{label}</Text>
-        {subtitle ? <Text style={styles.menuSubtitle}>{subtitle}</Text> : null}
-      </View>
-      <View>{right}</View>
-    </TouchableOpacity>
-  );
-}
-
-// ─────────────────────────────────────────────
-// Main Screen
-// ─────────────────────────────────────────────
-
-export default function ProfileScreen() {
+export const ProfileScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
   const { isDark } = useTheme();
+  const { setTheme } = useAppStore();
 
-  const [darkMode, setDarkMode] = useState(mockProfileData.darkAppearance);
+  // Switch state reflects actual dark mode, toggle sets explicit theme
+  const setDarkMode = (val: boolean) => setTheme(val ? 'dark' : 'light');
 
   const user = mockUserProfile;
   const stats = mockLearningStats;
@@ -112,14 +50,16 @@ export default function ProfileScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: bgColor }]}>
-      {/* ── Header ── */}
+      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.headerBtn}
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+        >
           <Ionicons name="chevron-back" size={24} color={textPrimary} />
         </TouchableOpacity>
-
         <Text style={[styles.headerTitle, { color: textPrimary }]}>My Profile</Text>
-
         <TouchableOpacity style={styles.headerBtn} activeOpacity={0.7}>
           <Ionicons name="settings-outline" size={24} color={textPrimary} />
         </TouchableOpacity>
@@ -129,13 +69,13 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
       >
-        {/* ── Avatar ── */}
+        {/* Avatar section */}
         <View style={styles.avatarSection}>
           <View style={styles.avatarRing}>
             {user.avatar ? (
               <View style={styles.avatarImageWrap}>
                 {Platform.OS === 'web' ? (
-                  // @ts-ignore – img is valid JSX on web
+                  // @ts-ignore
                   <img
                     src={user.avatar}
                     alt={user.name}
@@ -165,7 +105,7 @@ export default function ProfileScreen() {
           </Text>
         </View>
 
-        {/* ── Learning Stats ── */}
+        {/* Learning Stats */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: textPrimary }]}>Learning Stats</Text>
@@ -203,9 +143,8 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* ── Settings / Menu ── */}
+        {/* Settings menu */}
         <View style={[styles.section, styles.menuSection]}>
-          {/* Learning Goal */}
           <MenuRow
             isDark={isDark}
             icon={
@@ -220,7 +159,6 @@ export default function ProfileScreen() {
 
           <View style={[styles.divider, { backgroundColor: isDark ? '#2A2C36' : '#F0F1F5' }]} />
 
-          {/* Certificates */}
           <MenuRow
             isDark={isDark}
             icon={
@@ -235,7 +173,6 @@ export default function ProfileScreen() {
 
           <View style={[styles.divider, { backgroundColor: isDark ? '#2A2C36' : '#F0F1F5' }]} />
 
-          {/* Dark Appearance */}
           <MenuRow
             isDark={isDark}
             icon={
@@ -247,7 +184,7 @@ export default function ProfileScreen() {
             subtitle="Reduce eye strain"
             right={
               <Switch
-                value={darkMode}
+                value={isDark}
                 onValueChange={setDarkMode}
                 trackColor={{ false: '#D1D5DB', true: ACCENT }}
                 thumbColor="#FFFFFF"
@@ -258,26 +195,27 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
-      {/* ── Continue Learning Button ── */}
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
-        <TouchableOpacity style={styles.continueBtn} activeOpacity={0.85}>
+      {/* Continue Learning Button */}
+      <View
+        pointerEvents="box-none"
+        style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}
+      >
+        <TouchableOpacity
+          style={styles.continueBtn}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('Lessons')}
+        >
           <Text style={styles.continueBtnText}>CONTINUE LEARNING ▶</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-}
-
-// ─────────────────────────────────────────────
-// Styles
-// ─────────────────────────────────────────────
+};
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-
-  // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -296,8 +234,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.2,
   },
-
-  // Avatar
   avatarSection: {
     alignItems: 'center',
     marginTop: 8,
@@ -323,7 +259,6 @@ const styles = StyleSheet.create({
     height: 86,
     borderRadius: 43,
     overflow: 'hidden',
-    position: 'relative',
   },
   avatarImage: {
     width: 86,
@@ -357,8 +292,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#8A8FA8',
   },
-
-  // Section
   section: {
     marginHorizontal: 16,
     marginBottom: 16,
@@ -378,39 +311,13 @@ const styles = StyleSheet.create({
     color: ACCENT,
     fontWeight: '600',
   },
-
-  // Stat cards
   statsRow: {
     flexDirection: 'row',
     gap: 10,
   },
-  statCard: {
-    flex: 1,
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
   statIcon: {
     marginBottom: 4,
   },
-  statValue: {
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 2,
-  },
-  statLabel: {
-    fontSize: 9,
-    color: '#8A8FA8',
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-
-  // Menu
   menuSection: {
     borderRadius: 16,
     overflow: 'hidden',
@@ -420,15 +327,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  menuRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  menuIconWrap: {
-    marginRight: 12,
-  },
   menuIconCircle: {
     width: 40,
     height: 40,
@@ -436,24 +334,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  menuTextWrap: {
-    flex: 1,
-  },
-  menuLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  menuSubtitle: {
-    fontSize: 12,
-    color: '#8A8FA8',
-  },
   divider: {
     height: 1,
     marginLeft: 68,
   },
-
-  // Bottom button
   bottomBar: {
     position: 'absolute',
     bottom: 0,
