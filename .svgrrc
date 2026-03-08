@@ -1,0 +1,25 @@
+{
+  "native": true,
+  "typescript": true,
+  "icon": true,
+  "svgo": true,
+  "svgoConfig": {
+    "plugins": [
+      {
+        "name": "preset-default",
+        "params": {
+          "overrides": {
+            "removeViewBox": false
+          }
+        }
+      },
+      "removeXMLNS",
+      {
+        "name": "removeAttrs",
+        "params": {
+          "attrs": "xmlns:xlink"
+        }
+      }
+    ]
+  }
+}

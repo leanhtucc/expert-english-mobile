@@ -9,6 +9,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { LoginScreen } from '@/screens/auth/login';
+import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
+import { OnboardingScreen } from '@/screens/onboarding';
+import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
 import { useAuthStore } from '@/stores';
 
 import InitialNavigator from './InitialNavigator';
@@ -22,13 +26,22 @@ export type TabNavigatorParamList = {
 
 // Root Stack Param List
 export type RootStackParamList = {
+  // Onboarding
+  Onboarding: undefined;
+
   // Auth flow
   Start: { step?: number } | undefined;
   Login: undefined;
   SignUp: undefined;
   ForgotPassword: undefined;
   OTP: { email: string; isRegister?: boolean; userData?: any };
+  VerifyOTP: { email: string };
   ResetPassword: undefined;
+
+  // Survey flow
+  Survey: undefined;
+  LearningPath: undefined;
+  AIRoadmapLoading: undefined;
 
   // Main flow
   InitialNavigator: undefined;
@@ -73,43 +86,47 @@ export default function RootStack() {
 
   return (
     <NavigationContainer ref={navigationRef}>
-      {isLoggedIn ? (
-        <Stack.Navigator
-          initialRouteName="InitialNavigator"
-          screenOptions={{
-            gestureEnabled: false,
-          }}
-        >
-          <Stack.Screen
-            name="InitialNavigator"
-            component={InitialNavigator}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="TabNavigator"
-            component={TabNavigator}
-            options={{ headerShown: false }}
-          />
+      <Stack.Navigator
+        initialRouteName="Onboarding"
+        screenOptions={{
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
+        }}
+      >
+        <Stack.Screen
+          name="Onboarding"
+          component={OnboardingScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="VerifyOTP"
+          component={VerifyOTPScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="Survey" component={SurveyScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="LearningPath"
+          component={LearningPathScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AIRoadmapLoading"
+          component={AIRoadmapLoadingScreen}
+          options={{ headerShown: false }}
+        />
 
-          {/* Add more authenticated screens here as needed */}
-        </Stack.Navigator>
-      ) : (
-        <Stack.Navigator
-          initialRouteName="TabNavigator"
-          screenOptions={{
-            gestureEnabled: true,
-            gestureDirection: 'horizontal',
-          }}
-        >
-          <Stack.Screen
-            name="TabNavigator"
-            component={TabNavigator}
-            options={{ headerShown: false }}
-          />
-
-          {/* Add more unauthenticated screens here as needed */}
-        </Stack.Navigator>
-      )}
+        <Stack.Screen
+          name="InitialNavigator"
+          component={InitialNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="TabNavigator"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
