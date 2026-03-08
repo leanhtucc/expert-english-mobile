@@ -4,7 +4,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 
 import { IconFiledUser } from '@/components/icon';
 
@@ -12,7 +12,7 @@ import { HeroCard, RoadmapItem, TodayFocusCard } from '../components';
 import { MOCK_HOME_DATA } from '../constants';
 
 export const HomeScreen: React.FC = () => {
-  const router = useRouter();
+  const navigation = useNavigation<any>();
   const data = MOCK_HOME_DATA;
 
   const greeting = (() => {
@@ -39,7 +39,7 @@ export const HomeScreen: React.FC = () => {
         <TouchableOpacity
           activeOpacity={0.7}
           style={styles.bellBtn}
-          onPress={() => router.push('/(tabs)/profile')}
+          onPress={() => navigation.navigate('Profile')}
         >
           <Bell size={20} color="#374151" strokeWidth={1.8} />
         </TouchableOpacity>
@@ -55,7 +55,7 @@ export const HomeScreen: React.FC = () => {
         {/* Today's Focus */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Today&apos;s Focus</Text>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(tabs)/lessons')}>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('Lessons')}>
             <Text style={styles.viewAll}>View all</Text>
           </TouchableOpacity>
         </View>
@@ -64,7 +64,7 @@ export const HomeScreen: React.FC = () => {
           <TodayFocusCard
             key={lesson.id}
             lesson={lesson}
-            onStartSession={() => router.push('/(tabs)/lessons')}
+            onStartSession={() => navigation.navigate('Lessons')}
           />
         ))}
 

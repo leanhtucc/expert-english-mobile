@@ -1,6 +1,8 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { ThemedText } from '@/components/themed-text';
 
 import { ModuleCard } from '../components';
 import { MOCK_MODULES } from '../constants';
@@ -13,45 +15,25 @@ export const LessonsScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Lessons</Text>
-        <Text style={styles.subtitle}>{MOCK_MODULES.length} modules</Text>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="px-5 pb-4 pt-3">
+        <ThemedText className="text-2xl font-extrabold tracking-tight text-gray-900">
+          Lessons
+        </ThemedText>
+        <ThemedText className="mt-0.5 text-[13px] text-gray-500">
+          {MOCK_MODULES.length} modules
+        </ThemedText>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 4, paddingBottom: 96 }}
+      >
         {MOCK_MODULES.map(mod => (
           <ModuleCard key={mod.id} module={mod} onLessonPress={handleLessonPress} />
         ))}
-        <View style={{ height: 32 }} />
+        <View className="h-8" />
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#111827',
-    letterSpacing: -0.3,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  list: {
-    paddingTop: 4,
-    paddingBottom: 100,
-  },
-});

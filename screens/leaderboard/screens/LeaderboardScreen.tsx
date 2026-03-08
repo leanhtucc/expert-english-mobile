@@ -4,7 +4,7 @@ import React from 'react';
 import { ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 
 import { mockLeaderboard } from '@/data/mock-data';
 import { useTheme } from '@/hooks/use-theme';
@@ -14,7 +14,7 @@ import { ACCENT, GOLD, PODIUM_BG } from '../constants';
 
 export const LeaderboardScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const navigation = useNavigation<any>();
   const { isDark } = useTheme();
 
   const bgColor = isDark ? '#13141A' : '#FFFFFF';
@@ -38,7 +38,7 @@ export const LeaderboardScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.headerBtn}
           activeOpacity={0.7}
-          onPress={() => router.back()}
+          onPress={() => navigation.goBack()}
         >
           <Ionicons name="chevron-back" size={24} color={textPrimary} />
         </TouchableOpacity>

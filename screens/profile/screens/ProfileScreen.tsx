@@ -13,7 +13,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+
+import { useNavigation } from '@react-navigation/native';
 
 import {
   formatXP,
@@ -30,7 +31,7 @@ import { ACCENT, BLUE, GOLD, ORANGE } from '../constants';
 
 export const ProfileScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const navigation = useNavigation<any>();
   const { isDark } = useTheme();
   const { setTheme } = useAppStore();
 
@@ -54,7 +55,7 @@ export const ProfileScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.headerBtn}
           activeOpacity={0.7}
-          onPress={() => router.back()}
+          onPress={() => navigation.goBack()}
         >
           <Ionicons name="chevron-back" size={24} color={textPrimary} />
         </TouchableOpacity>
@@ -202,7 +203,7 @@ export const ProfileScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.continueBtn}
           activeOpacity={0.85}
-          onPress={() => router.push('/(tabs)/lessons')}
+          onPress={() => navigation.navigate('Lessons')}
         >
           <Text style={styles.continueBtnText}>CONTINUE LEARNING ▶</Text>
         </TouchableOpacity>
