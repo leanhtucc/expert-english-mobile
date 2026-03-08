@@ -1,5 +1,3 @@
-import { ActivityIndicator } from 'react-native';
-
 import {
   NavigationContainer,
   NavigatorScreenParams,
@@ -7,13 +5,15 @@ import {
 } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LoginScreen } from '@/screens/auth/login';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
+import {
+  AIFeedbackScreen,
+  PracticeSetupScreen,
+  SpeakingConversationScreen,
+} from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
-import { useAuthStore } from '@/stores';
 
 import InitialNavigator from './InitialNavigator';
 import TabNavigator from './tab-navigator';
@@ -48,6 +48,11 @@ export type RootStackParamList = {
   PremiumInterstitial: undefined;
   TabNavigator: NavigatorScreenParams<TabNavigatorParamList> | { screen?: string };
   Modal: undefined;
+
+  // Speaking Practice flow
+  PracticeSetup: undefined;
+  SpeakingConversation: { mode: 'dual-explorer' | 'english-master' | 'translation-hero' };
+  AIFeedback: { userAnswer: string; mode: string };
 };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -77,17 +82,10 @@ export function resetRoot(routeName: keyof RootStackParamList) {
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function RootStack() {
-  const isLoggedIn = useAuthStore(state => state.isAuthenticated);
-  const colorScheme = useColorScheme();
-
-  if (typeof isLoggedIn === 'undefined') {
-    return <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].tint} />;
-  }
-
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="Onboarding"
+        initialRouteName="TabNavigator"
         screenOptions={{
           gestureEnabled: true,
           gestureDirection: 'horizontal',
@@ -119,6 +117,23 @@ export default function RootStack() {
         <Stack.Screen
           name="InitialNavigator"
           component={InitialNavigator}
+          options={{ headerShown: false }}
+        />
+
+        {/* Speaking Practice Screens */}
+        <Stack.Screen
+          name="PracticeSetup"
+          component={PracticeSetupScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SpeakingConversation"
+          component={SpeakingConversationScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AIFeedback"
+          component={AIFeedbackScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

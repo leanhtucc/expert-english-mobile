@@ -27,11 +27,11 @@ export default function InitialNavigator() {
       try {
         // You can add premium interstitial logic here
         // For now, just go to TabNavigator
-        navigation.replace('TabNavigator', {});
+        navigation.replace('Onboarding');
       } catch (error) {
         console.error('Error checking navigation status:', error);
         // On error, just go to Home
-        navigation.replace('TabNavigator', {});
+        navigation.replace('Onboarding');
       }
     };
 
