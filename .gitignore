@@ -37,7 +37,9 @@ yarn-error.*
 .DS_Store
 *.pem
 
-assets/svgs/output/
+# SVG output - ignore generated icons but keep index
+assets/svgs/output/*.tsx
+!assets/svgs/output/index.ts
 
 # typescript
 *.tsbuildinfo

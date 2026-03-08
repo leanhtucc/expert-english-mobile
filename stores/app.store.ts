@@ -1,5 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { Language, Theme } from '@/types';
 
@@ -64,8 +65,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'app-storage',
-      // Sử dụng AsyncStorage cho React Native
-      // storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );

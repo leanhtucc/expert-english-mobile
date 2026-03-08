@@ -1,5 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
+import { Platform } from 'react-native';
+
 import { Tabs } from 'expo-router';
 
 import { Colors } from '@/constants/theme';
@@ -34,6 +36,10 @@ export default function TabLayout() {
         tabBarIconStyle: {
           marginBottom: 0,
         },
+        // Fix cho web - đảm bảo content có thể nhận touch events
+        ...(Platform.OS === 'web' && {
+          sceneStyle: { pointerEvents: 'auto' as const },
+        }),
       }}
     >
       <Tabs.Screen
@@ -41,6 +47,15 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => <MaterialIcons name="home" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="lessons"
+        options={{
+          title: 'Lessons',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="menu-book" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
