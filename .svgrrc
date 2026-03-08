@@ -13,7 +13,13 @@
           }
         }
       },
-      "removeXMLNS"
+      "removeXMLNS",
+      {
+        "name": "removeAttrs",
+        "params": {
+          "attrs": "xmlns:xlink"
+        }
+      }
     ]
   }
 }

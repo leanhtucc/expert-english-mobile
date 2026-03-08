@@ -1,7 +1,7 @@
 import { X } from 'lucide-react-native';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNavigation } from '@react-navigation/native';
@@ -10,8 +10,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import {
   IconCheckCourse,
   IconLoadingBuildCourse,
-  IconRobot,
   IconUpcomming,
+  ImageMasco,
 } from '@/components/icon';
 import { RootStackParamList } from '@/navigation';
 
@@ -100,13 +100,13 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
         <View className="w-9" />
       </View>
 
-      <View className="flex-1 px-6 pt-8">
+      <View className="flex-1 px-6 pt-3">
         {/* Illustration card */}
         <View
-          className="mb-7 items-center justify-center self-center rounded-3xl border border-red-200 bg-red-50"
-          style={{ width: 140, height: 140 }}
+          className="mb-7 items-center justify-center self-center overflow-hidden rounded-[40px] border-2 border-red-200 bg-red-100"
+          style={{ width: 300, height: 300 }}
         >
-          <IconRobot width={110} height={110} />
+          <ImageMasco width={200} height={200} />
         </View>
 
         {/* Title & subtitle */}
@@ -172,21 +172,41 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
 };
 
 const StepIcon: React.FC<{ status: StepStatus }> = ({ status }) => {
+  const spin = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (status !== 'in_progress') return;
+    const anim = Animated.loop(
+      Animated.timing(spin, {
+        toValue: 1,
+        duration: 900,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [status, spin]);
+
   if (status === 'completed')
     return (
       <View className="h-[34px] w-[34px] items-center justify-center rounded-full bg-[#C8102E]">
-        <IconCheckCourse width={18} height={18} />
+        <IconCheckCourse width={15} height={15} />
       </View>
     );
-  if (status === 'in_progress')
+  if (status === 'in_progress') {
+    const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
     return (
       <View className="h-[34px] w-[34px] items-center justify-center rounded-full border-2 border-[#C8102E] bg-red-50">
-        <IconLoadingBuildCourse width={20} height={20} />
+        <Animated.View style={{ transform: [{ rotate }] }}>
+          <IconLoadingBuildCourse width={15} height={15} />
+        </Animated.View>
       </View>
     );
+  }
   return (
     <View className="h-[34px] w-[34px] items-center justify-center rounded-full border-2 border-gray-200 bg-gray-50">
-      <IconUpcomming width={20} height={20} />
+      <IconUpcomming width={15} height={15} />
     </View>
   );
 };
