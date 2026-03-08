@@ -1,9 +1,11 @@
+export {
+  Step1WhoAreYou,
+  Step2SelectField,
+  Step3EnglishLevel,
+  Step4DailyGoal,
+  Step5Reminder,
+} from '../steps';
 export { PrimaryButton } from './PrimaryButton';
 export { SelectableCard } from './SelectableCard';
-export { Step1WhoAreYou } from './Step1WhoAreYou';
-export { Step2SelectField } from './Step2SelectField';
-export { Step3EnglishLevel } from './Step3EnglishLevel';
-export { Step4DailyGoal } from './Step4DailyGoal';
-export { Step5Reminder } from './Step5Reminder';
 export { SurveyHeader } from './SurveyHeader';
 export { TimePickerWheel } from './TimePickerWheel';

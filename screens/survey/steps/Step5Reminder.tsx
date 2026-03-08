@@ -1,24 +1,15 @@
-import { ChevronLeft, MapPin } from 'lucide-react-native';
-
 import React from 'react';
-import { Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { IconReminderBell } from '@/components/icon';
+import { IconReminderBell, IconStudySchedule } from '@/components/icon';
 
-import { HOUR_VALUES, MINUTE_VALUES } from '../survey.constants';
-import type { StepProps } from '../survey.types';
-import { PrimaryButton } from './PrimaryButton';
-import { TimePickerWheel } from './TimePickerWheel';
+import { PrimaryButton } from '../components/PrimaryButton';
+import { TimePickerWheel } from '../components/TimePickerWheel';
+import { HOUR_VALUES, MINUTE_VALUES } from '../constants/surveyConstants';
+import type { StepProps } from '../types/surveyTypes';
 
-export const Step5Reminder: React.FC<StepProps> = ({
-  answers,
-  onUpdate,
-  onNext,
-  onBack,
-  currentStep,
-  totalSteps,
-}) => {
+export const Step5Reminder: React.FC<StepProps> = ({ answers, onUpdate, onNext }) => {
   const { reminderEnabled, reminderTime } = answers;
 
   const hourIndex = Math.max(HOUR_VALUES.indexOf(String(reminderTime.hour).padStart(2, '0')), 0);
@@ -34,25 +25,7 @@ export const Step5Reminder: React.FC<StepProps> = ({
     onUpdate({ reminderTime: { ...reminderTime, minute: Number(MINUTE_VALUES[index]) } });
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
-      {/* Step 5 custom header with full progress bar */}
-      <View className="px-5 pb-2 pt-3">
-        <View className="mb-3 flex-row items-center">
-          <TouchableOpacity
-            onPress={onBack}
-            className="mr-3"
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <ChevronLeft size={22} color="#1a1a1a" />
-          </TouchableOpacity>
-          <Text className="flex-1 text-[11px] font-semibold uppercase text-[#C8102E]">
-            STEP {currentStep} OF {totalSteps}
-          </Text>
-          <Text className="text-[11px] font-bold uppercase text-gray-400">100% COMPLETE</Text>
-        </View>
-        <View className="h-1.5 rounded-full bg-[#C8102E]" />
-      </View>
-
+    <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
       <View className="flex-1 px-5 pt-4">
         <Text className="mb-1 text-2xl font-bold text-gray-900">Stay on track</Text>
         <Text className="mb-6 text-sm leading-5 text-gray-500">
@@ -65,12 +38,33 @@ export const Step5Reminder: React.FC<StepProps> = ({
             <IconReminderBell width={22} height={22} />
             <Text className="ml-3 text-base font-semibold text-gray-800">Enable Reminders</Text>
           </View>
-          <Switch
-            value={reminderEnabled}
-            onValueChange={value => onUpdate({ reminderEnabled: value })}
-            trackColor={{ false: '#d1d5db', true: '#C8102E' }}
-            thumbColor="#fff"
-          />
+          <TouchableOpacity
+            onPress={() => onUpdate({ reminderEnabled: !reminderEnabled })}
+            activeOpacity={0.85}
+            style={{
+              width: 50,
+              height: 28,
+              borderRadius: 14,
+              backgroundColor: reminderEnabled ? '#C8102E' : '#d1d5db',
+              justifyContent: 'center',
+              alignItems: reminderEnabled ? 'flex-end' : 'flex-start',
+              paddingHorizontal: 2,
+            }}
+          >
+            <View
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                backgroundColor: '#fff',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.2,
+                shadowRadius: 2,
+                elevation: 2,
+              }}
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Time picker wheel (only when enabled) */}
@@ -95,7 +89,7 @@ export const Step5Reminder: React.FC<StepProps> = ({
 
         {/* Evening tip */}
         <View className="mt-4 flex-row items-start rounded-2xl bg-blue-50 p-4">
-          <MapPin size={16} color="#3b82f6" />
+          <IconStudySchedule width={16} height={16} />
           <Text className="ml-3 flex-1 text-xs leading-5 text-blue-600">
             We will remind you to study at {HOUR_VALUES[hourIndex]}:{MINUTE_VALUES[minuteIndex]}{' '}
             every day. Studying in the evening helps with memory consolidation.

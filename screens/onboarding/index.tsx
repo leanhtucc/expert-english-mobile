@@ -68,10 +68,10 @@ export const OnboardingScreen: React.FC = () => {
     });
   };
 
-  const handleGetStarted = () => animateToStep(1);
+  const handleGetStarted = () => navigation.navigate('Survey');
   const handleGoogleLogin = () => console.log('Google login');
   const handleEmailLogin = () => navigation.navigate('Login');
-  const handleLogin = () => navigation.navigate('Login');
+  const handleLogin = () => animateToStep(1);
 
   return (
     <View style={{ flex: 1 }}>

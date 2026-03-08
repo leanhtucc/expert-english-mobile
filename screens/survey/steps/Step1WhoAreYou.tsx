@@ -2,30 +2,31 @@ import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ROLE_OPTIONS } from '../survey.constants';
-import type { StepProps, UserRole } from '../survey.types';
-import { PrimaryButton } from './PrimaryButton';
-import { SelectableCard } from './SelectableCard';
-import { SurveyHeader } from './SurveyHeader';
+import { IconFiledUser } from '@/components/icon';
+
+import { PrimaryButton } from '../components/PrimaryButton';
+import { SelectableCard } from '../components/SelectableCard';
+import { ROLE_OPTIONS } from '../constants/surveyConstants';
+import type { StepProps, UserRole } from '../types/surveyTypes';
 
 export const Step1WhoAreYou: React.FC<StepProps> = ({
   answers,
   onUpdate,
   onNext,
-  onBack,
   currentStep,
   totalSteps,
 }) => {
   const selected = answers.role;
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
-      <SurveyHeader currentStep={currentStep} totalSteps={totalSteps} onBack={onBack} />
-
+    <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
       >
+        <View className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-red-100">
+          <IconFiledUser width={26} height={26} />
+        </View>
         <Text className="mb-1 text-2xl font-bold text-gray-900">Who are you?</Text>
         <Text className="mb-6 text-sm leading-5 text-gray-500">
           Select your current role so we can personalize your learning path.

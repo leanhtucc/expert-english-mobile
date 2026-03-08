@@ -2,26 +2,16 @@ import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { LEVEL_OPTIONS } from '../survey.constants';
-import type { EnglishLevel, StepProps } from '../survey.types';
-import { PrimaryButton } from './PrimaryButton';
-import { SelectableCard } from './SelectableCard';
-import { SurveyHeader } from './SurveyHeader';
+import { PrimaryButton } from '../components/PrimaryButton';
+import { SelectableCard } from '../components/SelectableCard';
+import { LEVEL_OPTIONS } from '../constants/surveyConstants';
+import type { EnglishLevel, StepProps } from '../types/surveyTypes';
 
-export const Step3EnglishLevel: React.FC<StepProps> = ({
-  answers,
-  onUpdate,
-  onNext,
-  onBack,
-  currentStep,
-  totalSteps,
-}) => {
+export const Step3EnglishLevel: React.FC<StepProps> = ({ answers, onUpdate, onNext }) => {
   const selected = answers.level;
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
-      <SurveyHeader currentStep={currentStep} totalSteps={totalSteps} onBack={onBack} />
-
+    <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}

@@ -1,7 +1,9 @@
-import { ArrowRight, CheckCircle } from 'lucide-react-native';
+import { ArrowRight } from 'lucide-react-native';
 
 import React from 'react';
 import { ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+
+import { IconFinish } from '@/components/icon';
 
 interface PrimaryButtonProps {
   label: string;
@@ -40,7 +42,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     ) : (
       <>
         <Text className="mr-2 text-base font-bold text-white">{label}</Text>
-        {isFinish ? <CheckCircle size={18} color="#fff" /> : <ArrowRight size={18} color="#fff" />}
+        {isFinish ? <IconFinish width={18} height={18} /> : <ArrowRight size={18} color="#fff" />}
       </>
     )}
   </TouchableOpacity>

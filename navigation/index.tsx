@@ -12,7 +12,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { LoginScreen } from '@/screens/auth/login';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
-import { SurveyScreen } from '@/screens/survey';
+import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
 import { useAuthStore } from '@/stores';
 
 import InitialNavigator from './InitialNavigator';
@@ -40,6 +40,8 @@ export type RootStackParamList = {
 
   // Survey flow
   Survey: undefined;
+  LearningPath: undefined;
+  AIRoadmapLoading: undefined;
 
   // Main flow
   InitialNavigator: undefined;
@@ -103,6 +105,16 @@ export default function RootStack() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Survey" component={SurveyScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="LearningPath"
+          component={LearningPathScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AIRoadmapLoading"
+          component={AIRoadmapLoadingScreen}
+          options={{ headerShown: false }}
+        />
 
         <Stack.Screen
           name="InitialNavigator"

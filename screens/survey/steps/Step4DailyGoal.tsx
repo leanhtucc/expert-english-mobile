@@ -4,26 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconLearningTip } from '@/components/icon';
 
-import { GOAL_OPTIONS } from '../survey.constants';
-import type { DailyGoal, StepProps } from '../survey.types';
-import { PrimaryButton } from './PrimaryButton';
-import { SelectableCard } from './SelectableCard';
-import { SurveyHeader } from './SurveyHeader';
+import { PrimaryButton } from '../components/PrimaryButton';
+import { SelectableCard } from '../components/SelectableCard';
+import { GOAL_OPTIONS } from '../constants/surveyConstants';
+import type { DailyGoal, StepProps } from '../types/surveyTypes';
 
-export const Step4DailyGoal: React.FC<StepProps> = ({
-  answers,
-  onUpdate,
-  onNext,
-  onBack,
-  currentStep,
-  totalSteps,
-}) => {
+export const Step4DailyGoal: React.FC<StepProps> = ({ answers, onUpdate, onNext }) => {
   const selected = answers.dailyGoal;
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
-      <SurveyHeader currentStep={currentStep} totalSteps={totalSteps} onBack={onBack} />
-
+    <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
@@ -46,7 +36,7 @@ export const Step4DailyGoal: React.FC<StepProps> = ({
         ))}
 
         {/* Study tip */}
-        <View className="mt-2 flex-row items-start rounded-2xl bg-gray-50 p-4">
+        <View className="mt-2 flex-row items-start rounded-2xl bg-red-50 p-4">
           <IconLearningTip width={20} height={20} />
           <Text className="ml-3 flex-1 text-xs leading-5 text-gray-600">
             {'"Short, daily practice sessions are 4x more effective than long weekly ones."'}

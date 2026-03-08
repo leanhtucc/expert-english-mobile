@@ -44,12 +44,12 @@ export const OnboardingActions: React.FC<OnboardingActionsProps> = ({
 
         {/* Email Button */}
         <TouchableOpacity
-          className="mb-6 flex-row items-center justify-center rounded-full border border-white/50 bg-white/10 px-8 py-4"
+          className="mb-6 flex-row items-center justify-center rounded-full border border-white/50 bg-white px-8 py-4"
           onPress={onEmailLogin}
           activeOpacity={0.8}
         >
           <IconEmail width={22} height={22} />
-          <Text className="ml-3 text-base font-medium text-white">Continue with Email</Text>
+          <Text className="ml-3 text-base font-medium text-gray-800">Continue with Email</Text>
         </TouchableOpacity>
 
         {/* Terms */}
