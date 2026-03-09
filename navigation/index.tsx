@@ -12,6 +12,7 @@ import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
+import { VocabularyLearning } from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
 import TabNavigator from './tab-navigator';
@@ -53,6 +54,9 @@ export type RootStackParamList = {
   PracticeSetup: undefined;
   // SpeakingConversation: { mode: 'dual-explorer' | 'english-master' | 'translation-hero' }; // Removed
   AIFeedback: { userAnswer: string; mode: string };
+
+  // Vocabulary Learning flow
+  VocabularyLearning: undefined;
 };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -85,7 +89,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="Onboarding"
+        initialRouteName="VocabularyLearning"
         screenOptions={{
           gestureEnabled: true,
           gestureDirection: 'horizontal',
@@ -140,14 +144,14 @@ export default function RootStack() {
           component={PracticeSetupScreen}
           options={{ headerShown: false }}
         />
-        {/* <Stack.Screen
-          name="SpeakingConversation"
-          component={SpeakingConversationScreen}
-          options={{ headerShown: false }}
-        /> */}
         <Stack.Screen
           name="AIFeedback"
           component={AIFeedbackScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="VocabularyLearning"
+          component={VocabularyLearning}
           options={{ headerShown: false }}
         />
         <Stack.Screen
