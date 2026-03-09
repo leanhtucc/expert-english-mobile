@@ -14,18 +14,16 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
-import type { RootStackParamList } from '@/navigation';
-
 import { EmailInput, LoginHeader, LoginIcon, SubmitButton } from './components';
 
-type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
+type EnterEmailScreenNavigationProp = StackNavigationProp<any>;
 
 /**
- * Màn hình đăng nhập với Email
+ * Màn hình nhập email
  * User nhập email và nhận mã OTP để xác thực
  */
-export const LoginScreen: React.FC = () => {
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+export const EnterEmailScreen: React.FC = () => {
+  const navigation = useNavigation<EnterEmailScreenNavigationProp>();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -121,4 +119,4 @@ export const LoginScreen: React.FC = () => {
   );
 };
 
-export default LoginScreen;
+export default EnterEmailScreen;
