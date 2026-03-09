@@ -33,6 +33,7 @@ const STEP_SEQUENCE: StepStatus[][] = [
   ['in_progress', 'upcoming', 'upcoming'],
   ['completed', 'in_progress', 'upcoming'],
   ['completed', 'completed', 'in_progress'],
+  ['completed', 'completed', 'completed'],
 ];
 
 export const AIRoadmapLoadingScreen: React.FC = () => {
@@ -52,9 +53,10 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
         }).start();
 
         if (next >= 30 && next < 70) setSeqIndex(1);
-        else if (next >= 70) setSeqIndex(2);
+        else if (next >= 70 && next < 100) setSeqIndex(2);
 
         if (next >= 100) {
+          setSeqIndex(3);
           clearInterval(interval);
           // navigation.navigate('TabNavigator', {});
         }

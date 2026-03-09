@@ -29,7 +29,6 @@ const config: ExpoConfig = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
-    'expo-router',
     [
       'expo-splash-screen',
       {
@@ -44,7 +43,6 @@ const config: ExpoConfig = {
     ],
   ],
   experiments: {
-    typedRoutes: true,
     reactCompiler: true,
   },
   extra: {
