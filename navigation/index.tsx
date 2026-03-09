@@ -5,7 +5,9 @@ import {
 } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { LoginScreen } from '@/screens/auth/login';
+import CreatePasswordScreen from '@/screens/auth/CreatePassword';
+import { EnterEmailScreen } from '@/screens/auth/enterEmail';
+import LoginEmailScreen from '@/screens/auth/loginEmail';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
@@ -30,10 +32,12 @@ export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
   ForgotPassword: undefined;
+  EnterEmail: undefined;
   OTP: { email: string; isRegister?: boolean; userData?: any };
   VerifyOTP: { email: string };
   ResetPassword: undefined;
-
+  CreatePassword: undefined;
+  LoginEmail: undefined;
   // Survey flow
   Survey: undefined;
   LearningPath: undefined;
@@ -81,7 +85,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="TabNavigator"
+        initialRouteName="Onboarding"
         screenOptions={{
           gestureEnabled: true,
           gestureDirection: 'horizontal',
@@ -92,10 +96,24 @@ export default function RootStack() {
           component={OnboardingScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="EnterEmail"
+          component={EnterEmailScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="VerifyOTP"
           component={VerifyOTPScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CreatePassword"
+          component={CreatePasswordScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="LoginEmail"
+          component={LoginEmailScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Survey" component={SurveyScreen} options={{ headerShown: false }} />

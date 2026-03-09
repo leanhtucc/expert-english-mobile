@@ -4,10 +4,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import { IconHome, IconProfile, IconUserProfile } from '@/components/icon';
+import { IconHome, IconProfile, IconRanking, IconUserProfile } from '@/components/icon';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { HomeScreen, ProfileScreen } from '@/screens';
+import { HomeScreen, LeaderboardScreen, ProfileScreen } from '@/screens';
 import { PracticeSetupScreen } from '@/screens/speakingSession';
 
 const Tab = createBottomTabNavigator();
@@ -44,6 +44,8 @@ function CustomTabBar({
         return <IconHome width={size} height={size} color={iconColor} />;
       case 'speakingSession':
         return <IconProfile width={size} height={size} color={iconColor} />;
+      case 'Ranking':
+        return <IconRanking width={size} height={size} color={iconColor} />;
       case 'Profile':
         return <IconUserProfile width={size} height={size} color={iconColor} />;
       default:
@@ -132,6 +134,13 @@ export default function TabNavigator() {
           component={PracticeSetupScreen}
           options={{
             tabBarStyle: { display: 'none' },
+          }}
+        />
+        <Tab.Screen
+          name="Ranking"
+          component={LeaderboardScreen}
+          options={{
+            tabBarStyle: { display: 'flex' },
           }}
         />
         <Tab.Screen

@@ -16,12 +16,10 @@ import type { RouteProp } from '@react-navigation/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
-import type { RootStackParamList } from '@/navigation';
+import { OTPInput, ResendTimer, VerifyButton, VerifyHeader, VerifyIcon } from './components';
 
-import { OTPInput, ResendTimer, VerifyHeader, VerifyIcon } from './components';
-
-type VerifyOTPScreenNavigationProp = StackNavigationProp<RootStackParamList, 'VerifyOTP'>;
-type VerifyOTPScreenRouteProp = RouteProp<RootStackParamList, 'VerifyOTP'>;
+type VerifyOTPScreenNavigationProp = StackNavigationProp<any>;
+type VerifyOTPScreenRouteProp = RouteProp<any, any>;
 
 /**
  * Màn hình xác thực OTP
@@ -33,7 +31,7 @@ export const VerifyOTPScreen: React.FC = () => {
   const { email = 'hghoa2005@gmail.com' } = route.params || {};
 
   const [otp, setOtp] = useState('');
-  const [, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Demo OTP code
@@ -54,8 +52,8 @@ export const VerifyOTPScreen: React.FC = () => {
       // Check demo code
       if (otpValue === DEMO_OTP) {
         console.log('OTP verified successfully!');
-        // Navigate to main app or next screen
-        // navigation.navigate('Home');
+        // Navigate to CreatePassword screen
+        navigation.navigate('CreatePassword');
       } else {
         setError('Mã OTP không chính xác. Vui lòng thử lại.');
       }
@@ -130,36 +128,11 @@ export const VerifyOTPScreen: React.FC = () => {
               )}
 
               {/* Verify Button */}
-              <TouchableOpacity
-                className={`rounded-2xl px-6 py-[18px] ${otp.length === 6 ? 'bg-[#C6102E]' : 'bg-gray-200'}`}
-                style={
-                  otp.length === 6
-                    ? {
-                        shadowColor: '#C6102E',
-                        shadowOpacity: 0.35,
-                        shadowRadius: 12,
-                        shadowOffset: { width: 0, height: 6 },
-                        elevation: 6,
-                      }
-                    : undefined
-                }
+              <VerifyButton
                 onPress={() => handleOTPComplete(otp)}
                 disabled={otp.length < 6}
-                activeOpacity={0.85}
-              >
-                <View className="flex-row items-center justify-center gap-2">
-                  <Text
-                    className={`text-base font-semibold tracking-wide ${otp.length === 6 ? 'text-white' : 'text-gray-400'}`}
-                  >
-                    Verify Account
-                  </Text>
-                  <Ionicons
-                    name="arrow-forward"
-                    size={18}
-                    color={otp.length === 6 ? '#FFFFFF' : '#9CA3AF'}
-                  />
-                </View>
-              </TouchableOpacity>
+                loading={loading}
+              />
             </View>
           </View>
         </ScrollView>

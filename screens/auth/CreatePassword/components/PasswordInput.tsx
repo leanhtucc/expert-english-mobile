@@ -1,20 +1,26 @@
 import React from 'react';
 import { Text, TextInput, View } from 'react-native';
 
-interface EmailInputProps {
+interface PasswordInputProps {
   value: string;
   onChangeText: (text: string) => void;
+  placeholder?: string;
   error?: string;
 }
 
 /**
- * Component input email với validation
+ * Password input component
  */
-export const EmailInput: React.FC<EmailInputProps> = ({ value, onChangeText, error }) => {
+export const PasswordInput: React.FC<PasswordInputProps> = ({
+  value,
+  onChangeText,
+  placeholder = 'Enter your password',
+  error,
+}) => {
   return (
-    <View className="mb-6">
+    <View className="mb-4">
       <TextInput
-        className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4 text-base text-gray-900"
+        className="rounded-2xl border border-gray-100 bg-gray-50 px-6 py-5 text-lg text-gray-900"
         style={{
           shadowColor: '#000',
           shadowOpacity: 0.04,
@@ -22,16 +28,16 @@ export const EmailInput: React.FC<EmailInputProps> = ({ value, onChangeText, err
           shadowOffset: { width: 0, height: 2 },
           elevation: 1,
         }}
-        placeholder="Enter your email"
+        placeholder={placeholder}
         placeholderTextColor="#C0C0C0"
         value={value}
         onChangeText={onChangeText}
-        keyboardType="email-address"
+        secureTextEntry
         autoCapitalize="none"
-        autoComplete="email"
+        autoComplete="password"
         autoCorrect={false}
       />
-      {error && <Text className="mt-2 px-1 text-xs text-red-500">{error}</Text>}
+      {error && <Text className="mt-2 px-1 text-sm text-red-500">{error}</Text>}
     </View>
   );
 };
