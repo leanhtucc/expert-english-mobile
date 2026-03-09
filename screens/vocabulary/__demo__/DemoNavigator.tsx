@@ -109,21 +109,7 @@ export const DemoNavigator: React.FC = () => {
   };
 
   // Show back button overlay when not on menu
-  return (
-    <View className="flex-1">
-      {renderScreen()}
-      {currentScreen !== 'menu' && (
-        <View className="absolute top-12 right-4">
-          <Pressable
-            onPress={() => setCurrentScreen('menu')}
-            className="rounded-full bg-black/70 px-4 py-2"
-          >
-            <Text className="text-sm font-semibold text-white">← Menu</Text>
-          </Pressable>
-        </View>
-      )}
-    </View>
-  );
+  return <View className="flex-1">{renderScreen()}</View>;
 };
 
 /**

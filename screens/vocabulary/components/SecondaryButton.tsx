@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 interface SecondaryButtonProps {
   label: string;
@@ -20,10 +20,10 @@ export const SecondaryButton: React.FC<SecondaryButtonProps> = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
-      className={`flex-row items-center justify-center rounded-2xl border-2 border-red-600 bg-white py-4 px-6 ${disabled ? 'opacity-50' : 'active:bg-red-50'} ${className} `}
+      className={`flex-1 flex-row items-center justify-center rounded-2xl bg-gray-200 py-4 px-4 ${disabled ? 'opacity-50' : 'active:bg-gray-300'} ${className} `}
     >
-      {icon && <>{icon}</>}
-      <Text className="text-center text-base font-semibold text-red-600">{label}</Text>
+      {icon && <View className="mr-2">{icon}</View>}
+      <Text className="text-center text-base font-semibold text-gray-700">{label}</Text>
     </TouchableOpacity>
   );
 };

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StatusBar, Text, TouchableOpacity, View } from 'react-native';
+
+import { IconBackButton } from '@/components/icon';
 
 interface ScreenHeaderProps {
   title: string;
@@ -19,12 +21,13 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   className = '',
 }) => {
   return (
-    <View className={`flex-row items-center justify-between px-4 py-3 ${className}`}>
+    <View className={`mt-6 flex-row items-center justify-between px-4 py-3 ${className}`}>
+      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
       {/* Left Action */}
       <View className="w-10">
         {onBack && (
           <TouchableOpacity onPress={onBack} className="p-2">
-            <Text className="text-xl">←</Text>
+            <IconBackButton width={20} height={20} />
           </TouchableOpacity>
         )}
       </View>

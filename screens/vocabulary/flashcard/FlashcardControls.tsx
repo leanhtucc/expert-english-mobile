@@ -16,10 +16,16 @@ export const FlashcardControls: React.FC<FlashcardControlsProps> = ({
   disabled = false,
 }) => {
   return (
-    <View className="w-full space-y-3 px-4">
-      <PrimaryButton label="✓ I know it" onPress={onKnowIt} disabled={disabled} className="mb-3" />
+    <View className="absolute top-52 w-full flex-row items-center px-3">
+      {/* Bọc nút 1: Chiếm 1 nửa, có khoảng đệm bên phải (pr-2) */}
+      <View className="flex-1">
+        <SecondaryButton label="✕ DON'T KNOW" onPress={onDontKnow} disabled={disabled} />
+      </View>
 
-      <SecondaryButton label="✕ Don't know" onPress={onDontKnow} disabled={disabled} />
+      {/* Bọc nút 2: Chiếm 1 nửa, có khoảng đệm bên trái (pl-2) */}
+      <View className="flex-1 pl-2">
+        <PrimaryButton label="✓ KNOW IT" onPress={onKnowIt} disabled={disabled} />
+      </View>
     </View>
   );
 };
