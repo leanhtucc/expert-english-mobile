@@ -25,18 +25,18 @@ export const HighlightedTextDisplay: React.FC<HighlightedTextDisplayProps> = ({
           style={{
             flexDirection: 'row',
             flexWrap: 'wrap',
-            alignItems: 'flex-end',
-            paddingTop: -10,
+            alignItems: 'flex-start',
+            rowGap: 20, // Thu nhỏ khoảng cách giữa các dòng cho vừa với chữ nhỏ
           }}
         >
           {segments.map((segment, index) => {
-            // Correct word - render normally as part of sentence
+            // 1. Từ đúng
             if (segment.isCorrect) {
               return (
                 <Text
                   key={index}
                   style={{
-                    fontSize: 22,
+                    fontSize: 16, // Giảm từ 22 xuống 16
                     fontWeight: '500',
                     color: '#1F2937',
                     marginHorizontal: 4,
@@ -47,32 +47,33 @@ export const HighlightedTextDisplay: React.FC<HighlightedTextDisplayProps> = ({
               );
             }
 
-            // Incorrect word with correction
-            // Corrected word appears in sentence, incorrect word floats above
+            // 2. Từ sai có sửa
             if (segment.correction) {
               return (
                 <View key={index} style={{ marginHorizontal: 4, alignItems: 'center' }}>
-                  {/* Incorrect word above - red strikethrough */}
+                  {/* Chữ sai - Cùng kích thước với chữ đúng trong câu */}
                   <Text
                     style={{
                       color: '#DC2626',
                       textDecorationLine: 'line-through',
-                      fontSize: 14,
-                      marginBottom: 2,
+                      fontSize: 16, // Giảm từ 22 xuống 16
+                      fontWeight: '500',
                     }}
                   >
                     {segment.text}
                   </Text>
-                  {/* Corrected word in sentence - green box */}
+
+                  {/* Chữ đúng sửa lại - Nhỏ hơn một chút để làm huy hiệu (badge) */}
                   <Text
                     style={{
                       backgroundColor: '#D1FAE5',
                       color: '#059669',
                       fontWeight: '600',
-                      fontSize: 18,
-                      paddingHorizontal: 10,
-                      paddingVertical: 4,
-                      borderRadius: 8,
+                      fontSize: 14, // Giảm từ 18 xuống 14
+                      paddingHorizontal: 8,
+                      paddingVertical: 2,
+                      borderRadius: 6,
+                      marginTop: 2, // Kéo box xanh lại gần chữ đỏ hơn
                     }}
                   >
                     {segment.correction}
@@ -81,12 +82,12 @@ export const HighlightedTextDisplay: React.FC<HighlightedTextDisplayProps> = ({
               );
             }
 
-            // Incorrect word without correction
+            // 3. Từ sai không có sửa
             return (
               <Text
                 key={index}
                 style={{
-                  fontSize: 22,
+                  fontSize: 16, // Giảm từ 22 xuống 16
                   fontWeight: '500',
                   color: '#DC2626',
                   textDecorationLine: 'line-through',

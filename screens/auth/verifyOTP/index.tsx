@@ -52,8 +52,8 @@ export const VerifyOTPScreen: React.FC = () => {
       // Check demo code
       if (otpValue === DEMO_OTP) {
         console.log('OTP verified successfully!');
-        // Navigate to CreatePassword screen
-        navigation.navigate('CreatePassword');
+        // Navigate to CreatePassword screen with email
+        navigation.navigate('CreatePassword', { email });
       } else {
         setError('Mã OTP không chính xác. Vui lòng thử lại.');
       }
@@ -115,7 +115,7 @@ export const VerifyOTPScreen: React.FC = () => {
               />
 
               {/* OTP Input */}
-              <OTPInput length={6} onComplete={handleOTPComplete} onChangeOTP={setOtp} />
+              <OTPInput length={6} onComplete={otpValue => setOtp(otpValue)} onChangeOTP={setOtp} />
 
               {/* Resend Timer */}
               <ResendTimer initialSeconds={59} onResend={handleResendOTP} />

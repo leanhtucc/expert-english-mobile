@@ -36,7 +36,7 @@ export type RootStackParamList = {
   OTP: { email: string; isRegister?: boolean; userData?: any };
   VerifyOTP: { email: string };
   ResetPassword: undefined;
-  CreatePassword: undefined;
+  CreatePassword: { email: string } | undefined;
   LoginEmail: undefined;
   // Survey flow
   Survey: undefined;

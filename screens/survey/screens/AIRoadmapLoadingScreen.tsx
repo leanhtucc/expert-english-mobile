@@ -58,7 +58,10 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
         if (next >= 100) {
           setSeqIndex(3);
           clearInterval(interval);
-          // navigation.navigate('TabNavigator', {});
+          // Delay để người dùng thấy trạng thái hoàn thành trước khi chuyển màn
+          setTimeout(() => {
+            navigation.navigate('TabNavigator', {});
+          }, 800);
         }
         return next;
       });

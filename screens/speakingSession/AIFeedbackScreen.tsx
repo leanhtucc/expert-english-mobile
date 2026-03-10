@@ -141,12 +141,12 @@ export const AIFeedbackScreen: React.FC = () => {
           {/* Retry Button */}
           <TouchableOpacity
             onPress={handleRetry}
-            className="flex-1 items-center justify-center rounded-full border-2 border-red-500 bg-white py-4"
+            className="items-center justify-center rounded-full border-2 border-red-500 bg-white px-6 py-4"
             activeOpacity={0.8}
           >
             <View className="flex-row items-center gap-2">
-              <IconRepeat width={28} height={28} color="#EF4444" />
-              <Text className="text-base font-bold text-red-500">Retry</Text>
+              <IconRepeat width={20} height={20} color="#EF4444" />
+              <Text className="text-sm font-bold text-red-500">Retry</Text>
             </View>
           </TouchableOpacity>
 

@@ -22,7 +22,7 @@ export const SignupButton: React.FC<SignupButtonProps> = ({
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
-      className={`mt-6 flex-row items-center justify-center rounded-full py-6 ${
+      className={`mt-6 flex-row items-center justify-center rounded-full py-4 ${
         disabled || loading ? 'bg-red-300' : 'bg-red-600'
       }`}
       style={{
@@ -37,8 +37,8 @@ export const SignupButton: React.FC<SignupButtonProps> = ({
         <ActivityIndicator color="white" size="small" />
       ) : (
         <View className="flex-row items-center">
-          <Text className="mr-2 text-xl font-semibold text-white">Signup</Text>
-          <Ionicons name="arrow-forward" size={20} color="white" />
+          <Text className="mr-2 text-lg font-semibold text-white">Signup</Text>
+          <Ionicons name="arrow-forward" size={18} color="white" />
         </View>
       )}
     </TouchableOpacity>

@@ -20,7 +20,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
   return (
     <View className="mb-4">
       <TextInput
-        className="rounded-2xl border border-gray-100 bg-gray-50 px-6 py-5 text-lg text-gray-900"
+        className="rounded-3xl border border-gray-100 bg-white px-6 py-4 text-lg text-gray-900"
         style={{
           shadowColor: '#000',
           shadowOpacity: 0.04,

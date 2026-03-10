@@ -1,17 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
 import {
@@ -24,25 +26,24 @@ import {
 } from './components';
 
 type CreatePasswordScreenNavigationProp = StackNavigationProp<any>;
+type CreatePasswordScreenRouteProp = RouteProp<any, any>;
 
 /**
  * Màn hình đăng ký với Email và Password
  */
 export const CreatePasswordScreen: React.FC = () => {
   const navigation = useNavigation<CreatePasswordScreenNavigationProp>();
-  const [email, setEmail] = useState('');
+  const route = useRoute<CreatePasswordScreenRouteProp>();
+  const { email: emailParam = '' } = route.params || {};
+  const scrollViewRef = useRef<ScrollView>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
+  const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  // Validate email format
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
   // Handle signup
   const handleSignup = async () => {
@@ -53,12 +54,9 @@ export const CreatePasswordScreen: React.FC = () => {
 
     let hasError = false;
 
-    // Validate email
+    // Email should be pre-filled from previous screen
     if (!email.trim()) {
-      setEmailError('Vui lòng nhập email');
-      hasError = true;
-    } else if (!isValidEmail(email)) {
-      setEmailError('Email không hợp lệ');
+      setEmailError('Email không tồn tại');
       hasError = true;
     }
 
@@ -107,9 +105,15 @@ export const CreatePasswordScreen: React.FC = () => {
     navigation.goBack();
   };
 
-  // Check if form is valid
-  const isFormValid =
-    email.trim() !== '' && password.trim() !== '' && confirmPassword.trim() !== '';
+  // Check if form is valid (email is pre-filled, only check passwords)
+  const isFormValid = password.trim() !== '' && confirmPassword.trim() !== '';
+
+  // Handle confirm password focus
+  const handleConfirmPasswordFocus = () => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 300);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -117,9 +121,11 @@ export const CreatePasswordScreen: React.FC = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          ref={scrollViewRef}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 200 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -134,7 +140,7 @@ export const CreatePasswordScreen: React.FC = () => {
             </TouchableOpacity>
 
             {/* Main Content */}
-            <View className="mt-12 flex-1">
+            <View className="mt-6 flex-1">
               {/* Email Icon */}
               <EmailIcon />
 
@@ -144,8 +150,13 @@ export const CreatePasswordScreen: React.FC = () => {
                 subtitle="Please enter your email and password to login your account"
               />
 
-              {/* Email Input */}
-              <EmailInput value={email} onChangeText={setEmail} error={emailError} />
+              {/* Email Input - Read only */}
+              <EmailInput
+                value={email}
+                onChangeText={setEmail}
+                error={emailError}
+                editable={false}
+              />
 
               {/* New Password Input */}
               <PasswordInput
@@ -157,10 +168,12 @@ export const CreatePasswordScreen: React.FC = () => {
 
               {/* Confirm Password Input */}
               <PasswordInput
+                ref={confirmPasswordRef}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Enter your password again"
                 error={confirmPasswordError}
+                onFocus={handleConfirmPasswordFocus}
               />
 
               {/* Signup Button */}

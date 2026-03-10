@@ -98,13 +98,13 @@ export const PracticeSetupScreen: React.FC = () => {
         <View className="items-center pb-4">
           <TouchableOpacity
             onPress={handleStartSpeaking}
-            className="h-20 w-20 items-center justify-center rounded-full bg-red-500 shadow-lg"
+            className="h-16 w-16 items-center justify-center rounded-full bg-red-500 shadow-lg"
             activeOpacity={0.8}
           >
             {isRecording ? (
-              <IconVoiceBlack width={32} height={32} color="white" />
+              <IconVoiceBlack width={26} height={26} color="white" />
             ) : (
-              <IconPLay width={20} height={20} color="white" />
+              <IconPLay width={16} height={16} color="white" />
             )}
           </TouchableOpacity>
         </View>
