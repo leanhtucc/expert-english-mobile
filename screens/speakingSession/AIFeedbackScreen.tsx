@@ -38,7 +38,7 @@ const mockFeedback = {
   insight:
     'Great effort! You used the present tense when talking about "Yesterday". In English, past events require the Past Simple tense instead of "for + verb".',
   pronunciationScore: 92,
-  grammarScore: 85,
+  grammarScore: 60,
 };
 
 export const AIFeedbackScreen: React.FC = () => {
@@ -77,9 +77,7 @@ export const AIFeedbackScreen: React.FC = () => {
         contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 24 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Progress Section */}
         <View className="mb-4">
-          {/* Progress label + step */}
           <View className="mb-2 flex-row items-center justify-between">
             <Text className="text-sm font-semibold uppercase tracking-wide text-[#C8102E]">
               Security Protocol Scenario
@@ -87,13 +85,11 @@ export const AIFeedbackScreen: React.FC = () => {
             <Text className="text-sm text-gray-500">Step 4 of 5</Text>
           </View>
 
-          {/* Progress bar */}
           <View className="h-1.5 overflow-hidden rounded-full bg-gray-200">
             <View className="h-full rounded-full bg-[#C8102E]" style={{ width: '80%' }} />
           </View>
         </View>
 
-        {/* AI Tutor Question */}
         <View className="mb-6">
           <View className="mb-3 flex-row items-center gap-3">
             <View className="h-12 w-12 overflow-hidden rounded-full">
@@ -106,31 +102,30 @@ export const AIFeedbackScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Helpful Phrase */}
         <HelpfulPhraseCard phrase={mockFeedback.helpfulPhrase} />
 
-        {/* User Answer with Highlights */}
         <HighlightedTextDisplay segments={mockFeedback.highlightedAnswer} title="Your Answer" />
 
-        {/* AI Insight */}
         <AIInsightCard insight={mockFeedback.insight} />
 
-        {/* Real-time Feedback Scores */}
         <View className="mb-6">
-          {/* Title with icon outside */}
           <View className="mb-4 flex-row items-center gap-2">
             <IconFeedBackRealTime width={24} height={24} />
             <Text className="text-lg font-bold text-gray-900">Real-time Feedback</Text>
           </View>
 
-          {/* Two separate score cards */}
-          <View className="flex-row gap-2">
-            <ScoreBadge
-              label="Pronunciation"
-              score={mockFeedback.pronunciationScore}
-              type="pronunciation"
-            />
-            <ScoreBadge label="Grammar" score={mockFeedback.grammarScore} type="grammar" />
+          <View className="flex-row">
+            <View className="flex-1 pr-2">
+              <ScoreBadge
+                label="Pronunciation"
+                score={mockFeedback.pronunciationScore}
+                type="pronunciation"
+              />
+            </View>
+
+            <View className="flex-1 pl-2">
+              <ScoreBadge label="Grammar" score={mockFeedback.grammarScore} type="grammar" />
+            </View>
           </View>
         </View>
       </ScrollView>
