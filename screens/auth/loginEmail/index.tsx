@@ -72,9 +72,8 @@ export const LoginEmailScreen: React.FC = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // TODO: Store auth token and navigate to home
-      // navigation.navigate('Home');
-
+      // TODO: Store auth token
+      navigation.navigate('TabNavigator', {});
       console.log('Login success:', { email, password });
     } catch {
       setPasswordError('Email hoặc mật khẩu không đúng');

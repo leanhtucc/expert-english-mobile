@@ -6,7 +6,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Image } from 'expo-image';
 
-import { IconPLay, IconStreakProfile, IconXp } from '@/components/icon';
+import {
+  IconCertificates,
+  IconLearningGoal,
+  IconPLay,
+  IconStreakProfile,
+  IconXp,
+} from '@/components/icon';
 import {
   formatXP,
   mockCertificates,
@@ -38,7 +44,6 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1" style={{ backgroundColor: bgColor }}>
-      {/* ── Header ── */}
       <View
         className="flex-row items-center justify-between px-4 pb-3"
         style={{ paddingTop: insets.top + 8 }}
@@ -70,7 +75,6 @@ export default function ProfileScreen() {
               {user.avatar ? (
                 <View className="relative h-[86px] w-[86px] overflow-hidden rounded-full">
                   {Platform.OS === 'web' ? (
-                    // @ts-ignore – img is valid JSX on web
                     <img
                       src={user.avatar}
                       alt={user.name}
@@ -114,7 +118,6 @@ export default function ProfileScreen() {
           </Text>
         </View>
 
-        {/* ── Learning Stats ── */}
         <View className="mx-4 mb-4">
           <View className="mb-3 flex-row items-center justify-between">
             <Text className="text-lg font-bold" style={{ color: textPrimary }}>
@@ -149,9 +152,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* ── Settings / Menu ── */}
         <View className="mx-4 mb-4 overflow-hidden rounded-2xl shadow-sm">
-          {/* Learning Goal */}
           <MenuRow
             isDark={isDark}
             icon={
@@ -159,7 +160,7 @@ export default function ProfileScreen() {
                 className="h-10 w-10 items-center justify-center rounded-xl"
                 style={{ backgroundColor: '#FFE8EA' }}
               >
-                <MaterialCommunityIcons name="target" size={20} color={ACCENT} />
+                <IconLearningGoal width={20} height={20} color={ACCENT} />
               </View>
             }
             label="Learning Goal"
@@ -172,7 +173,6 @@ export default function ProfileScreen() {
             style={{ backgroundColor: isDark ? '#2A2C36' : '#F0F1F5' }}
           />
 
-          {/* Certificates */}
           <MenuRow
             isDark={isDark}
             icon={
@@ -180,7 +180,7 @@ export default function ProfileScreen() {
                 className="h-10 w-10 items-center justify-center rounded-xl"
                 style={{ backgroundColor: '#E8F0FF' }}
               >
-                <MaterialCommunityIcons name="monitor" size={20} color={BLUE} />
+                <IconCertificates width={20} height={20} color={BLUE} />
               </View>
             }
             label="Certificates"
@@ -193,7 +193,6 @@ export default function ProfileScreen() {
             style={{ backgroundColor: isDark ? '#2A2C36' : '#F0F1F5' }}
           />
 
-          {/* Dark Appearance */}
           <MenuRow
             isDark={isDark}
             icon={
@@ -220,7 +219,6 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
-      {/* ── Continue Learning Button ── */}
       <View
         className="absolute left-0 right-0 flex bg-transparent px-4 pt-3"
         style={{ bottom: insets.bottom + 80, paddingBottom: 16 }}

@@ -133,7 +133,7 @@ export const CreatePasswordScreen: React.FC = () => {
             {/* Back Button */}
             <TouchableOpacity
               onPress={handleBack}
-              className="mt-10 h-10 w-10 items-center justify-center"
+              className="mt-9 h-10 w-10 items-center justify-center"
               activeOpacity={0.7}
             >
               <Ionicons name="chevron-back" size={30} color="#1F2937" />
