@@ -12,6 +12,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import RootStack from '@/navigation';
 import '@/translations';
 
+import Toast from './components/Toast';
+
 // Initialize Sentry for error tracking
 Sentry.init({
   dsn: 'https://ea6dd677088dcb31aabbd85249df6c02@o4510742785228800.ingest.de.sentry.io/4510742789423184',
@@ -44,6 +46,7 @@ function App() {
       <SafeAreaProvider>
         <KeyboardProvider>
           <RootStack />
+          <Toast />
         </KeyboardProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

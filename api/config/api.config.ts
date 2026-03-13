@@ -8,7 +8,7 @@ export const apiConfig = {
   /**
    * Base URL for API requests
    */
-  baseURL: ENV.API_URL || 'https://api.expertenglish.com',
+  baseURL: ENV.API_URL || '# http://192.168.1.16:3000',
 
   /**
    * Request timeout in milliseconds

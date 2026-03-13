@@ -63,7 +63,7 @@ export default function ProfileScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 150 }}
       >
         {/* ── Avatar ── */}
         <View className="mt-2 mb-6 items-center">
@@ -130,7 +130,7 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
 
-          <View className="flex-row items-center justify-between gap-1">
+          <View className="flex-row items-center justify-between gap-2">
             <StatCard
               value={formatXP(stats.totalXP)}
               label="TOTAL XP"
@@ -221,7 +221,7 @@ export default function ProfileScreen() {
 
       <View
         className="absolute left-0 right-0 flex bg-transparent px-4 pt-3"
-        style={{ bottom: insets.bottom + 80, paddingBottom: 16 }}
+        style={{ bottom: insets.bottom + 45, paddingBottom: 16 }}
       >
         <TouchableOpacity
           className="flex-row items-center justify-center rounded-2xl py-[18px]"

@@ -1,24 +1,26 @@
-/**
- * User Entity Types
- */
-
-/**
- * User model
- */
-export interface User {
-  id: string;
+export interface UserInfo {
+  _id: string;
+  username: string;
+  password?: string; // Có thể để optional vì API profile thường ẩn pass
+  ssoId: string;
+  ssoProvider: string;
+  ssoUsername: string;
   email: string;
-  name: string;
-  avatar?: string;
-  role?: 'student' | 'teacher' | 'admin';
-  createdAt?: string;
-  updatedAt?: string;
+  firstname: string;
+  lastname: string;
+  fullname: string;
+  gender: 'Male' | 'Female';
+  dob: string;
+  systemRole: 'Admin' | 'User';
+  authList: string[];
+  studentPtitCode: string;
+  avatarUrl: string;
+  schoolName: string;
+  dataPartitionCode: string;
+  lastLoginAt: string;
 }
 
-/**
- * User profile update data
- */
-export interface UserProfileUpdate {
-  name?: string;
-  avatar?: string;
+export interface User extends UserInfo {
+  createdAt: string;
+  updatedAt: string;
 }
