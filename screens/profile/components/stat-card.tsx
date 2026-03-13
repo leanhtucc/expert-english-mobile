@@ -21,7 +21,7 @@ export function StatCard({ value, label, icon, isDark }: StatCardProps) {
         shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 2,
-        maxWidth: 110,
+        maxWidth: 100,
       }}
     >
       <View className="mb-1">{icon}</View>

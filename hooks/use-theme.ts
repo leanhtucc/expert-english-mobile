@@ -1,17 +1,14 @@
 import { useColorScheme as useRNColorScheme } from 'react-native';
 
-import { useAppStore } from '@/stores';
-
 /**
  * Theme Hook
  * Returns current theme mode and colors
  */
 export function useTheme() {
   const systemColorScheme = useRNColorScheme();
-  const { theme: themeMode } = useAppStore();
 
   // Determine actual theme based on setting
-  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemColorScheme === 'dark');
+  const isDark = systemColorScheme === 'dark';
 
   return {
     isDark,

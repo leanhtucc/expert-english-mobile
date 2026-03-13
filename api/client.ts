@@ -1,137 +1,127 @@
-import { apiConfig } from './config';
-import { authInterceptor, errorInterceptor, loggingInterceptor } from './interceptors';
+// src/api/client.ts
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
-/**
- * Custom API Error
- */
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode?: number,
-    public data?: any
-  ) {
-    super(message);
-    this.name = 'ApiError';
+import { useAuthStore } from '../stores/auth.store';
+// Lấy URL từ biến môi trường
+import { apiConfig } from './config/api.config';
+
+console.log('API baseURL from apiConfig:', apiConfig.baseURL); // Log baseURL để kiểm tra
+
+// Phản hồi chuẩn từ backend cho /auth/refresh: CommonResponse<AuthResponseData>
+type RefreshResponse = {
+  success: boolean;
+  data?: {
+    accessToken: string;
+  };
+};
+
+let isRefreshing = false;
+let failedQueue: {
+  resolve: (value?: unknown) => void;
+  reject: (error: unknown) => void;
+  config: any;
+}[] = [];
+
+const processQueue = (error: unknown, token: string | null) => {
+  failedQueue.forEach(req => {
+    if (error) {
+      req.reject(error);
+    } else if (token) {
+      req.config.headers.Authorization = `Bearer ${token}`;
+      req.resolve(apiClient(req.config));
+    }
+  });
+  failedQueue = [];
+};
+
+export const apiClient: AxiosInstance = axios.create({
+  baseURL: apiConfig.baseURL,
+  timeout: apiConfig.timeout,
+  headers: apiConfig.defaultHeaders,
+  withCredentials: true,
+});
+
+apiClient.interceptors.request.use((config: any) => {
+  const { token, accessToken } = useAuthStore.getState() as any;
+  const bearer = accessToken ?? token;
+  if (bearer && config.headers) {
+    config.headers.Authorization = `Bearer ${bearer}`;
   }
-}
+  return config;
+});
 
-/**
- * API Client with interceptors and error handling
- */
-class ApiClient {
-  private baseURL: string;
-  private timeout: number;
+apiClient.interceptors.response.use(
+  (response: any) => response,
+  async (error: AxiosError) => {
+    const originalRequest: any = error.config;
+    if (!error.response) throw error;
 
-  constructor(baseURL: string, timeout: number = 30000) {
-    this.baseURL = baseURL;
-    this.timeout = timeout;
-  }
+    const status = error.response.status;
+    const isAuthEndpoint =
+      originalRequest?.url?.includes('/auth/login') ||
+      originalRequest?.url?.includes('/auth/register') ||
+      originalRequest?.url?.includes('/auth/refresh') ||
+      originalRequest?._retry;
 
-  /**
-   * Make HTTP request with timeout and interceptors
-   */
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    if (status !== 401 || isAuthEndpoint) {
+      throw error;
+    }
+
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject, config: originalRequest });
+      });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
 
     try {
-      // Apply auth interceptor
-      const configWithAuth = await authInterceptor.onRequest(options);
-
-      // Apply default headers
-      const config: RequestInit = {
-        ...configWithAuth,
-        signal: controller.signal,
-        headers: {
-          ...apiConfig.defaultHeaders,
-          ...configWithAuth.headers,
-        },
-      };
-
-      // Log request
-      loggingInterceptor.onRequest(endpoint, config);
-
-      // Make request
-      const response = await fetch(url, config);
-
-      clearTimeout(timeoutId);
-
-      // Handle non-OK responses
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new ApiError(
-          errorData.message || `HTTP ${response.status}: ${response.statusText}`,
-          response.status,
-          errorData
-        );
+      const { refreshToken, clearAuth, setAccessToken } = useAuthStore.getState() as any;
+      if (!refreshToken) {
+        clearAuth?.();
+        throw error;
       }
 
-      // Parse response
-      const data = await response.json();
+      const res = await axios.post<RefreshResponse>(
+        `${apiConfig.baseURL}/auth/refresh`,
+        { refreshToken },
+        { withCredentials: true }
+      );
 
-      // Log response
-      loggingInterceptor.onResponse(endpoint, data);
+      const newAccessToken = res.data.data?.accessToken;
+      if (!newAccessToken) {
+        clearAuth?.();
+        throw error;
+      }
 
-      return data;
-    } catch (error) {
-      clearTimeout(timeoutId);
+      setAccessToken?.(newAccessToken);
 
-      // Log error
-      loggingInterceptor.onError(endpoint, error);
+      apiClient.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
+      processQueue(null, newAccessToken);
 
-      // Handle error
-      return errorInterceptor.onError(error);
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      return apiClient(originalRequest);
+    } catch (err) {
+      processQueue(err, null);
+      const { clearAuth } = useAuthStore.getState() as any;
+      clearAuth?.();
+      throw err;
+    } finally {
+      isRefreshing = false;
     }
   }
+);
 
-  /**
-   * GET request
-   */
-  async get<T>(endpoint: string, headers?: HeadersInit): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET', headers });
-  }
+/**
+ * Simple API error wrapper to keep compatibility with existing imports.
+ */
+export class ApiError extends Error {
+  status?: number;
 
-  /**
-   * POST request
-   */
-  async post<T>(endpoint: string, data?: any, headers?: HeadersInit): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'POST',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  }
-
-  /**
-   * PUT request
-   */
-  async put<T>(endpoint: string, data?: any, headers?: HeadersInit): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PUT',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  }
-
-  /**
-   * PATCH request
-   */
-  async patch<T>(endpoint: string, data?: any, headers?: HeadersInit): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PATCH',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  }
-
-  /**
-   * DELETE request
-   */
-  async delete<T>(endpoint: string, headers?: HeadersInit): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE', headers });
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
   }
 }
-
-// Export singleton instance
-export const apiClient = new ApiClient(apiConfig.baseURL, apiConfig.timeout);

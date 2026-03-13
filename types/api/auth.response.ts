@@ -1,48 +1,64 @@
-import type { User } from '../entities';
+import { CommonResponse } from '../common';
+import { UserInfo } from '../entities/user.entity';
 
 /**
- * Auth API Response Types
+ * Auth token payload
  */
-
-/**
- * Login response
- */
-export interface LoginResponse {
-  user: User;
-  token: string;
-  refreshToken?: string;
-  expiresIn?: number;
+export interface AuthResponseData {
+  accessToken: string;
+  refreshToken: string;
+  accessExpireAt: number;
+  refreshExpireAt: number;
 }
 
-/**
- * Register response
- */
-export interface RegisterResponse {
-  user: User;
-  token: string;
-  refreshToken?: string;
-}
+// Login / Google / Refresh / Logout share the same payload
+export type LoginResponse = CommonResponse<AuthResponseData>;
+export type LoginWithGoogleResponse = CommonResponse<AuthResponseData>;
+export type RefreshTokenResponse = CommonResponse<AuthResponseData>;
+export type LogoutResponse = CommonResponse<AuthResponseData>;
 
 /**
- * Token refresh response
+ * User session information
  */
-export interface RefreshTokenResponse {
-  token: string;
-  expiresIn?: number;
+export interface UserSessionData {
+  _id: string;
+  ip: string;
+  platform: 'Web' | 'Mobile';
+  userAgent: Record<string, unknown>;
+  origin: string;
+  user: string; // ID của user
+  userInfo: UserInfo;
+  jti: string;
+  exp: number;
 }
 
-/**
- * Forgot password response
- */
-export interface ForgotPasswordResponse {
-  message: string;
-  success: boolean;
-}
+export type UserProfileResponse = CommonResponse<UserInfo>;
 
 /**
- * Reset password response
+ * Dynamic email flow specific payloads
  */
-export interface ResetPasswordResponse {
-  message: string;
-  success: boolean;
+export interface SendOtpData {
+  /**
+   * Nếu true: tài khoản đã tồn tại -> flow Login
+   * Nếu false: chưa có tài khoản -> flow Đăng ký (OTP + tạo mật khẩu)
+   */
+  exists: boolean;
 }
+
+export type SendOtpResponse = CommonResponse<SendOtpData>;
+
+export interface CheckOtpData {
+  /**
+   * Token tạm thời chứng minh email + OTP đã được verify,
+   * dùng để gọi /auth/register ở bước tạo mật khẩu
+   */
+  verificationToken: string;
+}
+
+export type checkOtpResponse = CommonResponse<CheckOtpData>;
+
+/**
+ * Đăng ký sau khi verify OTP
+ * Backend có thể trả cùng payload token như login
+ */
+export type RegisterResponse = CommonResponse<AuthResponseData>;

@@ -1,45 +1,41 @@
-/**
- * Auth API Request Types
- */
-
-/**
- * Login request payload
- */
-export interface LoginRequest {
+export interface AuthSendOtpRequest {
   email: string;
+  type: 'login' | 'signup';
+}
+
+export interface LoginRequest {
+  platform: 'Web' | 'Mobile';
+  username: string;
   password: string;
-  rememberMe?: boolean;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+export interface LogoutRequest {
+  refreshToken: string;
+}
+
+export interface SendOtpRequest {
+  email: string;
+  type: 'login' | 'signup';
+}
+
+export interface CheckOtpRequest {
+  email: string;
+  otp: string;
+}
+
+export interface LoginWithGoogleRequest {
+  idToken: string;
 }
 
 /**
- * Register request payload
+ * Đăng ký sau khi verify OTP
+ * Sử dụng verificationToken trả về từ /auth/otp/login
  */
 export interface RegisterRequest {
   email: string;
   password: string;
-  name: string;
-  acceptTerms: boolean;
-}
-
-/**
- * Forgot password request
- */
-export interface ForgotPasswordRequest {
-  email: string;
-}
-
-/**
- * Reset password request
- */
-export interface ResetPasswordRequest {
-  token: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-/**
- * Refresh token request
- */
-export interface RefreshTokenRequest {
-  refreshToken: string;
+  verificationToken: string;
 }
