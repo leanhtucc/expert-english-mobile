@@ -59,7 +59,7 @@ export const LoginEmailScreen: React.FC = () => {
     const isSuccess = await loginWithEmail(email, password);
 
     if (isSuccess) {
-      navigation.navigate('TabNavigator', {});
+      navigation.navigate('Survey', {});
     }
   };
 

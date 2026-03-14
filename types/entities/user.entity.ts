@@ -18,6 +18,7 @@ export interface UserInfo {
   schoolName: string;
   dataPartitionCode: string;
   lastLoginAt: string;
+  isSurvey: boolean;
 }
 
 export interface User extends UserInfo {

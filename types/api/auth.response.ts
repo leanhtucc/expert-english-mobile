@@ -62,3 +62,7 @@ export type checkOtpResponse = CommonResponse<CheckOtpData>;
  * Backend có thể trả cùng payload token như login
  */
 export type RegisterResponse = CommonResponse<AuthResponseData>;
+
+export type LogoutRessponse = {
+  success: boolean;
+};

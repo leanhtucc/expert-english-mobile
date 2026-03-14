@@ -3,7 +3,13 @@ import { useState } from 'react';
 import { authApi } from '@/api';
 import { useAuthStore } from '@/stores/auth.store';
 import { useToastStore } from '@/stores/toast.store';
-import type { LoginResponse, RegisterResponse, SendOtpResponse, checkOtpResponse } from '@/types';
+import type {
+  LoginResponse,
+  RegisterResponse,
+  SendOtpResponse,
+  UserProfileResponse,
+  checkOtpResponse,
+} from '@/types';
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
@@ -116,6 +122,17 @@ export const useAuth = () => {
       setLoading(false);
     }
   };
+  const fetchUserInfo = async () => {
+    try {
+      const response = await authApi.getDataUser();
+      // Tuỳ vào cấu trúc CommonResponse của bạn, thường data thực tế sẽ nằm ở response.data.data
+      const userData = (response.data as UserProfileResponse).data;
+      return userData;
+    } catch (error: any) {
+      console.log('🚨 LỖI LẤY DATA USER:', error?.response?.data || error.message);
+      return null;
+    }
+  };
 
   const logoutUser = async () => {
     setLoading(true);
@@ -138,5 +155,6 @@ export const useAuth = () => {
     verifyEmailOTP,
     registerNewAccount,
     logoutUser,
+    fetchUserInfo,
   };
 };

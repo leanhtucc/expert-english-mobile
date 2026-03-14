@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import { CARD_BG_DARK, CARD_BG_LIGHT } from '../profile.constants';
+import { CARD_BG_DARK, CARD_BG_LIGHT } from '../constants/profile.constants';
 
 interface StatCardProps {
   value: string;
@@ -13,25 +13,24 @@ interface StatCardProps {
 export function StatCard({ value, label, icon, isDark }: StatCardProps) {
   return (
     <View
-      className="flex-1 items-center justify-center rounded-xl py-4"
+      className="w-full items-center justify-center rounded-2xl py-4"
       style={{
         backgroundColor: isDark ? CARD_BG_DARK : CARD_BG_LIGHT,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.05,
-        shadowRadius: 4,
+        shadowRadius: 10,
         elevation: 2,
-        maxWidth: 100,
       }}
     >
-      <View className="mb-1">{icon}</View>
+      <View className="mb-2">{icon}</View>
       <Text
-        className="mb-0.5 text-lg font-extrabold"
-        style={{ color: isDark ? '#FFF' : '#1A1A2E' }}
+        className="mb-1 text-[17px] font-extrabold"
+        style={{ color: isDark ? '#FFF' : '#111827' }}
       >
         {value}
       </Text>
-      <Text className="text-[12px] font-semibold tracking-wider" style={{ color: '#8A8FA8' }}>
+      <Text className="text-[11px] font-bold uppercase tracking-[1px]" style={{ color: '#9CA3AF' }}>
         {label}
       </Text>
     </View>

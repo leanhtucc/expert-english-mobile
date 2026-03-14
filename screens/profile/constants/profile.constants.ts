@@ -4,3 +4,7 @@ export const BLUE = '#4A90D9';
 export const ORANGE = '#F76E2E';
 export const CARD_BG_LIGHT = '#F8F9FC';
 export const CARD_BG_DARK = '#1E2028';
+export const PRIMARY = '#E53935';
+export const CARD_BG = '#FFF';
+export const CARD_SHADOW = 'shadow-sm';
+export const AVATAR_SIZE = 96;
