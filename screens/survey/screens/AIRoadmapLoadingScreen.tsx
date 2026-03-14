@@ -1,12 +1,13 @@
 import { X } from 'lucide-react-native';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
+import { surveyApi } from '@/api';
 import {
   IconCheckCourse,
   IconLoadingBuildCourse,
@@ -38,37 +39,118 @@ const STEP_SEQUENCE: StepStatus[][] = [
 
 export const AIRoadmapLoadingScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const route = useRoute<any>();
+
+  // Lấy params
+  const duration = route.params?.duration || 'standard';
+  const focusText = route.params?.focusText || '';
+
   const [progress, setProgress] = useState(0);
   const [seqIndex, setSeqIndex] = useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    console.log('\n=======================================');
+    console.log('🚀 [START] VÀO MÀN HÌNH LOADING AI');
+    console.log(`📌 Params nhận được - Duration: ${duration} | Focus: "${focusText}"`);
+
+    let isMounted = true;
+
+    // 1. Chạy thanh tiến trình giả
     const interval = setInterval(() => {
       setProgress(prev => {
-        const next = Math.min(prev + 3, 100);
+        const next = prev < 90 ? prev + Math.floor(Math.random() * 5) + 2 : 90;
+
         Animated.timing(progressAnim, {
           toValue: next,
-          duration: 400,
+          duration: 300,
           useNativeDriver: false,
         }).start();
 
         if (next >= 30 && next < 70) setSeqIndex(1);
         else if (next >= 70 && next < 100) setSeqIndex(2);
 
-        if (next >= 100) {
-          setSeqIndex(3);
-          clearInterval(interval);
-          // Delay để người dùng thấy trạng thái hoàn thành trước khi chuyển màn
-          setTimeout(() => {
-            navigation.navigate('TabNavigator', {});
-          }, 800);
+        // Log tiến trình (chỉ log khi chia hết cho 10 để tránh trôi terminal)
+        if (next % 10 === 0 || next === 90) {
+          console.log(`⏳ Tiến trình giả lập: ${next}%`);
         }
+
         return next;
       });
-    }, 300);
+    }, 400);
 
-    return () => clearInterval(interval);
-  }, [navigation, progressAnim]);
+    // 2. Hàm gọi API sinh lộ trình
+    const generateCourse = async () => {
+      try {
+        console.log(
+          `🌐 [API CALL] Đang gọi API cho lộ trình: ${duration === 'fast' ? '7 Ngày' : '4 Tuần'}...`
+        );
+
+        let response;
+        if (duration === 'fast') {
+          response = await surveyApi.generateLearningPath7day();
+        } else {
+          // Lưu ý: Nếu API 4 week cần truyền focusText, bạn truyền vào đây
+          response = await surveyApi.generateLearningPath4Week();
+        }
+
+        if (!isMounted) return;
+
+        console.log('✅ [API THÀNH CÔNG] Dữ liệu trả về:', JSON.stringify(response.data, null, 2));
+
+        // 3. Xử lý sau khi thành công
+        console.log('⏩ [TIẾN TRÌNH] Ép tiến trình lên 100%');
+        clearInterval(interval);
+        setProgress(100);
+        setSeqIndex(3);
+        Animated.timing(progressAnim, {
+          toValue: 100,
+          duration: 500,
+          useNativeDriver: false,
+        }).start();
+
+        setTimeout(() => {
+          console.log('⏭️ [ĐIỀU HƯỚNG] Chuyển sang TabNavigator (Màn Home)');
+          console.log('=======================================\n');
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'TabNavigator' as any }],
+          });
+        }, 800);
+      } catch (error: any) {
+        if (!isMounted) return;
+        clearInterval(interval);
+
+        console.log(
+          '❌ [API THẤT BẠI] Lỗi sinh lộ trình:',
+          error?.response?.status,
+          error?.response?.data || error.message
+        );
+
+        if (error?.response?.status === 400) {
+          Alert.alert(
+            'Notice',
+            'User has not completed survey. Please return and complete the survey first.'
+          );
+        } else {
+          Alert.alert('Error', 'Failed to generate your learning path. Please try again.');
+        }
+
+        console.log('🔙 [ĐIỀU HƯỚNG] Trở về màn trước do lỗi');
+        console.log('=======================================\n');
+        navigation.goBack();
+      }
+    };
+
+    // Bắt đầu gọi API
+    generateCourse();
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      console.log('🧹 [CLEANUP] Unmount màn hình Loading');
+    };
+  }, [duration, focusText, navigation, progressAnim]);
 
   const STATUS_DETAIL: Record<StepStatus, string> = {
     completed: 'Completed',
@@ -90,7 +172,7 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* Header */}
+      {/* Các phần UI giữ nguyên như cũ, không thay đổi */}
       <View className="flex-row items-center border-b border-gray-100 px-5 py-3">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -106,7 +188,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
       </View>
 
       <View className="flex-1 px-6 pt-3">
-        {/* Illustration card */}
         <View
           className="mb-7 items-center justify-center self-center overflow-hidden rounded-[40px] border-2 border-red-200 bg-red-100"
           style={{ width: 300, height: 300 }}
@@ -114,7 +195,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
           <ImageMasco width={200} height={200} />
         </View>
 
-        {/* Title & subtitle */}
         <Text className="mb-2 text-center text-xl font-extrabold text-gray-900">
           Generating Your AI Roadmap
         </Text>
@@ -122,13 +202,12 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
           Our AI is tailoring curriculum for your industry
         </Text>
 
-        {/* Progress section */}
         <View className="mb-8">
           <View className="mb-2 flex-row justify-between">
             <Text className="text-[13px] font-semibold text-gray-700">
               {inProgressStep?.label ?? 'Finalizing...'}
             </Text>
-            <Text className="text-[13px] font-bold text-[#C8102E]">{progress}%</Text>
+            <Text className="text-[13px] font-bold text-[#C8102E]">{Math.floor(progress)}%</Text>
           </View>
           <View className="h-2 overflow-hidden rounded-full bg-gray-100">
             <Animated.View
@@ -138,7 +217,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Step timeline */}
         <View>
           {steps.map((step, i) => (
             <View key={i} className="mb-1 flex-row">

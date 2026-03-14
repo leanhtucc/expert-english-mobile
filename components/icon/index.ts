@@ -40,6 +40,7 @@ export { default as IconLogoStart } from './IconLogoStart';
 export { default as IconMarketing } from './IconMarketing';
 export { default as IconMedical } from './IconMedical';
 export { default as IconMicrophone } from './IconMicrophone';
+export { default as IconMoon } from './IconMoon';
 export { default as IconNextButton } from './IconNextButton';
 export { default as IconNextButtonPage } from './IconNextButtonPage';
 export { default as IconNoteSuggesstion } from './IconNoteSuggesstion';

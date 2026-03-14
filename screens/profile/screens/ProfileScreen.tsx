@@ -1,5 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
-
 import React, { useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
@@ -7,6 +5,7 @@ import {
   IconCertificates,
   IconClock,
   IconLessionFinish,
+  IconMoon,
   IconPersonInfo,
   IconSignOut,
   IconStreak,
@@ -28,21 +27,23 @@ import { ConfirmModal } from '../components/ConfirmModal';
 export default function ProfileScreen({ navigation }: { navigation: any }) {
   const { user, stats, goal, logout } = useProfile();
   const [darkMode, setDarkMode] = React.useState(false);
-  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
-  const handleLogoutConfirm = () => {
-    setDeleteModalVisible(false);
-    console.log('Đã xoá tài khoản!');
+
+  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+
+  const handleLogoutConfirm = async () => {
+    setLogoutModalVisible(false);
+
+    await logout();
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Onboarding' }],
+    });
   };
 
   return (
     <View className="flex-1 bg-[#F8F6F6]">
-      <ProfileHeader
-        title="Profile"
-        onBack={() => navigation.goBack()}
-        onShare={() => {
-          /* share logic */
-        }}
-      />
+      <ProfileHeader title="Profile" onBack={() => navigation.goBack()} onShare={() => {}} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -52,9 +53,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           name={user.name}
           email={user.email}
           level={user.level}
-          onEdit={() => {
-            /* edit logic */
-          }}
+          onEdit={() => {}}
         />
         <View className="mx-4 mb-4 flex-row justify-between">
           <View className="w-[31%]">
@@ -103,9 +102,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           <LearningGoalCard
             minutes={goal.minutesPerDay}
             progress={goal.progress}
-            onChange={() => {
-              /* change goal logic */
-            }}
+            onChange={() => {}}
           />
         </View>
         <View className="mx-4 mb-1 overflow-hidden rounded-3xl bg-white shadow-sm">
@@ -117,9 +114,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             }
             label="Certificates"
             subtitle="0 Mastered Categories"
-            onPress={() => {
-              /* navigate */
-            }}
+            onPress={() => {}}
             isDark={false}
           />
         </View>
@@ -135,7 +130,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           <View className="ml-[60px] h-[1px] bg-gray-100" />
 
           <MenuRow
-            icon={<Ionicons name="moon-outline" size={24} color="#4A5568" />}
+            icon={<IconMoon width={24} height={24} color="#4A5568" />}
             label="Dark Appearance"
             showChevron={false}
             right={
@@ -158,7 +153,6 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                     height: 24,
                     borderRadius: 12,
                     backgroundColor: '#fff',
-                    // Đã bỏ toàn bộ code shadow đi để nút phẳng y hệt như bản thiết kế Figma
                   }}
                 />
               </TouchableOpacity>
@@ -166,25 +160,24 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             isDark={false}
           />
 
-          {/* Vạch kẻ ngang kéo dài hết */}
           <View className="h-[1px] w-full bg-gray-100" />
 
           <MenuRow
             icon={<IconSignOut width={24} height={24} color="#E53935" />}
             label="Logout"
-            textColor="#E53935" // Chữ màu đỏ
-            showChevron={false} // Không cần mũi tên
-            onPress={logout}
+            textColor="#E53935"
+            showChevron={false}
+            onPress={() => setLogoutModalVisible(true)}
             isDark={false}
           />
         </View>
       </ScrollView>
       <ConfirmModal
-        visible={isDeleteModalVisible}
+        visible={isLogoutModalVisible}
         icon={<IconSignOut width={45} height={45} color="#FF3B30" />}
-        title="Delete Account?"
-        description="Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost."
-        onCancel={() => setDeleteModalVisible(false)}
+        title="Logout"
+        description="Are you sure you want to log out of this device?"
+        onCancel={() => setLogoutModalVisible(false)}
         onConfirm={handleLogoutConfirm}
       />
     </View>

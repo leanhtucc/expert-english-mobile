@@ -84,8 +84,8 @@ export default function PersonalInformationScreen({ navigation }: { navigation: 
       <ConfirmModal
         visible={isDeleteModalVisible}
         icon={<IconUserCircle width={45} height={45} color="#FF3B30" />}
-        title="Delete Account?"
-        description="Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost."
+        title="Delete Account"
+        description="After deleting your account, all your data will be lost and cannot be recovered. Are you sure you want to delete it?"
         onCancel={() => setDeleteModalVisible(false)}
         onConfirm={handleDeleteConfirm}
       />

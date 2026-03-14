@@ -7,8 +7,22 @@ import { SelectableCard } from '../components/SelectableCard';
 import { LEVEL_OPTIONS } from '../constants/surveyConstants';
 import type { EnglishLevel, StepProps } from '../types/surveyTypes';
 
-export const Step3EnglishLevel: React.FC<StepProps> = ({ answers, onUpdate, onNext }) => {
+export const Step3EnglishLevel: React.FC<StepProps & { surveyData?: any }> = ({
+  answers,
+  onUpdate,
+  onNext,
+  surveyData,
+}) => {
   const selected = answers.level;
+
+  const options =
+    surveyData?.englishLevelOptions?.length > 0
+      ? surveyData.englishLevelOptions.map((opt: any) => ({
+          value: opt.value,
+          title: opt.label,
+          description: opt.description,
+        }))
+      : LEVEL_OPTIONS;
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
@@ -23,7 +37,7 @@ export const Step3EnglishLevel: React.FC<StepProps> = ({ answers, onUpdate, onNe
           Choose the level that best describes your ability to communicate.
         </Text>
 
-        {LEVEL_OPTIONS.map(option => (
+        {options.map((option: any) => (
           <SelectableCard
             key={option.value}
             {...option}

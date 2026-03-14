@@ -1,11 +1,14 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import { Animated, Easing, StatusBar, View } from 'react-native';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Alert, Animated, Easing, StatusBar, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
+import { surveyApi } from '@/api';
 import { RootStackParamList } from '@/navigation';
+import { SubmitSurveyOptionRequest } from '@/types/api/survey.request';
+import { SurveyResponseData } from '@/types/api/survey.response';
 
 import {
   Step1WhoAreYou,
@@ -32,23 +35,29 @@ export const SurveyScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<SurveyAnswers>(DEFAULT_ANSWERS);
+  const [surveyData, setSurveyData] = useState<SurveyResponseData | null>(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
-  // Stores the pending enter direction — set before setStep, read after commit
   const pendingDir = useRef<'forward' | 'back' | null>(null);
 
-  // Fires synchronously after the new step content is committed to the native tree.
-  // At this point opacity is still 0, so we can safely reposition before animating in.
+  useEffect(() => {
+    surveyApi
+      .getDataSurvey()
+      .then(res => {
+        if (res.data) setSurveyData(res.data);
+      })
+      .catch(err => console.error('Lỗi khi fetch data survey:', err));
+  }, []);
+
   useLayoutEffect(() => {
     if (pendingDir.current === null) return;
-
     const enterFrom = pendingDir.current === 'forward' ? SLIDE_DISTANCE : -SLIDE_DISTANCE;
     pendingDir.current = null;
-
     slideAnim.setValue(enterFrom);
     fadeAnim.setValue(0);
-
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -69,8 +78,6 @@ export const SurveyScreen: React.FC = () => {
     (next: number) => {
       const dir: 'forward' | 'back' = next > step ? 'forward' : 'back';
       const exitSlide = dir === 'forward' ? -SLIDE_DISTANCE : SLIDE_DISTANCE;
-
-      // Animate current content out, then swap step
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
@@ -86,7 +93,6 @@ export const SurveyScreen: React.FC = () => {
         }),
       ]).start(({ finished }) => {
         if (!finished) return;
-        // Record direction before state update so useLayoutEffect can read it
         pendingDir.current = dir;
         setStep(next);
       });
@@ -94,13 +100,51 @@ export const SurveyScreen: React.FC = () => {
     [fadeAnim, slideAnim, step]
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleSubmitSurvey = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const formattedHour = String(answers.reminderTime.hour).padStart(2, '0');
+      const formattedMinute = String(answers.reminderTime.minute).padStart(2, '0');
+      const reminderTimeStr = `${formattedHour}:${formattedMinute}`;
+
+      const payload: SubmitSurveyOptionRequest = {
+        current_status: answers.role || '',
+        industry_id: answers.field || '',
+        role_id: null,
+        english_level: answers.level || '',
+        daily_learning_minutes: answers.dailyGoal || 15,
+        daily_reminder_enabled: answers.reminderEnabled,
+        reminder_time: reminderTimeStr,
+        custom_focus: '',
+        course_duration_weeks: 4,
+      };
+
+      console.log('Đang gửi data lên server:', payload);
+
+      await surveyApi.submitSurvey(payload as any);
+
+      console.log('✅ Submit survey thành công!');
+      setTimeout(() => {
+        setIsSubmitting(false);
+        navigation.navigate('LearningPath');
+      }, 1000);
+    } catch (error) {
+      console.error('❌ Lỗi khi submit survey:', error);
+      Alert.alert('Error', 'Failed to save your preferences. Please try again.');
+      setIsSubmitting(false);
+    }
+  };
+
   const handleNext = useCallback(() => {
     if (step < TOTAL_STEPS) {
       animateStep(step + 1);
     } else {
-      navigation.navigate('LearningPath');
+      handleSubmitSurvey();
     }
-  }, [animateStep, navigation, step]);
+  }, [step, animateStep, handleSubmitSurvey]);
 
   const handleBack = useCallback(() => {
     if (step > 1) {
@@ -121,6 +165,8 @@ export const SurveyScreen: React.FC = () => {
     onBack: handleBack,
     currentStep: step,
     totalSteps: TOTAL_STEPS,
+    surveyData,
+    isSubmitting,
   };
 
   const stepMap: Record<number, React.ReactElement> = {
