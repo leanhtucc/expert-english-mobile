@@ -56,7 +56,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
 
     let isMounted = true;
 
-    // 1. Chạy thanh tiến trình giả
     const interval = setInterval(() => {
       setProgress(prev => {
         const next = prev < 90 ? prev + Math.floor(Math.random() * 5) + 2 : 90;
@@ -70,7 +69,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
         if (next >= 30 && next < 70) setSeqIndex(1);
         else if (next >= 70 && next < 100) setSeqIndex(2);
 
-        // Log tiến trình (chỉ log khi chia hết cho 10 để tránh trôi terminal)
         if (next % 10 === 0 || next === 90) {
           console.log(`⏳ Tiến trình giả lập: ${next}%`);
         }
@@ -79,7 +77,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
       });
     }, 400);
 
-    // 2. Hàm gọi API sinh lộ trình
     const generateCourse = async () => {
       try {
         console.log(
@@ -90,7 +87,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
         if (duration === 'fast') {
           response = await surveyApi.generateLearningPath7day();
         } else {
-          // Lưu ý: Nếu API 4 week cần truyền focusText, bạn truyền vào đây
           response = await surveyApi.generateLearningPath4Week();
         }
 
@@ -98,7 +94,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
 
         console.log('✅ [API THÀNH CÔNG] Dữ liệu trả về:', JSON.stringify(response.data, null, 2));
 
-        // 3. Xử lý sau khi thành công
         console.log('⏩ [TIẾN TRÌNH] Ép tiến trình lên 100%');
         clearInterval(interval);
         setProgress(100);
@@ -142,7 +137,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
       }
     };
 
-    // Bắt đầu gọi API
     generateCourse();
 
     return () => {
@@ -172,7 +166,6 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* Các phần UI giữ nguyên như cũ, không thay đổi */}
       <View className="flex-row items-center border-b border-gray-100 px-5 py-3">
         <TouchableOpacity
           onPress={() => navigation.goBack()}

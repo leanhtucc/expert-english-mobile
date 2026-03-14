@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react-native';
 
 import React from 'react';
-import { ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
 import { IconFinish } from '@/components/icon';
 
@@ -37,13 +37,16 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     }`}
     style={!disabled ? ACTIVE_SHADOW : undefined}
   >
+    <Text className="mr-2 text-base font-bold text-white">{label}</Text>
+
     {loading ? (
-      <ActivityIndicator color="#fff" />
+      <View className="h-[18px] w-[18px] items-center justify-center">
+        <ActivityIndicator size="small" color="#fff" />
+      </View>
+    ) : isFinish ? (
+      <IconFinish width={18} height={18} />
     ) : (
-      <>
-        <Text className="mr-2 text-base font-bold text-white">{label}</Text>
-        {isFinish ? <IconFinish width={18} height={18} /> : <ArrowRight size={18} color="#fff" />}
-      </>
+      <ArrowRight size={18} color="#fff" />
     )}
   </TouchableOpacity>
 );

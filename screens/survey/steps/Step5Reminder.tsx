@@ -114,6 +114,7 @@ export const Step5Reminder: React.FC<Step5Props> = ({
           label={isSubmitting ? 'Saving...' : 'Finish'}
           onPress={handleFinish}
           disabled={isSubmitting}
+          loading={isSubmitting}
           isFinish
         />
       </View>
