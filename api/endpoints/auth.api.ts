@@ -1,74 +1,40 @@
-import { LoginRequest, LoginResponse, RegisterRequest, User } from '@/types/api';
+import {
+  AuthSendOtpRequest,
+  CheckOtpRequest,
+  LoginRequest,
+  LoginResponse,
+  LoginWithGoogleRequest,
+  LogoutRequest,
+  LogoutRessponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  RegisterRequest,
+  RegisterResponse,
+  SendOtpResponse,
+  UserProfileResponse,
+  checkOtpResponse,
+} from '@/types';
 
 import { apiClient } from '../client';
 
 /**
  * Auth API Endpoints
- * Handles authentication-related API calls
  */
 export const authApi = {
-  /**
-   * Login user with credentials
-   * @param credentials - User email and password
-   * @returns LoginResponse with user data and token
-   */
-  login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-    return await apiClient.post<LoginResponse>('/auth/login', credentials);
-  },
+  login: (data: LoginRequest) => apiClient.post<LoginResponse>('/auth/login', data),
 
-  /**
-   * Register new user
-   * @param data - Registration data (email, password, name)
-   * @returns LoginResponse with user data and token
-   */
-  register: async (data: RegisterRequest): Promise<LoginResponse> => {
-    return await apiClient.post<LoginResponse>('/auth/register', data);
-  },
+  refreshToken: (data: RefreshTokenRequest) =>
+    apiClient.post<RefreshTokenResponse>('/auth/refresh', data),
 
-  /**
-   * Logout current user
-   * @returns void
-   */
-  logout: async (): Promise<void> => {
-    await apiClient.post('/auth/logout');
-  },
+  logout: (data: LogoutRequest) => apiClient.post<LogoutRessponse>('/auth/logout', data),
 
-  /**
-   * Get current user profile
-   * @returns User profile data
-   */
-  getProfile: async (): Promise<User> => {
-    return await apiClient.get<User>('/auth/profile');
-  },
+  sendOtp: (data: AuthSendOtpRequest) => apiClient.post<SendOtpResponse>('/auth/otp/send', data),
 
-  /**
-   * Refresh access token
-   * @param refreshToken - Current refresh token
-   * @returns New access token
-   */
-  refreshToken: async (refreshToken: string): Promise<{ token: string }> => {
-    return await apiClient.post<{ token: string }>('/auth/refresh', { refreshToken });
-  },
+  checkOtp: (data: CheckOtpRequest) => apiClient.post<checkOtpResponse>('/auth/otp/login', data),
 
-  /**
-   * Request password reset
-   * @param email - User email
-   * @returns Success message
-   */
-  forgotPassword: async (email: string): Promise<{ message: string }> => {
-    return await apiClient.post<{ message: string }>('/auth/forgot-password', { email });
-  },
+  register: (data: RegisterRequest) => apiClient.post<RegisterResponse>('/auth/register', data),
 
-  /**
-   * Reset password with token
-   * @param token - Reset token from email
-   * @param newPassword - New password
-   * @returns Success message
-   */
-  resetPassword: async (token: string, newPassword: string): Promise<{ message: string }> => {
-    return await apiClient.post<{ message: string }>('/auth/reset-password', {
-      token,
-      newPassword,
-    });
-  },
+  loginWithGoogle: (data: LoginWithGoogleRequest) =>
+    apiClient.post<LoginResponse>('/auth/google', data),
+  getDataUser: () => apiClient.get<UserProfileResponse>('/user/me'),
 };

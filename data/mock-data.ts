@@ -2,13 +2,15 @@
  * Mock Data
  * Dữ liệu giả lập dùng chung toàn app khi chưa có API thực
  */
-import { User } from '@/types/entities';
+import { User } from '@sentry/react-native';
 
 // ─────────────────────────────────────────────
 // User / Profile
 // ─────────────────────────────────────────────
 
 export interface UserProfile extends User {
+  name: string | undefined;
+  avatar: any;
   level: number;
   track: string;
   proficiency: 'Beginner' | 'Elementary' | 'Intermediate' | 'Advanced' | 'Proficient';
@@ -46,7 +48,7 @@ export interface ProfileMockData {
 // ─────────────────────────────────────────────
 
 export const mockUserProfile: UserProfile = {
-  id: 'usr_001',
+  _id: 'usr_001',
   email: 'alex.chen@example.com',
   name: 'Alex Chen',
   avatar: 'https://picsum.photos/seed/alexchen/200/200',

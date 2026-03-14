@@ -1,5 +1,3 @@
-import { ActivityIndicator } from 'react-native';
-
 import {
   NavigationContainer,
   NavigatorScreenParams,
@@ -7,13 +5,14 @@ import {
 } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { LoginScreen } from '@/screens/auth/login';
+import CreatePasswordScreen from '@/screens/auth/CreatePassword';
+import { EnterEmailScreen } from '@/screens/auth/enterEmail';
+import LoginEmailScreen from '@/screens/auth/loginEmail';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
+import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
+import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
-import { useAuthStore } from '@/stores';
 
 import InitialNavigator from './InitialNavigator';
 import TabNavigator from './tab-navigator';
@@ -28,26 +27,27 @@ export type TabNavigatorParamList = {
 export type RootStackParamList = {
   // Onboarding
   Onboarding: undefined;
-
-  // Auth flow
   Start: { step?: number } | undefined;
   Login: undefined;
   SignUp: undefined;
   ForgotPassword: undefined;
+  EnterEmail: undefined;
   OTP: { email: string; isRegister?: boolean; userData?: any };
   VerifyOTP: { email: string };
   ResetPassword: undefined;
-
-  // Survey flow
+  CreatePassword: { email: string } | undefined;
+  LoginEmail: undefined;
   Survey: undefined;
   LearningPath: undefined;
   AIRoadmapLoading: undefined;
-
-  // Main flow
   InitialNavigator: undefined;
   PremiumInterstitial: undefined;
   TabNavigator: NavigatorScreenParams<TabNavigatorParamList> | { screen?: string };
   Modal: undefined;
+  PracticeSetup: undefined;
+  PersonalInformationScreen: undefined;
+  ChangePasswordScreen: undefined;
+  AIFeedback: { userAnswer: string; mode: string };
 };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -77,15 +77,8 @@ export function resetRoot(routeName: keyof RootStackParamList) {
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function RootStack() {
-  const isLoggedIn = useAuthStore(state => state.isAuthenticated);
-  const colorScheme = useColorScheme();
-
-  if (typeof isLoggedIn === 'undefined') {
-    return <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].tint} />;
-  }
-
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
         initialRouteName="Onboarding"
         screenOptions={{
@@ -98,10 +91,24 @@ export default function RootStack() {
           component={OnboardingScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="EnterEmail"
+          component={EnterEmailScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="VerifyOTP"
           component={VerifyOTPScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CreatePassword"
+          component={CreatePasswordScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="LoginEmail"
+          component={LoginEmailScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Survey" component={SurveyScreen} options={{ headerShown: false }} />
@@ -119,6 +126,33 @@ export default function RootStack() {
         <Stack.Screen
           name="InitialNavigator"
           component={InitialNavigator}
+          options={{ headerShown: false }}
+        />
+
+        {/* Speaking Practice Screens */}
+        <Stack.Screen
+          name="PracticeSetup"
+          component={PracticeSetupScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PersonalInformationScreen"
+          component={PersonalInformationScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ChangePasswordScreen"
+          component={ChangePasswordScreen}
+          options={{ headerShown: false }}
+        />
+        {/* <Stack.Screen
+          name="SpeakingConversation"
+          component={SpeakingConversationScreen}
+          options={{ headerShown: false }}
+        /> */}
+        <Stack.Screen
+          name="AIFeedback"
+          component={AIFeedbackScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

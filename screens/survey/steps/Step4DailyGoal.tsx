@@ -9,8 +9,22 @@ import { SelectableCard } from '../components/SelectableCard';
 import { GOAL_OPTIONS } from '../constants/surveyConstants';
 import type { DailyGoal, StepProps } from '../types/surveyTypes';
 
-export const Step4DailyGoal: React.FC<StepProps> = ({ answers, onUpdate, onNext }) => {
+export const Step4DailyGoal: React.FC<StepProps & { surveyData?: any }> = ({
+  answers,
+  onUpdate,
+  onNext,
+  surveyData,
+}) => {
   const selected = answers.dailyGoal;
+
+  const options =
+    surveyData?.dailyGoalOptions?.length > 0
+      ? surveyData.dailyGoalOptions.map((opt: any) => ({
+          value: String(opt.value), // Cần ép kiểu thành chuỗi do prop value của SelectableCard
+          title: opt.label,
+          // Nếu API trả về recommend, bạn có thể truyền thêm cờ recommend vào đây
+        }))
+      : GOAL_OPTIONS;
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
@@ -25,7 +39,7 @@ export const Step4DailyGoal: React.FC<StepProps> = ({ answers, onUpdate, onNext 
           How much time can you commit each day?
         </Text>
 
-        {GOAL_OPTIONS.map(option => (
+        {options.map((option: any) => (
           <SelectableCard
             key={option.value}
             {...option}

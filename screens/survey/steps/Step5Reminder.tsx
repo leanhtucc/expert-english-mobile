@@ -9,7 +9,16 @@ import { TimePickerWheel } from '../components/TimePickerWheel';
 import { HOUR_VALUES, MINUTE_VALUES } from '../constants/surveyConstants';
 import type { StepProps } from '../types/surveyTypes';
 
-export const Step5Reminder: React.FC<StepProps> = ({ answers, onUpdate, onNext }) => {
+interface Step5Props extends StepProps {
+  isSubmitting?: boolean;
+}
+
+export const Step5Reminder: React.FC<Step5Props> = ({
+  answers,
+  onUpdate,
+  onNext,
+  isSubmitting,
+}) => {
   const { reminderEnabled, reminderTime } = answers;
 
   const hourIndex = Math.max(HOUR_VALUES.indexOf(String(reminderTime.hour).padStart(2, '0')), 0);
@@ -17,6 +26,12 @@ export const Step5Reminder: React.FC<StepProps> = ({ answers, onUpdate, onNext }
     MINUTE_VALUES.indexOf(String(Math.round(reminderTime.minute / 5) * 5).padStart(2, '0')),
     0
   );
+
+  const handleFinish = async () => {
+    if (isSubmitting) return;
+
+    onNext();
+  };
 
   const handleHourChange = (index: number) =>
     onUpdate({ reminderTime: { ...reminderTime, hour: Number(HOUR_VALUES[index]) } });
@@ -32,7 +47,6 @@ export const Step5Reminder: React.FC<StepProps> = ({ answers, onUpdate, onNext }
           Consistency is the secret to mastering medical English. Let us help you keep your streak.
         </Text>
 
-        {/* Reminder toggle */}
         <View className="flex-row items-center justify-between rounded-2xl border border-gray-200 bg-white p-4">
           <View className="flex-row items-center">
             <IconReminderBell width={22} height={22} />
@@ -67,7 +81,6 @@ export const Step5Reminder: React.FC<StepProps> = ({ answers, onUpdate, onNext }
           </TouchableOpacity>
         </View>
 
-        {/* Time picker wheel (only when enabled) */}
         {reminderEnabled && (
           <View className="mt-5 items-center rounded-2xl border border-gray-200 bg-white py-4">
             <View className="flex-row items-center">
@@ -87,7 +100,6 @@ export const Step5Reminder: React.FC<StepProps> = ({ answers, onUpdate, onNext }
           </View>
         )}
 
-        {/* Evening tip */}
         <View className="mt-4 flex-row items-start rounded-2xl bg-blue-50 p-4">
           <IconStudySchedule width={16} height={16} />
           <Text className="ml-3 flex-1 text-xs leading-5 text-blue-600">
@@ -98,7 +110,13 @@ export const Step5Reminder: React.FC<StepProps> = ({ answers, onUpdate, onNext }
       </View>
 
       <View className="pb-8 pt-2">
-        <PrimaryButton label="Finish" onPress={onNext} isFinish />
+        <PrimaryButton
+          label={isSubmitting ? 'Saving...' : 'Finish'}
+          onPress={handleFinish}
+          disabled={isSubmitting}
+          loading={isSubmitting}
+          isFinish
+        />
       </View>
     </SafeAreaView>
   );

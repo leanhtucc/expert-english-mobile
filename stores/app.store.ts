@@ -1,20 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import type { Language, Theme } from '@/types';
-
 /**
  * App Store Interface
  */
 interface AppState {
-  // Theme
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-
-  // Language
-  language: Language;
-  setLanguage: (language: Language) => void;
-
   // Notifications
   notificationsEnabled: boolean;
   toggleNotifications: () => void;
@@ -38,14 +28,6 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      // Theme
-      theme: 'system',
-      setTheme: theme => set({ theme }),
-
-      // Language
-      language: 'en',
-      setLanguage: language => set({ language }),
-
       // Notifications
       notificationsEnabled: true,
       toggleNotifications: () => set({ notificationsEnabled: !get().notificationsEnabled }),

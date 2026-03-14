@@ -70,7 +70,7 @@ export const OnboardingScreen: React.FC = () => {
 
   const handleGetStarted = () => navigation.navigate('Survey');
   const handleGoogleLogin = () => console.log('Google login');
-  const handleEmailLogin = () => navigation.navigate('Login');
+  const handleEmailLogin = () => navigation.navigate('EnterEmail');
   const handleLogin = () => animateToStep(1);
 
   return (
