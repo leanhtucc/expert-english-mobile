@@ -10,6 +10,7 @@ import { EnterEmailScreen } from '@/screens/auth/enterEmail';
 import LoginEmailScreen from '@/screens/auth/loginEmail';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
+import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
 
@@ -26,8 +27,6 @@ export type TabNavigatorParamList = {
 export type RootStackParamList = {
   // Onboarding
   Onboarding: undefined;
-
-  // Auth flow
   Start: { step?: number } | undefined;
   Login: undefined;
   SignUp: undefined;
@@ -38,20 +37,16 @@ export type RootStackParamList = {
   ResetPassword: undefined;
   CreatePassword: { email: string } | undefined;
   LoginEmail: undefined;
-  // Survey flow
   Survey: undefined;
   LearningPath: undefined;
   AIRoadmapLoading: undefined;
-
-  // Main flow
   InitialNavigator: undefined;
   PremiumInterstitial: undefined;
   TabNavigator: NavigatorScreenParams<TabNavigatorParamList> | { screen?: string };
   Modal: undefined;
-
-  // Speaking Practice flow
   PracticeSetup: undefined;
-  // SpeakingConversation: { mode: 'dual-explorer' | 'english-master' | 'translation-hero' }; // Removed
+  PersonalInformationScreen: undefined;
+  ChangePasswordScreen: undefined;
   AIFeedback: { userAnswer: string; mode: string };
 };
 
@@ -138,6 +133,16 @@ export default function RootStack() {
         <Stack.Screen
           name="PracticeSetup"
           component={PracticeSetupScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PersonalInformationScreen"
+          component={PersonalInformationScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ChangePasswordScreen"
+          component={ChangePasswordScreen}
           options={{ headerShown: false }}
         />
         {/* <Stack.Screen
