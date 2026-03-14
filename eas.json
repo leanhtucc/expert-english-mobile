@@ -20,11 +20,26 @@
         "simulator": true
       }
     },
+    "develop-apk": {
+      "distribution": "internal",
+      "channel": "development",
+      "env": {
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_API_URL": "https://prolingo-be.iuptit.com",
+        "EXPO_PUBLIC_ENVIRONMENT": "development",
+        "EXPO_PUBLIC_DEBUG_MODE": "true"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "APP_ENV": "staging"
+        "APP_ENV": "staging",
+        "EXPO_PUBLIC_API_URL": "https://prolingo-be.iuptit.com",
+        "EXPO_PUBLIC_ENVIRONMENT": "staging"
       },
       "android": {
         "buildType": "apk"
@@ -33,7 +48,9 @@
     "production": {
       "channel": "production",
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://prolingo-be.iuptit.com",
+        "EXPO_PUBLIC_ENVIRONMENT": "production"
       },
       "android": {
         "buildType": "app-bundle"

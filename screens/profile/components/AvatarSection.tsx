@@ -1,7 +1,6 @@
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
-import IconVerified from '@/assets/svgs/output/IconVerified';
-import { IconGraduation } from '@/components/icon';
+import { IconGraduation, IconVerified } from '@/components/icon';
 
 import { AVATAR_SIZE, PRIMARY } from '../constants/profile.constants';
 

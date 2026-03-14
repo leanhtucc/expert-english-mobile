@@ -4,8 +4,7 @@ import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-na
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import { IconBackButton } from '@/assets/svgs/output';
-import { IconCupGoat, IconPLay, IconVoiceBlack } from '@/components/icon';
+import { IconBackButton, IconCupGoat, IconPLay, IconVoiceBlack } from '@/components/icon';
 import { RootStackParamList } from '@/navigation';
 import { PracticeMode, ScenarioPreview } from '@/types/speaking.types';
 
