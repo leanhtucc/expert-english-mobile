@@ -1,8 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import { IconTop1Cup } from '@/assets/svgs/output';
-import { IconRankTop1, IconRankTop2, IconRankTop3 } from '@/components/icon';
+import { IconRankTop1, IconRankTop2, IconRankTop3, IconTop1Cup } from '@/components/icon';
 import { LeaderboardPlayer } from '@/data/mock-data';
 
 import { RING_COLORS } from '../leaderboard.constants';
