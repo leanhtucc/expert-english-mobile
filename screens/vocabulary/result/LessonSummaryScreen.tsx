@@ -1,141 +1,234 @@
-import React from 'react';
-import { SafeAreaView, ScrollView, Text, View } from 'react-native';
-
-import { PrimaryButton } from '../components/PrimaryButton';
-import { SecondaryButton } from '../components/SecondaryButton';
-import { ResultStatCard } from './ResultStatCard';
+import { Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 export interface LessonSummaryData {
   totalWords: number;
   accuracy: number;
   timeSpent: string;
-  masteredWords: number;
+  masteredWords?: number;
   streak?: number;
+  weakWords?: number;
 }
 
 interface LessonSummaryScreenProps {
   data: LessonSummaryData;
-  onStartSpeaking?: () => void;
-  onViewVocabulary?: () => void;
-  onContinue?: () => void;
-  showSpeakingButton?: boolean;
+  onRestart?: () => void;
+  onReviewWeak?: () => void;
+  onClose?: () => void;
 }
 
 export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
   data,
-  onStartSpeaking,
-  onViewVocabulary,
-  onContinue,
-  showSpeakingButton = true,
+  onRestart,
+  onReviewWeak,
+  onClose,
 }) => {
-  const getPerformanceMessage = () => {
-    if (data.accuracy >= 90) return 'Spectacular!';
-    if (data.accuracy >= 75) return 'Great Job!';
-    if (data.accuracy >= 60) return 'Good Work!';
-    return 'Keep Practicing!';
-  };
-
-  const getPerformanceSubtitle = () => {
-    if (data.accuracy >= 90) {
-      return `You've mastered ${data.masteredWords} new industry terms`;
-    }
-    return `You've learned ${data.masteredWords} new terms`;
-  };
-
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaView className="flex-1 bg-gradient-to-b from-red-50 to-white">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 24 }}
-        showsVerticalScrollIndicator={false}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: '#fff' }}
+      edges={['top', 'bottom', 'left', 'right']}
+    >
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          paddingHorizontal: 24,
+          paddingTop: 44,
+          paddingBottom: insets.bottom,
+        }}
       >
-        {/* Header Badge */}
-        <View className="mb-6 mt-4 items-center">
-          <View className="rounded-2xl bg-white px-6 py-2 shadow-sm">
-            <Text className="text-sm font-semibold text-red-600">LESSON SUMMARY</Text>
+        {/* Header */}
+        <View
+          style={{ width: '100%', flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}
+        >
+          <TouchableOpacity onPress={onClose} style={{ padding: 8 }}>
+            <MaterialIcons name="close" size={28} color="#222" />
+          </TouchableOpacity>
+          <View style={{ flex: 1, alignItems: 'center', marginRight: 30 }}>
+            <Text style={{ fontWeight: '600', fontSize: 16, color: '#222' }}>Session Summary</Text>
           </View>
         </View>
 
         {/* Mascot/Character */}
-        <View className="mb-6 items-center">
-          <View className="h-40 w-40 items-center justify-center rounded-full bg-red-100">
-            {/* Placeholder for mascot image */}
-            <Text className="text-6xl">🎉</Text>
+        <View style={{ marginBottom: 24 }}>
+          <View
+            style={{
+              width: 120,
+              height: 120,
+              borderRadius: 24,
+              backgroundColor: '#F3F6FB',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {/* Replace with image if needed */}
+            <Text style={{ fontSize: 64 }}>😊</Text>
           </View>
         </View>
 
-        {/* Performance Title */}
-        <Text className="mb-2 text-center text-4xl font-bold text-gray-800">
-          {getPerformanceMessage()}
+        {/* Title */}
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: '700',
+            color: '#222',
+            textAlign: 'center',
+            marginBottom: 8,
+          }}
+        >
+          Great job finishing the flashcards!
+        </Text>
+        {/* Subtitle */}
+        <Text style={{ fontSize: 15, color: '#6B7280', textAlign: 'center', marginBottom: 24 }}>
+          Time to review and lock these words into your memory.
         </Text>
 
-        <Text className="mb-8 text-center text-base text-gray-600">{getPerformanceSubtitle()}</Text>
-
-        {/* Stats Grid */}
-        <View className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-          <View className="flex-row justify-around">
-            <ResultStatCard
-              icon={<Text className="text-3xl">📚</Text>}
-              value={data.totalWords}
-              label="Total"
-            />
-
-            <View className="w-px bg-gray-200" />
-
-            <ResultStatCard
-              icon={<Text className="text-3xl">✓</Text>}
-              value={`${data.accuracy}%`}
-              label="Accuracy"
-              valueColor="text-green-600"
-            />
-
-            <View className="w-px bg-gray-200" />
-
-            <ResultStatCard
-              icon={<Text className="text-3xl">⏱</Text>}
-              value={data.timeSpent}
-              label="Time"
-            />
+        {/* Stats Row */}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            width: '100%',
+            marginBottom: 32,
+          }}
+        >
+          {/* Words */}
+          <View style={{ alignItems: 'center', flex: 1 }}>
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: '#F3F6FB',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ fontSize: 24, color: '#E11D48' }}>🎓</Text>
+            </View>
+            <Text style={{ fontWeight: '700', fontSize: 18, color: '#222' }}>
+              {data.totalWords}
+            </Text>
+            <Text style={{ fontSize: 13, color: '#6B7280' }}>Words</Text>
           </View>
-
-          {data.streak && data.streak > 1 && (
-            <>
-              <View className="my-4 h-px bg-gray-200" />
-              <View className="items-center">
-                <Text className="mb-1 text-2xl">🔥</Text>
-                <Text className="text-xl font-bold text-orange-600">{data.streak} Day Streak!</Text>
-                <Text className="text-sm text-gray-500">Keep it up!</Text>
-              </View>
-            </>
-          )}
+          {/* Accuracy */}
+          <View style={{ alignItems: 'center', flex: 1 }}>
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: '#F3F6FB',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ fontSize: 24, color: '#E11D48' }}>⭐</Text>
+            </View>
+            <Text style={{ fontWeight: '700', fontSize: 18, color: '#222' }}>{data.accuracy}%</Text>
+            <Text style={{ fontSize: 13, color: '#6B7280' }}>Accuracy</Text>
+          </View>
+          {/* Time */}
+          <View style={{ alignItems: 'center', flex: 1 }}>
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: '#F3F6FB',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ fontSize: 24, color: '#E11D48' }}>⏱️</Text>
+            </View>
+            <Text style={{ fontWeight: '700', fontSize: 18, color: '#222' }}>{data.timeSpent}</Text>
+            <Text style={{ fontSize: 13, color: '#6B7280' }}>Time</Text>
+          </View>
         </View>
 
-        {/* Action Buttons */}
-        <View className="space-y-3">
-          {showSpeakingButton && onStartSpeaking && (
-            <PrimaryButton label="🎤 Start Speaking" onPress={onStartSpeaking} className="mb-3" />
-          )}
+        {/* Buttons */}
+        <View style={{ width: '100%' }}>
+          {/* Restart Button */}
+          <Pressable
+            onPress={onRestart}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: '#F3F6FB',
+              borderRadius: 16,
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+              marginBottom: 16,
+            }}
+          >
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: '#fff',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: 12,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+              }}
+            >
+              <Text style={{ fontSize: 20, color: '#E11D48' }}>↻</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontWeight: '600', fontSize: 16, color: '#222' }}>
+                Restart Flashcards
+              </Text>
+              <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>
+                Go through the full deck again
+              </Text>
+            </View>
+          </Pressable>
 
-          {onViewVocabulary && (
-            <SecondaryButton
-              label="📖 View My Vocabulary"
-              onPress={onViewVocabulary}
-              className="mb-3"
-            />
-          )}
-
-          {onContinue && !showSpeakingButton && (
-            <PrimaryButton label="Continue" onPress={onContinue} />
-          )}
+          {/* Review Weak Words Button */}
+          <Pressable
+            onPress={onReviewWeak}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: '#E11D48',
+              borderRadius: 16,
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+          >
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: '#fff',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: 12,
+              }}
+            >
+              <Text style={{ fontSize: 20, color: '#E11D48' }}>📝</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontWeight: '600', fontSize: 16, color: '#fff' }}>
+                Review Weak Words
+              </Text>
+              <Text style={{ fontSize: 13, color: '#fff', marginTop: 2 }}>
+                Focus on the {data.weakWords ?? 3} unknown words
+              </Text>
+            </View>
+            <Text style={{ fontSize: 22, color: '#fff', marginLeft: 8 }}>{'>'}</Text>
+          </Pressable>
         </View>
-
-        {/* Encouragement Message */}
-        <View className="mt-8 rounded-2xl bg-blue-50 p-4">
-          <Text className="text-center text-sm leading-5 text-blue-800">
-            💡 Tip: Practice speaking these words aloud to improve retention!
-          </Text>
-        </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };

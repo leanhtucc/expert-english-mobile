@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import { FlashcardItem } from './useFlashcard';
 
@@ -8,6 +9,7 @@ interface FlashcardCardProps {
   isFlipped: boolean;
   onFlip: () => void;
   onPlayAudio?: () => void;
+  imageUrl?: string;
 }
 
 export const FlashcardCard: React.FC<FlashcardCardProps> = ({
@@ -17,49 +19,159 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
   onPlayAudio,
 }) => {
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={onFlip} className="w-full">
-      <View className="min-h-[300px] justify-center rounded-2xl bg-white p-6 shadow-sm">
+    <TouchableOpacity activeOpacity={0.9} onPress={onFlip} style={{ width: '100%' }}>
+      <View
+        style={{
+          minHeight: 400,
+          justifyContent: 'center',
+          backgroundColor: '#fff',
+          padding: 28,
+          borderRadius: 32,
+          shadowColor: '#C70F2B',
+          shadowOffset: { width: 0, height: 12 },
+          shadowOpacity: 0.18,
+          shadowRadius: 32,
+          elevation: 12,
+          borderWidth: 1.5,
+          borderColor: '#F1F5F9',
+        }}
+      >
         {!isFlipped ? (
           // Front: Word
-          <View className="items-center">
-            <Text className="mb-3 text-center text-4xl font-bold text-gray-800">{card.word}</Text>
-
+          <View style={{ alignItems: 'center' }}>
+            {/* Image section */}
+            {card.imageUrl && (
+              <Image
+                source={{ uri: card.imageUrl }}
+                style={{ width: 220, height: 140, borderRadius: 20, marginBottom: 22 }}
+                resizeMode="cover"
+              />
+            )}
+            <Text
+              style={{
+                marginBottom: 2,
+                textAlign: 'center',
+                fontSize: 32,
+                fontWeight: '800',
+                color: '#0F172A',
+                letterSpacing: 0.2,
+              }}
+            >
+              {card.word}
+            </Text>
             {card.phonetic && (
-              <Text className="mb-4 text-center text-lg text-gray-500">{card.phonetic}</Text>
+              <Text
+                style={{
+                  marginBottom: 18,
+                  textAlign: 'center',
+                  fontSize: 18,
+                  color: '#C70F2B',
+                  fontWeight: '600',
+                  letterSpacing: 0.1,
+                }}
+              >
+                {card.phonetic}
+              </Text>
             )}
-
             {onPlayAudio && (
-              <TouchableOpacity onPress={onPlayAudio} className="mt-4 rounded-full bg-red-600 p-4">
-                <Text className="text-2xl text-white">🔊</Text>
-              </TouchableOpacity>
+              <View style={{ alignItems: 'center', marginTop: 10, marginBottom: 2 }}>
+                <TouchableOpacity
+                  onPress={onPlayAudio}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#C70F2B',
+                    borderRadius: 28,
+                    paddingHorizontal: 32,
+                    paddingVertical: 14,
+                    minWidth: 140,
+                    shadowColor: '#C70F2B',
+                    shadowOffset: { width: 0, height: 6 },
+                    shadowOpacity: 0.22,
+                    shadowRadius: 12,
+                    elevation: 6,
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <FontAwesome
+                    name="volume-up"
+                    size={22}
+                    color="#fff"
+                    style={{ marginRight: 10 }}
+                  />
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 18 }}>Listen</Text>
+                </TouchableOpacity>
+              </View>
             )}
-
-            <Text className="mt-8 text-sm text-gray-400">Tap to see definition</Text>
+            <Text style={{ marginTop: 24, fontSize: 14, color: '#94A3B8', textAlign: 'center' }}>
+              Tap to see definition
+            </Text>
           </View>
         ) : (
-          // Back: Definition & Example
-          <View>
-            <View className="mb-4">
-              <Text className="mb-2 text-sm font-semibold text-red-600">Definition:</Text>
-              <Text className="text-base leading-6 text-gray-700">{card.definition}</Text>
-            </View>
+          // Back: Vietnamese Meaning & Example (Design style)
+          <View style={{ flex: 1 }}>
+            {/* Vietnamese Meaning Section */}
+            <Text
+              style={{
+                color: '#64748B',
+                fontSize: 12,
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                marginBottom: 4,
+                letterSpacing: 0.5,
+              }}
+            >
+              VIETNAMESE MEANING
+            </Text>
+            <Text style={{ color: '#C70F2B', fontWeight: '700', fontSize: 20, marginBottom: 2 }}>
+              {card.translation || 'Mô hình ' + card.word}
+            </Text>
+            <Text style={{ color: '#334155', fontSize: 16, marginBottom: 18 }}>
+              {card.definition}
+            </Text>
 
+            {/* Usage Example Section */}
+            <Text
+              style={{
+                color: '#64748B',
+                fontSize: 12,
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                marginBottom: 4,
+                letterSpacing: 0.5,
+              }}
+            >
+              USAGE EXAMPLE
+            </Text>
             {card.example && (
-              <View className="mb-4">
-                <Text className="mb-2 text-sm font-semibold text-red-600">Example:</Text>
-                <Text className="text-base italic leading-6 text-gray-600">
-                  &ldquo;{card.example}&rdquo;
+              <View
+                style={{
+                  backgroundColor: '#F1F5F9',
+                  borderRadius: 14,
+                  padding: 14,
+                  marginBottom: 12,
+                }}
+              >
+                <Text style={{ color: '#334155', fontSize: 16 }}>
+                  {/* Highlight từ khóa nếu có */}
+                  {card.example.split(card.word).map((part, idx, arr) =>
+                    idx < arr.length - 1 ? (
+                      <React.Fragment key={idx}>
+                        {part}
+                        <Text style={{ color: '#C70F2B', fontWeight: '700' }}>{card.word}</Text>
+                      </React.Fragment>
+                    ) : (
+                      part
+                    )
+                  )}
                 </Text>
               </View>
             )}
 
-            {card.translation && (
-              <View className="mt-4 border-t border-gray-200 pt-4">
-                <Text className="text-center text-sm text-gray-500">{card.translation}</Text>
-              </View>
-            )}
-
-            <Text className="mt-6 text-center text-sm text-gray-400">Tap to flip back</Text>
+            <Text style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: '#94A3B8' }}>
+              Tap to flip back
+            </Text>
           </View>
         )}
       </View>

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { SafeAreaView, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView, Text, View } from 'react-native';
 
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -37,35 +37,41 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
   }, [pairs]);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
       <ScreenHeader
-        title="Match the Terms"
-        subtitle="Connect terms with definitions"
+        title="Vocabulary Quiz"
+        subtitle="LEVEL: PROFESSIONAL AI"
+        rightAction={<Text className="text-base font-semibold text-pink-500">Skip</Text>}
         onBack={onBack}
         onClose={onClose}
       />
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 16 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Progress */}
-        <ProgressBar current={progress.current} total={progress.total} className="mb-6" />
-
-        {/* Instructions */}
-        <View className="mb-6 rounded-2xl bg-blue-50 p-4">
-          <Text className="text-center text-sm text-blue-800">
-            💡 Tap a term, then tap its matching definition
+      {/* Progress Bar and Progress Text */}
+      <View className="px-6 pt-4 pb-2">
+        <View className="mb-2 flex-row items-center justify-between">
+          <Text className="text-xs font-medium text-gray-500">Matching Progress</Text>
+          <Text className="text-xs font-bold text-pink-500">
+            {progress.current} / {progress.total}
           </Text>
         </View>
+        <ProgressBar current={progress.current} total={progress.total} className="mb-0" />
+      </View>
 
-        {/* Two Column Layout */}
+      {/* Title and Subtitle */}
+      <View className="px-6 pt-2 pb-2">
+        <Text className="mb-1 text-xl font-bold text-gray-900">Connect the Terms</Text>
+        <Text className="text-sm text-gray-500">
+          Match the English AI terminology to its meaning.
+        </Text>
+      </View>
+
+      {/* Two Column Layout */}
+      <View className="flex-1 px-6 pb-24">
         <View className="flex-row">
           {/* Terms Column */}
           <View className="flex-1 pr-2">
-            <Text className="mb-3 text-sm font-bold text-gray-700">TERMS</Text>
+            {/* No section title for clean look */}
             {pairs.map(pair => (
               <TermItem
                 key={pair.id}
@@ -81,7 +87,7 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
 
           {/* Definitions Column */}
           <View className="flex-1 pl-2">
-            <Text className="mb-3 text-sm font-bold text-gray-700">DEFINITIONS</Text>
+            {/* No section title for clean look */}
             {shuffledDefinitions.map(pair => (
               <TermItem
                 key={pair.id}
@@ -95,7 +101,9 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
             ))}
           </View>
         </View>
-      </ScrollView>
+      </View>
+
+      {/* Bottom Action Buttons hidden as requested */}
     </SafeAreaView>
   );
 };

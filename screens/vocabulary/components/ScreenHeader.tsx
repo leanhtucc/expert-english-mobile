@@ -21,7 +21,10 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   className = '',
 }) => {
   return (
-    <View className={`mt-6 flex-row items-center justify-between px-4 py-3 ${className}`}>
+    <View
+      className={`flex-row items-center justify-between bg-white px-4 py-3 ${className}`}
+      // paddingTop removed; use SafeAreaView in parent screen
+    >
       <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
       {/* Left Action */}
       <View className="w-10">

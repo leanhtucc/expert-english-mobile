@@ -21,6 +21,7 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
   onBack,
   onClose,
 }) => {
+  const insets = require('react-native-safe-area-context').useSafeAreaInsets();
   const {
     currentQuestion,
     selectedAnswer,
@@ -40,6 +41,9 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
     return null;
   }
 
+  // Button height (padding + button) for bottom spacing
+  const BUTTON_HEIGHT = 56 + 16 * 2; // button height + vertical padding
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
@@ -52,12 +56,11 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: BUTTON_HEIGHT + insets.bottom }}
         showsVerticalScrollIndicator={false}
       >
         {/* Progress */}
         <ProgressBar current={progress.current} total={progress.total} className="mb-6" />
-
         {/* Question Card */}
         <QuestionCard
           beforeBlank={sentenceParts.before}
@@ -78,16 +81,23 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
             onSelectAnswer={handleSelectAnswer}
           />
         </View>
-
-        {/* Next Button */}
-        {isAnswered && (
-          <PrimaryButton
-            label={isLastQuestion ? 'Finish' : 'Next Question'}
-            onPress={handleNext}
-            className="mt-4"
-          />
-        )}
       </ScrollView>
+      {/* Bottom Button Area: always reserve space */}
+      <View
+        style={{
+          padding: 16,
+          paddingBottom: insets.bottom,
+          backgroundColor: 'rgba(250,250,250,0.96)',
+        }}
+      >
+        {isAnswered ? (
+          <PrimaryButton label={isLastQuestion ? 'Finish' : 'Next Question'} onPress={handleNext} />
+        ) : (
+          // Reserve space for button when not shown
+          <View style={{ height: 56 }} />
+        )}
+      </View>
     </SafeAreaView>
   );
 };
+export default FillBlankScreen;

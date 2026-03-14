@@ -39,8 +39,6 @@ export const TermItem: React.FC<TermItemProps> = ({ text, isSelected, isMatched,
     >
       <View className="flex-row items-center justify-between">
         <Text className={`${getTextStyle()} flex-1 text-base font-medium`}>{text}</Text>
-
-        {isMatched && <Text className="ml-2 text-xl text-green-600">✓</Text>}
       </View>
     </TouchableOpacity>
   );

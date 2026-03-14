@@ -22,24 +22,4 @@ export const mockMatchPairs: MatchPair[] = [
     term: 'Batch Size',
     definition: 'The number of training examples used in one iteration',
   },
-  {
-    id: '5',
-    term: 'Learning Rate',
-    definition: 'The step size used when updating model weights during training',
-  },
-  {
-    id: '6',
-    term: 'Loss Function',
-    definition: 'A function that measures how well the model predictions match the actual values',
-  },
-  {
-    id: '7',
-    term: 'Activation Function',
-    definition: 'A mathematical function that determines the output of a neural network node',
-  },
-  {
-    id: '8',
-    term: 'Backpropagation',
-    definition: 'The algorithm for calculating gradients used to update neural network weights',
-  },
 ];

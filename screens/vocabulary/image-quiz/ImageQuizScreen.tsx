@@ -25,7 +25,6 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
     currentQuestion,
     selectedAnswer,
     isAnswered,
-    isCorrect,
     isLastQuestion,
     progress,
     handleSelectAnswer,
@@ -51,7 +50,7 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Progress */}
@@ -78,25 +77,25 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
             />
           ))}
         </View>
-
-        {/* Explanation (if answered) */}
-        {isAnswered && currentQuestion.explanation && (
-          <View className="mb-6 rounded-2xl bg-blue-50 p-4">
-            <Text className="mb-2 text-sm font-semibold text-blue-800">
-              {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
-            </Text>
-            <Text className="text-sm leading-5 text-blue-700">{currentQuestion.explanation}</Text>
-          </View>
-        )}
-
-        {/* Next Button */}
-        {isAnswered && (
+      </ScrollView>
+      {/* Next Button fixed at bottom */}
+      {isAnswered && (
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            padding: 16,
+            backgroundColor: 'rgba(250,250,250,0.96)',
+          }}
+        >
           <PrimaryButton
             label={isLastQuestion ? 'Finish Quiz' : 'Next Question'}
             onPress={handleNext}
           />
-        )}
-      </ScrollView>
+        </View>
+      )}
     </SafeAreaView>
   );
 };

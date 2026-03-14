@@ -1,5 +1,6 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProgressBar } from '../components/ProgressBar';
@@ -15,17 +16,18 @@ interface MultipleChoiceScreenProps {
   onClose?: () => void;
 }
 
+// paddingTop removed from ScreenHeader; use SafeAreaView in parent screen
 export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
   questions,
   onComplete,
   onBack,
   onClose,
 }) => {
+  const insets = useSafeAreaInsets();
   const {
     currentQuestion,
     selectedAnswer,
     isAnswered,
-    isCorrect,
     isLastQuestion,
     progress,
     handleSelectAnswer,
@@ -53,7 +55,7 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Progress */}
@@ -80,26 +82,23 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
             />
           ))}
         </View>
-
-        {/* Explanation */}
-        {isAnswered && currentQuestion.explanation && (
-          <View className={`mb-6 rounded-2xl p-4 ${isCorrect ? 'bg-green-50' : 'bg-blue-50'}`}>
-            <Text
-              className={`mb-2 text-sm font-semibold ${isCorrect ? 'text-green-800' : 'text-blue-800'}`}
-            >
-              {isCorrect ? '✓ Correct!' : 'ℹ Good to know'}
-            </Text>
-            <Text className={`text-sm leading-5 ${isCorrect ? 'text-green-700' : 'text-blue-700'}`}>
-              {currentQuestion.explanation}
-            </Text>
-          </View>
-        )}
-
-        {/* Next Button */}
-        {isAnswered && (
-          <PrimaryButton label={isLastQuestion ? 'Finish' : 'Next Question'} onPress={handleNext} />
-        )}
       </ScrollView>
+      {/* Next Button fixed at bottom */}
+      {isAnswered && (
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            padding: 16,
+            paddingBottom: insets.bottom,
+            backgroundColor: 'rgba(250,250,250,0.96)',
+          }}
+        >
+          <PrimaryButton label={isLastQuestion ? 'Finish' : 'Next Question'} onPress={handleNext} />
+        </View>
+      )}
     </SafeAreaView>
   );
 };

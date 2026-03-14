@@ -8,9 +8,16 @@ interface ImageQuestionProps {
 
 export const ImageQuestion: React.FC<ImageQuestionProps> = ({ imageUrl, className = '' }) => {
   return (
-    <View className={`w-full overflow-hidden rounded-2xl bg-white shadow-sm ${className}`}>
-      <View className="aspect-square">
-        <Image source={{ uri: imageUrl }} className="h-full w-full" resizeMode="cover" />
+    <View
+      className={`w-full items-center overflow-hidden rounded-2xl bg-white shadow-sm ${className}`}
+      style={{ marginVertical: 16 }}
+    >
+      <View style={{ width: '60%', height: 200 }}>
+        <Image
+          source={{ uri: imageUrl }}
+          style={{ width: '100%', height: '100%', borderRadius: 16 }}
+          resizeMode="cover"
+        />
       </View>
 
       {/* Decorative gradient overlay */}

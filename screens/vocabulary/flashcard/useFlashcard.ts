@@ -8,6 +8,7 @@ export interface FlashcardItem {
   example: string;
   translation: string;
   audioUrl?: string;
+  imageUrl?: string;
 }
 
 interface UseFlashcardProps {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, View } from 'react-native';
+import { View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -20,6 +21,7 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
   onBack,
   onClose,
 }) => {
+  const insets = useSafeAreaInsets();
   const {
     currentCard,
     isFlipped,
@@ -38,25 +40,23 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <ScreenHeader
-        title="Vocabulary Flashcard"
-        subtitle="Listen + Speak"
-        onBack={onBack}
-        onClose={onClose}
-      />
-
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 16 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Progress */}
-        <ProgressBar current={progress.current} total={progress.total} className="mb-6" />
-
-        {/* Flashcard */}
-        <View className="mb-6">
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: '#F8FAFC' }}
+      edges={['top', 'left', 'right', 'bottom']}
+    >
+      <View style={{ flex: 1, paddingHorizontal: 16, justifyContent: 'space-between' }}>
+        {/* Header + Progress */}
+        <View>
+          <ScreenHeader
+            title="Vocabulary Flashcard"
+            subtitle="Listen + Speak"
+            onBack={onBack}
+            onClose={onClose}
+          />
+          <ProgressBar current={progress.current} total={progress.total} />
+        </View>
+        {/* Card center */}
+        <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%' }}>
           <FlashcardCard
             card={currentCard}
             isFlipped={isFlipped}
@@ -64,14 +64,15 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
             onPlayAudio={handlePlayAudio}
           />
         </View>
-
-        {/* Controls */}
-        <FlashcardControls
-          onKnowIt={handleKnowIt}
-          onDontKnow={handleDontKnow}
-          disabled={!isFlipped}
-        />
-      </ScrollView>
+        {/* Controls bottom */}
+        <View style={{ paddingBottom: insets.bottom, paddingTop: 8 }}>
+          <FlashcardControls
+            onKnowIt={handleKnowIt}
+            onDontKnow={handleDontKnow}
+            disabled={!isFlipped}
+          />
+        </View>
+      </View>
     </SafeAreaView>
   );
 };

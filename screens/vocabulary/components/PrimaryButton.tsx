@@ -22,7 +22,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      className={`flex-1 flex-row items-center justify-center rounded-2xl bg-red-600 py-4 px-4 ${disabled || loading ? 'opacity-50' : 'active:bg-red-700'} ${className} `}
+      className={`flex-row items-center justify-center rounded-2xl bg-red-600 py-4 px-4 ${disabled || loading ? 'opacity-50' : 'active:bg-red-700'} ${className}`}
     >
       {loading ? (
         <ActivityIndicator color="white" />
