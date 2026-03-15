@@ -9,14 +9,23 @@ import { SelectableCard } from '../components/SelectableCard';
 import { ROLE_OPTIONS } from '../constants/surveyConstants';
 import type { StepProps, UserRole } from '../types/surveyTypes';
 
-export const Step1WhoAreYou: React.FC<StepProps> = ({
+export const Step1WhoAreYou: React.FC<StepProps & { surveyData?: any }> = ({
   answers,
   onUpdate,
   onNext,
   currentStep,
   totalSteps,
+  surveyData,
 }) => {
   const selected = answers.role;
+  const options =
+    surveyData?.currentStatusOptions?.length > 0
+      ? surveyData.currentStatusOptions.map((opt: any) => ({
+          value: opt.value,
+          title: opt.labelEn || opt.labelVi,
+          description: opt.descriptionEn,
+        }))
+      : ROLE_OPTIONS;
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
@@ -32,7 +41,7 @@ export const Step1WhoAreYou: React.FC<StepProps> = ({
           Select your current role so we can personalize your learning path.
         </Text>
 
-        {ROLE_OPTIONS.map(option => (
+        {options.map((option: any) => (
           <SelectableCard
             key={option.value}
             {...option}

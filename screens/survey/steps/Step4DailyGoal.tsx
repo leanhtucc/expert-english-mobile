@@ -20,9 +20,8 @@ export const Step4DailyGoal: React.FC<StepProps & { surveyData?: any }> = ({
   const options =
     surveyData?.dailyGoalOptions?.length > 0
       ? surveyData.dailyGoalOptions.map((opt: any) => ({
-          value: String(opt.value), // Cần ép kiểu thành chuỗi do prop value của SelectableCard
+          value: String(opt.value),
           title: opt.label,
-          // Nếu API trả về recommend, bạn có thể truyền thêm cờ recommend vào đây
         }))
       : GOAL_OPTIONS;
 

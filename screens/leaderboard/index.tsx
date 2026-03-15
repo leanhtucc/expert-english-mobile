@@ -4,7 +4,7 @@ import React from 'react';
 import { ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ImageLinearBackground } from '@/assets/svgs/output';
+import { ImageLinearBackground } from '@/components/icon';
 import { mockLeaderboard } from '@/data/mock-data';
 import { useTheme } from '@/hooks/use-theme';
 

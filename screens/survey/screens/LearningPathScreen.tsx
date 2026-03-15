@@ -155,7 +155,6 @@ export const LearningPathScreen: React.FC = () => {
           }`}
           disabled={!canGenerate}
           activeOpacity={0.85}
-          // SỬA DÒNG NÀY: Truyền params sang màn Loading
           onPress={() =>
             navigation.navigate('AIRoadmapLoading' as any, {
               duration: selectedDuration,

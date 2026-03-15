@@ -55,7 +55,6 @@ export const LoginEmailScreen: React.FC = () => {
 
     if (hasError) return;
 
-    // Gọi API Login: Lúc này email sẽ là "admin", password là "admin"
     const isSuccess = await loginWithEmail(email, password);
 
     if (isSuccess) {
