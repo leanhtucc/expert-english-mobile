@@ -1,6 +1,7 @@
 import {
   AuthSendOtpRequest,
   CheckOtpRequest,
+  ExchangePasswordRequest,
   LoginRequest,
   LoginResponse,
   LoginWithGoogleRequest,
@@ -37,4 +38,15 @@ export const authApi = {
   loginWithGoogle: (data: LoginWithGoogleRequest) =>
     apiClient.post<LoginResponse>('/auth/google', data),
   getDataUser: () => apiClient.get<UserProfileResponse>('/user/me'),
+
+  updateProfileUser: (id: string, data: FormData) =>
+    apiClient.put<UserProfileResponse>(`/user/${id}`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
+
+  deleteAccount: (id: string) => apiClient.delete(`/user/${id}`),
+
+  exchangePassword: (data: ExchangePasswordRequest) => apiClient.post('/user/me/password', data),
 };

@@ -26,7 +26,7 @@ export const LoginEmailScreen: React.FC = () => {
   const route = useRoute<LoginEmailScreenRouteProp>();
   const { email: initialEmail = '' } = route.params || {};
 
-  const { loading, loginWithEmail } = useAuth(); // Sử dụng Hook
+  const { loading, loginWithEmail } = useAuth();
 
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
