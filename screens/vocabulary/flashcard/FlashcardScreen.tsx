@@ -40,12 +40,8 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
   }
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: '#F8FAFC' }}
-      edges={['top', 'left', 'right', 'bottom']}
-    >
-      <View style={{ flex: 1, paddingHorizontal: 16, justifyContent: 'space-between' }}>
-        {/* Header + Progress */}
+    <SafeAreaView className="flex-1 bg-slate-50" edges={['top', 'left', 'right']}>
+      <View className="flex-1 px-4">
         <View>
           <ScreenHeader
             title="Vocabulary Flashcard"
@@ -55,8 +51,8 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
           />
           <ProgressBar current={progress.current} total={progress.total} />
         </View>
-        {/* Card center */}
-        <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+
+        <View className="w-full flex-1 items-center justify-center pb-6">
           <FlashcardCard
             card={currentCard}
             isFlipped={isFlipped}
@@ -64,14 +60,17 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
             onPlayAudio={handlePlayAudio}
           />
         </View>
-        {/* Controls bottom */}
-        <View style={{ paddingBottom: insets.bottom, paddingTop: 8 }}>
-          <FlashcardControls
-            onKnowIt={handleKnowIt}
-            onDontKnow={handleDontKnow}
-            disabled={!isFlipped}
-          />
-        </View>
+      </View>
+
+      <View
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+        className="w-full border-t border-slate-200 bg-white"
+      >
+        <FlashcardControls
+          onKnowIt={handleKnowIt}
+          onDontKnow={handleDontKnow}
+          disabled={!isFlipped}
+        />
       </View>
     </SafeAreaView>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { mockLessonResultExcellent } from '../__mocks__';
-import { LessonSummaryScreen } from '../result/LessonSummaryScreen';
+import { LessonSummaryScreen } from '../result';
 
 export const DemoLessonResultScreen: React.FC = () => {
   return (

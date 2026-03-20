@@ -1,3 +1,3 @@
-export { LessonSummaryScreen } from './LessonSummaryScreen';
-export type { LessonSummaryData } from './LessonSummaryScreen';
-export { ResultStatCard } from './ResultStatCard';
+export { LessonSummaryScreen } from './LessionSummaryScreen';
+export { SessonSummaryScreen } from './SessonSummaryScreen';
+export type { LessonSummaryData } from './SessonSummaryScreen';

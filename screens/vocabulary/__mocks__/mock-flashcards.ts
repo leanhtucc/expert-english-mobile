@@ -5,10 +5,9 @@ export const mockFlashcards: FlashcardItem[] = [
     id: '1',
     word: 'Transformer',
     phonetic: '/trænsˈfɔːrmər/',
-    definition:
-      'A deep learning model architecture that uses self-attention mechanisms to process sequential data.',
+    definition: 'Cấu trúc mạng nơ-ron chuyên xử lý dữ liệu tuần tự.',
     example: 'The Transformer architecture revolutionized natural language processing.',
-    translation: 'Kiến trúc Transformer - Mô hình học sâu sử dụng cơ chế tự chú ý',
+    translation: 'Mô hình Transformer',
     audioUrl: 'https://example.com/audio/transformer.mp3',
   },
   {
@@ -16,7 +15,7 @@ export const mockFlashcards: FlashcardItem[] = [
     word: 'Neural Network',
     phonetic: '/ˈnjʊərəl ˈnetwɜːrk/',
     definition:
-      'A computing system inspired by biological neural networks that learns to perform tasks by considering examples.',
+      'Cấu trúc mạng nơ-ron mô phỏng hệ thống thần kinh sinh học, được sử dụng để học cách thực hiện các nhiệm vụ thông qua việc xem xét các ví dụ.',
     example: 'Neural networks are the foundation of modern artificial intelligence.',
     translation: 'Mạng nơ-ron - Hệ thống tính toán mô phỏng mạng nơ-ron sinh học',
     audioUrl: 'https://example.com/audio/neural-network.mp3',

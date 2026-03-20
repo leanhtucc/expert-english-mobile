@@ -1,4 +1,4 @@
-import { LessonSummaryData } from '../result/LessonSummaryScreen';
+import { LessonSummaryData } from '../result/SessonSummaryScreen';
 
 export const mockLessonResultExcellent: LessonSummaryData = {
   totalWords: 20,

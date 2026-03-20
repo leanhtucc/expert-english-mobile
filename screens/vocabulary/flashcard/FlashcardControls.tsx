@@ -2,8 +2,9 @@ import React from 'react';
 import { View } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
+import { SecondaryButton } from '../components';
+// Tùy đường dẫn của bạn nhé
 import { PrimaryButton } from '../components/PrimaryButton';
-import { SecondaryButton } from '../components/SecondaryButton';
 
 interface FlashcardControlsProps {
   onKnowIt: () => void;
@@ -17,29 +18,27 @@ export const FlashcardControls: React.FC<FlashcardControlsProps> = ({
   disabled = false,
 }) => {
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        width: '100%',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        marginTop: 0,
-      }}
-    >
-      <View style={{ flex: 1, marginRight: 8 }}>
+    <View className="mt-4 w-full flex-row items-center px-4 pb-2">
+      {/* NÚT DON'T KNOW */}
+      <View className="mr-2 flex-1">
         <SecondaryButton
           label="DON'T KNOW"
           onPress={onDontKnow}
           disabled={disabled}
-          icon={<FontAwesome name="close" size={18} color="#334155" />}
+          icon={<FontAwesome name="close" size={16} color="#475569" />}
+          labelClassName="text-[#475569] text-[15px]"
+          centered={true}
+          style={{ borderWidth: 0, backgroundColor: '#F1F5F9' }}
         />
       </View>
-      <View style={{ flex: 1, marginLeft: 8 }}>
+
+      {/* NÚT KNOW IT */}
+      <View className="ml-2 flex-1">
         <PrimaryButton
           label="KNOW IT"
           onPress={onKnowIt}
           disabled={disabled}
-          icon={<FontAwesome name="check" size={18} color="#fff" />}
+          icon={<FontAwesome name="check" size={16} color="#fff" />}
         />
       </View>
     </View>
