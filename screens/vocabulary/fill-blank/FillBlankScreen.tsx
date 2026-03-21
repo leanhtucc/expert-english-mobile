@@ -1,6 +1,10 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { IconNextButtonBlack } from '@/components/icon';
+
+import { CheckResultButton } from '../components';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -21,7 +25,7 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
   onBack,
   onClose,
 }) => {
-  const insets = require('react-native-safe-area-context').useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
   const {
     currentQuestion,
     selectedAnswer,
@@ -37,67 +41,80 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
     onComplete,
   });
 
-  if (!currentQuestion) {
-    return null;
-  }
-
-  // Button height (padding + button) for bottom spacing
-  const BUTTON_HEIGHT = 56 + 16 * 2; // button height + vertical padding
+  if (!currentQuestion) return null;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <ScreenHeader
-        title="Fill in the Blank"
-        subtitle="Complete the sentence"
-        onBack={onBack}
-        onClose={onClose}
-      />
-
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: BUTTON_HEIGHT + insets.bottom }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Progress */}
-        <ProgressBar current={progress.current} total={progress.total} className="mb-6" />
-        {/* Question Card */}
-        <QuestionCard
-          beforeBlank={sentenceParts.before}
-          afterBlank={sentenceParts.after}
-          selectedAnswer={selectedAnswer || undefined}
-          isAnswered={isAnswered}
-          isCorrect={isCorrect}
-          hint={currentQuestion.hint}
+    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
+      {/* 1. HEADER */}
+      <View className="w-full bg-white">
+        <ScreenHeader
+          title="Fill in the Blank"
+          subtitle="Complete the sentence"
+          onBack={onBack}
+          onClose={onClose}
         />
+      </View>
 
-        {/* Answer Options */}
-        <View className="mt-6">
-          <AnswerInput
-            options={currentQuestion.options}
-            selectedAnswer={selectedAnswer}
-            correctAnswer={currentQuestion.correctAnswer}
-            isAnswered={isAnswered}
-            onSelectAnswer={handleSelectAnswer}
-          />
+      <View className="flex-1 bg-[#F8FAFC]">
+        {/* 2. PROGRESS BAR */}
+        <View className="w-full px-5 pt-4 pb-5">
+          <ProgressBar current={progress.current} total={progress.total} />
         </View>
-      </ScrollView>
-      {/* Bottom Button Area: always reserve space */}
-      <View
-        style={{
-          padding: 16,
-          paddingBottom: insets.bottom,
-          backgroundColor: 'rgba(250,250,250,0.96)',
-        }}
-      >
-        {isAnswered ? (
-          <PrimaryButton label={isLastQuestion ? 'Finish' : 'Next Question'} onPress={handleNext} />
+
+        {/* 3. CONTENT AREA */}
+        <ScrollView
+          className="w-full flex-1"
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 160 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="mb-6 w-full">
+            <QuestionCard
+              beforeBlank={sentenceParts.before}
+              afterBlank={sentenceParts.after}
+              selectedAnswer={selectedAnswer || undefined}
+              isAnswered={isAnswered}
+              isCorrect={isCorrect}
+              hint={currentQuestion.hint}
+            />
+          </View>
+
+          <View className="w-full">
+            <AnswerInput
+              options={currentQuestion.options}
+              selectedAnswer={selectedAnswer}
+              correctAnswer={currentQuestion.correctAnswer}
+              isAnswered={isAnswered} // Khoá không cho bấm sau khi đã submit
+              onSelectAnswer={handleSelectAnswer}
+            />
+          </View>
+        </ScrollView>
+      </View>
+
+      {/* 4. BOTTOM BUTTON */}
+      <View className="absolute bottom-[-25px] left-0 right-0 w-full">
+        {!isAnswered ? (
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            className="w-full border-t border-slate-200 bg-white px-5 pt-4"
+          >
+            <PrimaryButton
+              label="Check Answer"
+              onPress={handleNext}
+              disabled={!selectedAnswer}
+              rightIcon={<IconNextButtonBlack width={20} height={20} />}
+            />
+          </View>
         ) : (
-          // Reserve space for button when not shown
-          <View style={{ height: 56 }} />
+          <CheckResultButton
+            status={isCorrect ? 'correct' : 'wrong'}
+            text={isLastQuestion ? 'Finish Quiz' : 'Next Question'}
+            showIconNext={true}
+            onPress={handleNext}
+          />
         )}
       </View>
     </SafeAreaView>
   );
 };
+
 export default FillBlankScreen;

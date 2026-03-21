@@ -1,9 +1,12 @@
+import { Feather } from '@expo/vector-icons';
+
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 interface OptionItemProps {
   label: string;
   isSelected?: boolean;
+  isCorrect?: boolean;
   onPress: () => void;
   disabled?: boolean;
 }
@@ -11,6 +14,7 @@ interface OptionItemProps {
 export const OptionItem: React.FC<OptionItemProps> = ({
   label,
   isSelected = false,
+  isCorrect = false,
   onPress,
   disabled = false,
 }) => {
@@ -18,11 +22,26 @@ export const OptionItem: React.FC<OptionItemProps> = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
-      className={` ${isSelected ? 'border-red-600 bg-red-50' : 'border-gray-200 bg-white'} mb-3 rounded-2xl border-2 p-4 ${disabled ? 'opacity-50' : 'active:opacity-70'} `}
+      activeOpacity={0.7}
+      // Bỏ justify-between để icon ôm sát vào text
+      className={`mb-3 flex-row items-center rounded-2xl border-[1.5px] px-5 py-4 ${
+        isCorrect || isSelected ? 'border-[#E11D48] bg-[#FFF1F2]' : 'border-slate-100 bg-white'
+      } ${disabled ? 'opacity-100' : ''}`}
     >
-      <Text className={`${isSelected ? 'text-red-600' : 'text-gray-800'} text-base font-medium`}>
+      <Text
+        className={`text-[15px] font-bold ${
+          isCorrect || isSelected ? 'text-[#1E293B]' : 'text-[#334155]'
+        }`}
+      >
         {label}
       </Text>
+
+      {/* Dùng thẳng icon check-circle của Feather, cách chữ một khoảng ml-2.5 */}
+      {(isCorrect || isSelected) && (
+        <View className="ml-2.5">
+          <Feather name="check-circle" size={18} color="#E11D48" />
+        </View>
+      )}
     </TouchableOpacity>
   );
 };

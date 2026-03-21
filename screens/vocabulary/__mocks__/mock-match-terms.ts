@@ -3,23 +3,27 @@ import { MatchPair } from '../match-terms/useMatchTerms';
 export const mockMatchPairs: MatchPair[] = [
   {
     id: '1',
-    term: 'Overfitting',
-    definition:
-      'When a model learns training data too well, including noise, and performs poorly on new data',
+    term: 'Neural Network',
+    definition: 'Mạng thần kinh',
   },
   {
     id: '2',
-    term: 'Hyperparameter',
-    definition: 'A parameter set before training that controls the learning process',
+    term: 'Machine Learning',
+    definition: 'Máy học',
   },
   {
     id: '3',
-    term: 'Epoch',
-    definition: 'One complete pass through the entire training dataset',
+    term: 'Deep Learning',
+    definition: 'Học sâu',
   },
   {
     id: '4',
-    term: 'Batch Size',
-    definition: 'The number of training examples used in one iteration',
+    term: 'Algorithm',
+    definition: 'Thuật toán',
+  },
+  {
+    id: '5',
+    term: 'Data Science',
+    definition: 'Khoa học dữ liệu',
   },
 ];

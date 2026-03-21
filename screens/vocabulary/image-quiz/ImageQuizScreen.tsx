@@ -1,12 +1,16 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { CheckResultButton } from '../components';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ImageQuestion } from './ImageQuestion';
 import { OptionButton } from './OptionButton';
 import { ImageQuizQuestion, useImageQuiz } from './useImageQuiz';
+
+// <-- Import file này
 
 interface ImageQuizScreenProps {
   questions: ImageQuizQuestion[];
@@ -21,10 +25,12 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
   onBack,
   onClose,
 }) => {
+  const insets = useSafeAreaInsets();
   const {
     currentQuestion,
     selectedAnswer,
     isAnswered,
+    isCorrect, // Lấy thêm trạng thái Đúng/Sai từ hook
     isLastQuestion,
     progress,
     handleSelectAnswer,
@@ -39,63 +45,70 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <ScreenHeader
-        title="Image Quiz"
-        subtitle="Identify the vocabulary"
-        onBack={onBack}
-        onClose={onClose}
-      />
+    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
+      <View className="w-full bg-white">
+        <ScreenHeader
+          title="Image Quiz"
+          subtitle="Identify the vocabulary"
+          onBack={onBack}
+          onClose={onClose}
+        />
+      </View>
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Progress */}
-        <ProgressBar current={progress.current} total={progress.total} className="mb-6" />
-
-        {/* Image */}
-        <ImageQuestion imageUrl={currentQuestion.imageUrl} className="mb-6" />
-
-        {/* Question Text */}
-        <Text className="mb-4 text-center text-lg font-semibold text-gray-800">
-          Which specialized AI architecture is shown in this visualization?
-        </Text>
-
-        {/* Options */}
-        <View className="mb-6">
-          {currentQuestion.options.map((option, index) => (
-            <OptionButton
-              key={index}
-              label={option}
-              isSelected={selectedAnswer === option}
-              isCorrect={option === currentQuestion.correctAnswer}
-              isAnswered={isAnswered}
-              onPress={() => handleSelectAnswer(option)}
-            />
-          ))}
+      <View className="flex-1 bg-[#F8FAFC]">
+        <View className="w-full px-5 pt-5 pb-2">
+          <ProgressBar current={progress.current} total={progress.total} />
         </View>
-      </ScrollView>
-      {/* Next Button fixed at bottom */}
-      {isAnswered && (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            padding: 16,
-            backgroundColor: 'rgba(250,250,250,0.96)',
-          }}
+
+        <ScrollView
+          className="w-full flex-1"
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 160 }}
+          showsVerticalScrollIndicator={false}
         >
-          <PrimaryButton
-            label={isLastQuestion ? 'Finish Quiz' : 'Next Question'}
+          <View className="mb-8 w-full">
+            <ImageQuestion imageUrl={currentQuestion.imageUrl} />
+          </View>
+
+          <Text className="mb-8 px-2 text-center text-[18px] font-bold text-[#1E293B]">
+            {currentQuestion.correctAnswer ||
+              'Which specialized AI architecture is shown in this visualization?'}
+          </Text>
+
+          <View className="w-full">
+            {currentQuestion.options.map((option, index) => (
+              <OptionButton
+                key={index}
+                label={option}
+                isSelected={selectedAnswer === option}
+                isCorrect={option === currentQuestion.correctAnswer}
+                isAnswered={isAnswered}
+                onPress={() => handleSelectAnswer(option)}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+
+      {/* DẢI NÚT ĐÁY MÀN HÌNH: CHUYỂN ĐỔI GIỮA NÚT SUBMIT BÌNH THƯỜNG VÀ CHECK RESULT */}
+      <View className="absolute bottom-[-25px] left-0 right-0 w-full">
+        {!isAnswered ? (
+          // Khi CHƯA CHỐT ĐÁP ÁN: Hiện Primary Button bình thường
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            className="w-full border-t border-slate-200 bg-white px-5 pt-4"
+          >
+            <PrimaryButton label="Submit Answer" onPress={handleNext} disabled={!selectedAnswer} />
+          </View>
+        ) : (
+          // Khi ĐÃ CHỐT ĐÁP ÁN: Hiện thanh CheckResult bay lên
+          <CheckResultButton
+            status={isCorrect ? 'correct' : 'wrong'}
+            text={isLastQuestion ? 'Finish Quiz' : 'Next Question'}
+            showIconNext={true}
             onPress={handleNext}
           />
-        </View>
-      )}
+        )}
+      </View>
     </SafeAreaView>
   );
 };

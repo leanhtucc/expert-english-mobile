@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 interface OptionItemProps {
-  letter: string;
+  letter?: string;
   text: string;
   isSelected: boolean;
   isCorrect?: boolean;
@@ -11,83 +11,72 @@ interface OptionItemProps {
 }
 
 export const OptionItem: React.FC<OptionItemProps> = ({
-  letter,
   text,
   isSelected,
   isCorrect,
   isAnswered,
   onPress,
 }) => {
+  // 1. Xác định màu nền và viền thẻ
   const getContainerStyle = () => {
+    // KHI CHƯA CHỐT: Đang chọn thì viền đỏ
     if (!isAnswered) {
-      return isSelected ? 'bg-red-50 border-red-600' : 'bg-white border-gray-200';
+      return isSelected ? 'border-[#E11D48] bg-[#FFF1F2]' : 'border-slate-200 bg-white';
     }
 
+    // KHI ĐÃ CHỐT:
     if (isCorrect) {
-      return 'bg-green-100 border-green-500';
+      return 'border-[#22c55e] bg-[#f0fdf4]'; // Đáp án chuẩn LUÔN LUÔN hiện Xanh lá
     }
-
     if (isSelected && !isCorrect) {
-      return 'bg-red-100 border-red-500';
+      return 'border-[#ef4444] bg-[#fef2f2]'; // Lỡ chọn sai thì thẻ đó hiện Đỏ
     }
 
-    return 'bg-white border-gray-200 opacity-50';
+    // Các đáp án sai khác không được chọn thì mờ đi
+    return 'border-slate-200 bg-white opacity-50';
   };
 
-  const getLetterStyle = () => {
-    if (!isAnswered) {
-      return isSelected ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-600';
-    }
-
-    if (isCorrect) {
-      return 'bg-green-500 text-white';
-    }
-
-    if (isSelected && !isCorrect) {
-      return 'bg-red-500 text-white';
-    }
-
-    return 'bg-gray-100 text-gray-400';
+  // 2. Xác định màu viền của hình tròn Radio
+  const getRadioColor = () => {
+    if (!isAnswered) return isSelected ? 'border-[#E11D48]' : 'border-slate-300';
+    if (isCorrect) return 'border-[#22c55e]';
+    if (isSelected && !isCorrect) return 'border-[#ef4444]';
+    return 'border-slate-300';
   };
 
-  const getTextStyle = () => {
-    if (!isAnswered) {
-      return isSelected ? 'text-red-600' : 'text-gray-800';
-    }
+  // 3. Xác định màu chấm tròn bên trong Radio
+  const getRadioInnerColor = () => {
+    if (!isAnswered) return 'bg-[#E11D48]';
+    if (isCorrect) return 'bg-[#22c55e]';
+    if (isSelected && !isCorrect) return 'bg-[#ef4444]';
+    return 'bg-transparent';
+  };
 
-    if (isCorrect) {
-      return 'text-green-700';
-    }
-
-    if (isSelected && !isCorrect) {
-      return 'text-red-700';
-    }
-
-    return 'text-gray-400';
+  // 4. Xác định màu chữ
+  const getTextColor = () => {
+    if (!isAnswered) return 'text-[#334155]';
+    if (isCorrect) return 'text-[#16a34a]'; // Chữ đáp án đúng đổi màu xanh
+    if (isSelected && !isCorrect) return 'text-[#dc2626]'; // Chữ đáp án sai đổi màu đỏ
+    return 'text-[#334155]';
   };
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={isAnswered}
-      className={` ${getContainerStyle()} mb-3 flex-row items-center rounded-2xl border-2 p-4 ${!isAnswered ? 'active:opacity-70' : ''} `}
+      activeOpacity={0.7}
+      className={`mb-4 min-h-[72px] flex-row items-center justify-between rounded-2xl border-2 px-5 py-4 ${getContainerStyle()}`}
     >
-      {/* Letter Badge */}
+      <Text className={`flex-1 pr-4 text-[16px] font-semibold ${getTextColor()}`}>{text}</Text>
+
       <View
-        className={`${getLetterStyle()} mr-4 h-10 w-10 items-center justify-center rounded-full`}
+        className={`h-6 w-6 items-center justify-center rounded-full border-[2.5px] ${getRadioColor()}`}
       >
-        <Text className="font-bold">{letter}</Text>
+        {/* Hiện chấm tròn bên trong nếu Đang chọn, hoặc khi chốt mà thẻ đó là đáp án đúng / đáp án người dùng chọn sai */}
+        {(!isAnswered && isSelected) || (isAnswered && (isCorrect || isSelected)) ? (
+          <View className={`h-3 w-3 rounded-full ${getRadioInnerColor()}`} />
+        ) : null}
       </View>
-
-      {/* Option Text */}
-      <Text className={`${getTextStyle()} flex-1 text-base font-medium`}>{text}</Text>
-
-      {/* Check/Cross Icon */}
-      {isAnswered && (
-        <Text className={`${getTextStyle()} ml-2 text-xl font-bold`}>
-          {isCorrect ? '✓' : isSelected ? '✗' : ''}
-        </Text>
-      )}
     </TouchableOpacity>
   );
 };

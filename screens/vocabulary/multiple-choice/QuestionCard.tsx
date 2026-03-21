@@ -7,17 +7,15 @@ interface QuestionCardProps {
   className?: string;
 }
 
-export const QuestionCard: React.FC<QuestionCardProps> = ({ word, question, className = '' }) => {
+export const QuestionCard: React.FC<QuestionCardProps> = ({ question, className = '' }) => {
   return (
-    <View className={`rounded-2xl bg-white p-6 shadow-sm ${className}`}>
-      {/* Word */}
-      <View className="mb-4 items-center">
-        <Text className="mb-2 text-3xl font-bold text-red-600">{word}</Text>
-        <View className="h-1 w-16 rounded-full bg-red-600" />
-      </View>
-
-      {/* Question */}
-      <Text className="text-center text-lg leading-7 text-gray-700">{question}</Text>
+    <View
+      // ĐÃ THÊM LẠI: border-[3px] border-[#38bdf8] để bo viền xanh
+      className={`min-h-[140px] w-full items-center justify-center rounded-2xl bg-white p-6 shadow-sm ${className}`}
+    >
+      <Text className="text-center text-[18px] font-bold leading-7 text-[#1E293B]">
+        &quot;{question}&quot;
+      </Text>
     </View>
   );
 };

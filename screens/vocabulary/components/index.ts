@@ -1,3 +1,4 @@
+export { default as CheckResultButton } from './CheckResultButton';
 export { OptionButton } from './OptionButton';
 export { PrimaryButton } from './PrimaryButton';
 export { ProgressBar } from './ProgressBar';

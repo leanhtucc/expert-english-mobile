@@ -1,9 +1,13 @@
-import React from 'react';
-import { SafeAreaView, ScrollView, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { ArrowRight } from 'lucide-react-native';
+
+import React, { useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '../components/PrimaryButton';
+import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
-import { SecondaryButton } from '../components/SecondaryButton';
 import { MistakeCard } from './MistakeCard';
 
 export interface MistakeItem {
@@ -12,6 +16,7 @@ export interface MistakeItem {
   correctAnswer: string;
   yourAnswer: string;
   explanation?: string;
+  options?: string[]; // Khai báo thêm trường options nếu có
 }
 
 interface ReviewSessionScreenProps {
@@ -20,63 +25,102 @@ interface ReviewSessionScreenProps {
   onRetakeQuiz?: () => void;
   onContinue?: () => void;
   onBack?: () => void;
+  onClose?: () => void;
 }
 
 export const ReviewSessionScreen: React.FC<ReviewSessionScreenProps> = ({
   mistakes,
-  onReviewWord,
-  onRetakeQuiz,
   onContinue,
   onBack,
+  onClose,
 }) => {
+  const insets = useSafeAreaInsets();
+
+  // State quản lý lỗi đang được hiển thị
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Fallback an toàn nếu list lỗi trống
+  if (!mistakes || mistakes.length === 0) return null;
+
+  const currentMistake = mistakes[currentIndex];
+  const totalMistakes = mistakes.length;
+  const currentStep = currentIndex + 1;
+  const mistakesRemaining = totalMistakes - currentStep;
+
+  // Hàm chuyển sang lỗi tiếp theo
+  const handleNext = () => {
+    if (currentIndex < totalMistakes - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      onContinue?.();
+    }
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <ScreenHeader title="Review & Master" subtitle="Learn from mistakes" onBack={onBack} />
+    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
+      {/* 1. HEADER */}
+      <View className="w-full bg-white">
+        <ScreenHeader
+          title="Review Session"
+          onClose={onClose || onBack}
+          // Icon chấm hỏi bên góc phải
+          rightAction={<Feather name="help-circle" size={20} color="#334155" />}
+        />
+      </View>
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 16 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Summary */}
-        <View className="mb-6 rounded-2xl bg-gradient-to-r from-red-50 to-orange-50 p-5">
-          <Text className="mb-2 text-center text-2xl font-bold text-gray-800">
-            {mistakes.length} {mistakes.length === 1 ? 'Mistake' : 'Mistakes'} to Review
+      <View className="flex-1 bg-[#F8FAFC]">
+        {/* 2. SECTION: MASTERY LEVEL (Progress) */}
+        <View className="w-full px-5 pt-4">
+          <Text className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">
+            Mastery Level
           </Text>
-          <Text className="text-center text-sm text-gray-600">
-            Let&apos;s turn these into strengths!
-          </Text>
+          <View className="mb-2 flex-row items-center justify-between">
+            <Text className="text-[16px] font-bold text-[#1E293B]">Practice Progress</Text>
+            <Text className="text-[14px] font-bold text-[#E11D48]">
+              {currentStep} of {totalMistakes}
+            </Text>
+          </View>
+
+          <ProgressBar current={currentStep} total={totalMistakes} className="mb-3" />
+
+          <View className="flex-row items-center">
+            <Feather name="alert-circle" size={14} color="#ef4444" />
+            <Text className="ml-1.5 text-[12px] text-[#64748B]">
+              {mistakesRemaining} Mistakes remaining
+            </Text>
+          </View>
         </View>
 
-        {/* Mistakes List */}
-        {mistakes.map(mistake => (
+        {/* 3. SECTION: CURRENT FOCUS */}
+        <ScrollView
+          className="w-full flex-1"
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text className="mb-3 text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">
+            Current Focus
+          </Text>
+
           <MistakeCard
-            key={mistake.id}
-            word={mistake.word}
-            correctAnswer={mistake.correctAnswer}
-            yourAnswer={mistake.yourAnswer}
-            explanation={mistake.explanation}
-            onReview={onReviewWord ? () => onReviewWord(mistake.id) : undefined}
+            word={currentMistake.word}
+            correctAnswer={currentMistake.correctAnswer}
+            yourAnswer={currentMistake.yourAnswer}
+            explanation={currentMistake.explanation}
+            options={currentMistake.options}
           />
-        ))}
+        </ScrollView>
+      </View>
 
-        {/* Action Buttons */}
-        <View className="mt-4 space-y-3">
-          {onRetakeQuiz && (
-            <PrimaryButton label="🔄 Retake Quiz" onPress={onRetakeQuiz} className="mb-3" />
-          )}
-
-          {onContinue && <SecondaryButton label="Continue Learning" onPress={onContinue} />}
-        </View>
-
-        {/* Motivational Message */}
-        <View className="mt-6 rounded-2xl bg-blue-50 p-4">
-          <Text className="text-center text-sm leading-5 text-blue-800">
-            🌟 Every mistake is a learning opportunity. Review these words and try again!
-          </Text>
-        </View>
-      </ScrollView>
+      <View
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+        className="absolute bottom-0 left-0 right-0 border-t border-slate-200 bg-white px-5 pt-4"
+      >
+        <PrimaryButton
+          label={currentIndex === totalMistakes - 1 ? 'Finish Review' : 'Check Answer'}
+          onPress={handleNext}
+          rightIcon={<ArrowRight width={20} height={20} fill="#fff" />}
+        />
+      </View>
     </SafeAreaView>
   );
 };

@@ -31,29 +31,35 @@ export const useImageQuiz = ({ questions, onComplete }: UseImageQuizProps) => {
   const isLastQuestion = currentIndex === questions.length - 1;
   const isCorrect = selectedAnswer === currentQuestion?.correctAnswer;
 
+  // 1. KHI BẤM CHỌN ĐÁP ÁN: Chỉ lưu vào selectedAnswer, KHÔNG khoá UI
   const handleSelectAnswer = useCallback(
     (answer: string) => {
       if (isAnswered) return;
-
       setSelectedAnswer(answer);
-      setIsAnswered(true);
+    },
+    [isAnswered]
+  );
 
-      if (answer === currentQuestion.correctAnswer) {
+  // 2. KHI BẤM NÚT DƯỚI ĐÁY: Tách làm 2 giai đoạn
+  const handleNext = useCallback(() => {
+    // GIAI ĐOẠN 1: Chưa chốt đáp án -> Bấm Submit để chốt, tính điểm và hiện CheckResultButton
+    if (!isAnswered) {
+      setIsAnswered(true);
+      if (selectedAnswer === currentQuestion.correctAnswer) {
         setCorrectAnswers(prev => [...prev, currentQuestion.id]);
       } else {
         setIncorrectAnswers(prev => [...prev, currentQuestion.id]);
       }
-    },
-    [isAnswered, currentQuestion]
-  );
+      return; // Dừng lại, không qua câu mới
+    }
 
-  const handleNext = useCallback(() => {
+    // GIAI ĐOẠN 2: Đã chốt đáp án -> Bấm Next Question để qua câu mới hoặc kết thúc
     if (isLastQuestion) {
       const results: QuizResults = {
         totalQuestions: questions.length,
-        correctAnswers: correctAnswers.length + (isCorrect ? 1 : 0),
-        incorrectAnswers: incorrectAnswers.length + (isCorrect ? 0 : 1),
-        score: Math.round(((correctAnswers.length + (isCorrect ? 1 : 0)) / questions.length) * 100),
+        correctAnswers: correctAnswers.length,
+        incorrectAnswers: incorrectAnswers.length,
+        score: Math.round((correctAnswers.length / questions.length) * 100),
       };
       onComplete?.(results);
     } else {
@@ -62,11 +68,14 @@ export const useImageQuiz = ({ questions, onComplete }: UseImageQuizProps) => {
       setIsAnswered(false);
     }
   }, [
+    isAnswered,
     isLastQuestion,
+    selectedAnswer,
+    currentQuestion?.correctAnswer,
+    currentQuestion?.id,
     questions.length,
     correctAnswers.length,
     incorrectAnswers.length,
-    isCorrect,
     onComplete,
   ]);
 

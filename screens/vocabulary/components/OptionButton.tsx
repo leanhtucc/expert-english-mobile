@@ -1,5 +1,9 @@
+import { Feather } from '@expo/vector-icons';
+
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
+
+import { IconCheckAnswer } from '@/components/icon';
 
 interface OptionButtonProps {
   label: string;
@@ -20,34 +24,46 @@ export const OptionButton: React.FC<OptionButtonProps> = ({
   disabled = false,
   className = '',
 }) => {
-  const getBackgroundColor = () => {
-    if (isCorrect) return 'bg-green-100';
-    if (isWrong) return 'bg-red-100';
-    if (isSelected) return 'bg-red-50';
-    return 'bg-white';
-  };
-
-  const getBorderColor = () => {
-    if (isCorrect) return 'border-green-500';
-    if (isWrong) return 'border-red-500';
-    if (isSelected) return 'border-red-600';
-    return 'border-gray-200';
-  };
-
+  // Logic màu chữ
   const getTextColor = () => {
-    if (isCorrect) return 'text-green-700';
-    if (isWrong) return 'text-red-700';
-    if (isSelected) return 'text-red-600';
-    return 'text-gray-800';
+    if (isCorrect) return 'text-[#16a34a]';
+    if (isWrong) return 'text-[#dc2626]';
+    if (isSelected) return 'text-[#E11D48]';
+    return 'text-[#334155]';
   };
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
-      className={` ${getBackgroundColor()} ${getBorderColor()} mb-3 rounded-2xl border-2 p-4 ${disabled ? 'opacity-50' : 'active:opacity-70'} ${className} `}
+      activeOpacity={0.7}
+      // ĐÃ THÊM `mb-2` VÀO ĐÂY ĐỂ ÉP BUỘC CÁC NÚT PHẢI CÁCH NHAU 8px
+      className={`bg-white} mb-2 flex-row items-center justify-between rounded-2xl border-[1.5px] border-slate-200 px-5 py-6 ${
+        disabled && !isCorrect && !isWrong ? 'opacity-60' : ''
+      } ${className}`}
     >
-      <Text className={`${getTextColor()} text-center text-base font-medium`}>{label}</Text>
+      <Text className={`${getTextColor()} flex-1 pr-2 text-[15px] font-bold`}>{label}</Text>
+
+      {/* Hiển thị Icon tương ứng với trạng thái */}
+      <View className="ml-2">
+        {/* NẾU ĐÚNG */}
+        {isCorrect && <IconCheckAnswer width={20} height={20} color="#16a34a" />}
+
+        {/* NẾU SAI */}
+        {isWrong && <Feather name="x-circle" size={20} color="#dc2626" />}
+
+        {/* NẾU ĐANG CHỌN (CHƯA CHỐT) */}
+        {isSelected && !isCorrect && !isWrong && (
+          <View className="h-[20px] w-[20px] items-center justify-center rounded-full border-[2.5px] border-[#E11D48]">
+            <View className="h-2.5 w-2.5 rounded-full bg-[#E11D48]" />
+          </View>
+        )}
+
+        {/* NẾU CHƯA CHỌN */}
+        {!isSelected && !isCorrect && !isWrong && (
+          <View className="h-[20px] w-[20px] rounded-full border-[2px] border-slate-300" />
+        )}
+      </View>
     </TouchableOpacity>
   );
 };

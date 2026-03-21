@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 interface OptionButtonProps {
   label: string;
@@ -16,56 +16,50 @@ export const OptionButton: React.FC<OptionButtonProps> = ({
   isAnswered,
   onPress,
 }) => {
-  const getButtonStyle = () => {
+  const getContainerStyle = () => {
     if (!isAnswered) {
-      return isSelected ? 'bg-red-50 border-red-600' : 'bg-white border-gray-200';
+      return isSelected ? 'border-[#E11D48] bg-[#FFF1F2]' : 'border-slate-200 bg-white';
     }
-
-    if (isCorrect) {
-      return 'bg-green-100 border-green-500';
-    }
-
-    if (isSelected && !isCorrect) {
-      return 'bg-red-100 border-red-500';
-    }
-
-    return 'bg-white border-gray-200 opacity-50';
+    if (isCorrect) return 'border-[#22c55e] bg-[#f0fdf4]';
+    if (isSelected && !isCorrect) return 'border-[#ef4444] bg-[#fef2f2]';
+    return 'border-slate-200 bg-white opacity-50';
   };
 
-  const getTextStyle = () => {
-    if (!isAnswered) {
-      return isSelected ? 'text-red-600' : 'text-gray-800';
-    }
-
-    if (isCorrect) {
-      return 'text-green-700';
-    }
-
-    if (isSelected && !isCorrect) {
-      return 'text-red-700';
-    }
-
-    return 'text-gray-400';
+  const getRadioColor = () => {
+    if (!isAnswered) return isSelected ? 'border-[#E11D48]' : 'border-slate-300';
+    if (isCorrect) return 'border-[#22c55e]';
+    if (isSelected && !isCorrect) return 'border-[#ef4444]';
+    return 'border-slate-300';
   };
 
-  const getIcon = () => {
-    if (!isAnswered) return null;
-
-    if (isCorrect) return '✓';
-    if (isSelected && !isCorrect) return '✗';
-
-    return null;
+  const getRadioInnerColor = () => {
+    if (!isAnswered) return 'bg-[#E11D48]';
+    if (isCorrect) return 'bg-[#22c55e]';
+    if (isSelected && !isCorrect) return 'bg-[#ef4444]';
+    return '';
   };
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={isAnswered}
-      className={` ${getButtonStyle()} mb-3 flex-row items-center justify-between rounded-2xl border-2 p-4 ${!isAnswered ? 'active:opacity-70' : ''} `}
+      activeOpacity={0.7}
+      className={`mb-4 min-h-[64px] flex-row items-center justify-between rounded-3xl border-[2px] px-5 py-4 ${getContainerStyle()}`}
     >
-      <Text className={`${getTextStyle()} flex-1 text-base font-medium`}>{label}</Text>
+      <Text
+        className={`flex-1 pr-4 text-[15px] font-semibold ${isAnswered && isCorrect ? 'text-[#16a34a]' : 'text-[#334155]'}`}
+      >
+        {label}
+      </Text>
 
-      {getIcon() && <Text className={`${getTextStyle()} ml-2 text-xl font-bold`}>{getIcon()}</Text>}
+      {/* Radio Button */}
+      <View
+        className={`h-6 w-6 items-center justify-center rounded-full border-[2.5px] ${getRadioColor()}`}
+      >
+        {(isSelected || (isAnswered && isCorrect)) && (
+          <View className={`h-3 w-3 rounded-full ${getRadioInnerColor()}`} />
+        )}
+      </View>
     </TouchableOpacity>
   );
 };

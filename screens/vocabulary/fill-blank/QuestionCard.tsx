@@ -18,52 +18,36 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   isCorrect,
   hint,
 }) => {
-  const getBlankStyle = () => {
-    if (!isAnswered) return 'bg-gray-100 border-gray-300';
-    if (isCorrect) return 'bg-green-100 border-green-500';
-    return 'bg-red-100 border-red-500';
-  };
-
-  const getBlankTextStyle = () => {
-    if (!isAnswered) return 'text-gray-400';
-    if (isCorrect) return 'text-green-700';
-    return 'text-red-700';
-  };
-
   return (
-    <View className="rounded-2xl bg-white p-6 shadow-sm">
-      {/* Sentence with blank */}
-      <View className="mb-4 flex-row flex-wrap items-center justify-center">
-        <Text className="text-center text-lg leading-8 text-gray-800">{beforeBlank} </Text>
+    <View className="w-full rounded-[24px] border border-slate-100 bg-white p-5 pt-4 shadow-sm">
+      {/* Câu hỏi có điền chỗ trống */}
+      <Text className="mb-5 text-[18px] font-bold leading-snug text-[#1E293B]">
+        {/* Phần trước khoảng trống */}
+        {beforeBlank}
 
-        <View
-          className={` ${getBlankStyle()} min-w-[100px] items-center justify-center rounded-lg border-2 px-4 py-2`}
+        {/* Khoảng trống / Đáp án */}
+        <Text
+          className={`font-black ${
+            !isAnswered
+              ? 'text-slate-300' // Luôn xám nếu chưa chốt đáp án
+              : isCorrect
+                ? 'text-[#16a34a]' // Xanh lá nếu chốt và đúng
+                : 'text-[#e11d48]' // Đỏ nếu chốt và sai
+          }`}
+          style={{ textDecorationLine: 'underline' }}
         >
-          <Text className={`${getBlankTextStyle()} text-lg font-semibold`}>
-            {selectedAnswer || '______'}
-          </Text>
-        </View>
+          {/* CHỈ HIỆN ĐÁP ÁN NẾU ĐÃ BẤM CHỐT */}
+          {isAnswered && selectedAnswer ? ` ${selectedAnswer} ` : ' ____________ '}
+        </Text>
 
-        <Text className="text-center text-lg leading-8 text-gray-800"> {afterBlank}</Text>
-      </View>
+        {/* Phần sau khoảng trống */}
+        {afterBlank}
+      </Text>
 
-      {/* Hint */}
-      {hint && !isAnswered && (
-        <View className="mt-4 rounded-xl bg-blue-50 p-3">
-          <Text className="text-center text-sm text-blue-700">💡 Hint: {hint}</Text>
-        </View>
-      )}
-
-      {/* Feedback */}
-      {isAnswered && (
-        <View className={`mt-4 rounded-xl p-3 ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
-          <Text
-            className={`text-center text-sm font-semibold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}
-          >
-            {isCorrect ? '✓ Correct!' : '✗ Try again next time'}
-          </Text>
-        </View>
-      )}
+      {/* Hint / Instruction */}
+      <Text className="text-[14px] leading-relaxed text-[#94A3B8]">
+        {hint || 'Identify the correct industry term for biased or skewed results.'}
+      </Text>
     </View>
   );
 };

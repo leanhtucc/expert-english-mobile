@@ -8,6 +8,7 @@ interface PrimaryButtonProps {
   loading?: boolean;
   className?: string;
   icon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
@@ -16,6 +17,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   disabled = false,
   loading = false,
   className = '',
+  rightIcon,
   icon,
 }) => {
   return (
@@ -30,6 +32,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
         <>
           {icon && <View className="mr-2">{icon}</View>}
           <Text className="text-center text-base font-semibold text-white">{label}</Text>
+          {rightIcon && <View className="ml-2">{rightIcon}</View>}
         </>
       )}
     </TouchableOpacity>

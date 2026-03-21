@@ -1,45 +1,30 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 
 interface TermItemProps {
   id: string;
   text: string;
   isSelected: boolean;
-  isMatched: boolean;
   onPress: () => void;
   type: 'term' | 'definition';
 }
 
-export const TermItem: React.FC<TermItemProps> = ({ text, isSelected, isMatched, onPress }) => {
-  const getContainerStyle = () => {
-    if (isMatched) {
-      return 'bg-green-100 border-green-500 opacity-70';
-    }
-    if (isSelected) {
-      return 'bg-red-50 border-red-600';
-    }
-    return 'bg-white border-gray-200';
-  };
-
-  const getTextStyle = () => {
-    if (isMatched) {
-      return 'text-green-700 line-through';
-    }
-    if (isSelected) {
-      return 'text-red-600';
-    }
-    return 'text-gray-800';
-  };
-
+export const TermItem: React.FC<TermItemProps> = ({ text, isSelected, onPress }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={isMatched}
-      className={` ${getContainerStyle()} mb-3 rounded-2xl border-2 p-4 ${!isMatched ? 'active:opacity-70' : ''} `}
+      activeOpacity={0.7}
+      className={`mb-4 min-h-[64px] items-center justify-center rounded-2xl border-[2px] px-3 py-3 shadow-sm ${
+        isSelected ? 'border-[#E11D48] bg-[#FFF1F2]' : 'border-slate-200 bg-white'
+      }`}
     >
-      <View className="flex-row items-center justify-between">
-        <Text className={`${getTextStyle()} flex-1 text-base font-medium`}>{text}</Text>
-      </View>
+      <Text
+        className={`text-center text-[14.5px] ${
+          isSelected ? 'font-bold text-[#E11D48]' : 'font-medium text-[#334155]'
+        }`}
+      >
+        {text}
+      </Text>
     </TouchableOpacity>
   );
 };

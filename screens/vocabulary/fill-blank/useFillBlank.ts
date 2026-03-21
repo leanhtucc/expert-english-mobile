@@ -34,21 +34,29 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
     return { before, after };
   }, [currentQuestion]);
 
+  // 1. KHI CHỌN ĐÁP ÁN: Chỉ lưu tạm đáp án, không khóa trạng thái (isAnswered)
   const handleSelectAnswer = useCallback(
     (answer: string) => {
+      // Nếu đã bấm nút Check Answer ở dưới đáy rồi thì mới không cho chọn lại
       if (isAnswered) return;
 
       setSelectedAnswer(answer);
-      setIsAnswered(true);
-
-      if (answer === currentQuestion.correctAnswer) {
-        setCorrectCount(prev => prev + 1);
-      }
     },
-    [isAnswered, currentQuestion]
+    [isAnswered]
   );
 
+  // 2. KHI BẤM NÚT DƯỚI ĐÁY: Tách làm 2 giai đoạn
   const handleNext = useCallback(() => {
+    // GIAI ĐOẠN 1: Bấm "Check Answer" -> Chốt đáp án, tính điểm, hiện thanh CheckResult bay lên
+    if (!isAnswered) {
+      setIsAnswered(true);
+      if (selectedAnswer === currentQuestion.correctAnswer) {
+        setCorrectCount(prev => prev + 1);
+      }
+      return; // Dừng hàm lại tại đây, không nhảy sang câu mới vội
+    }
+
+    // GIAI ĐOẠN 2: Bấm "Next Question" trên thanh CheckResult -> Chuyển câu hoặc Finish
     if (isLastQuestion) {
       const score = Math.round((correctCount / questions.length) * 100);
       onComplete?.(score);
@@ -57,7 +65,15 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
       setSelectedAnswer(null);
       setIsAnswered(false);
     }
-  }, [isLastQuestion, correctCount, questions.length, onComplete]);
+  }, [
+    isAnswered,
+    isLastQuestion,
+    correctCount,
+    selectedAnswer,
+    currentQuestion?.correctAnswer,
+    questions.length,
+    onComplete,
+  ]);
 
   const reset = useCallback(() => {
     setCurrentIndex(0);

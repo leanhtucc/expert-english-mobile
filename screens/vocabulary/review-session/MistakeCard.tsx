@@ -1,55 +1,70 @@
+import { Feather } from '@expo/vector-icons';
+
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
+
+import { OptionItem } from './OptionItem';
 
 interface MistakeCardProps {
   word: string;
   correctAnswer: string;
   yourAnswer: string;
   explanation?: string;
-  onReview?: () => void;
+  options?: string[]; // Thêm mảng options
+  onSelectOption?: (option: string) => void;
 }
 
 export const MistakeCard: React.FC<MistakeCardProps> = ({
   word,
   correctAnswer,
-  yourAnswer,
   explanation,
-  onReview,
+  options = [],
+  onSelectOption,
 }) => {
+  // Tạo dữ liệu giả định 4 đáp án nếu data của bạn chưa truyền mảng options vào
+  const displayOptions =
+    options.length > 0 ? options : [correctAnswer, 'Optimized', 'Scaled', 'Neural Network'];
+
   return (
-    <View className="mb-4 rounded-2xl bg-white p-5 shadow-sm">
-      {/* Word */}
-      <Text className="mb-3 text-xl font-bold text-gray-800">{word}</Text>
-
-      {/* Your Answer */}
-      <View className="mb-2">
-        <Text className="mb-1 text-sm text-gray-500">Your answer:</Text>
-        <View className="rounded-lg border border-red-200 bg-red-50 p-3">
-          <Text className="text-base text-red-700">✗ {yourAnswer}</Text>
+    <View className="w-full rounded-[24px] border border-slate-100 bg-white p-5 shadow-sm">
+      {/* Label Terminology & Info Icon */}
+      <View className="mb-4 flex-row items-center justify-between">
+        <View className="rounded-lg bg-[#F1F5F9] px-3 py-1.5">
+          <Text className="text-[10px] font-bold uppercase tracking-wider text-[#64748B]">
+            Terminology
+          </Text>
         </View>
+        <Feather name="info" size={20} color="#FCA5A5" />
       </View>
 
-      {/* Correct Answer */}
-      <View className="mb-3">
-        <Text className="mb-1 text-sm text-gray-500">Correct answer:</Text>
-        <View className="rounded-lg border border-green-200 bg-green-50 p-3">
-          <Text className="text-base text-green-700">✓ {correctAnswer}</Text>
-        </View>
+      {/* Câu hỏi (hoặc từ vựng) */}
+      <Text className="mb-2.5 text-[18px] font-bold leading-snug text-[#1E293B]">{word}</Text>
+
+      {/* Giải thích / Gợi ý */}
+      <Text className="mb-6 text-[14px] leading-relaxed text-[#94A3B8]">
+        {explanation || 'Identify the correct industry term for biased or skewed results.'}
+      </Text>
+
+      {/* Danh sách các Option */}
+      <View className="w-full">
+        {displayOptions.map((opt, index) => {
+          // Gắn chữ A, B, C, D vào đầu nếu chưa có
+          const letter = String.fromCharCode(65 + index);
+          const label = opt.startsWith(`${letter}.`) ? opt : `${letter}. ${opt}`;
+
+          // Xác định xem thẻ này có phải là thẻ đúng cần bôi đỏ không
+          const isCorrectOption = opt.includes(correctAnswer) || opt === correctAnswer;
+
+          return (
+            <OptionItem
+              key={index}
+              label={label}
+              isCorrect={isCorrectOption}
+              onPress={() => onSelectOption?.(opt)}
+            />
+          );
+        })}
       </View>
-
-      {/* Explanation */}
-      {explanation && (
-        <View className="mb-3 rounded-lg bg-blue-50 p-3">
-          <Text className="text-sm leading-5 text-blue-700">{explanation}</Text>
-        </View>
-      )}
-
-      {/* Review Button */}
-      {onReview && (
-        <TouchableOpacity onPress={onReview} className="mt-2 rounded-xl bg-red-600 py-3">
-          <Text className="text-center text-sm font-semibold text-white">Review This Word</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };

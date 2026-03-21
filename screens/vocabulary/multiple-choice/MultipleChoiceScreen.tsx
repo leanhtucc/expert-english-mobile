@@ -1,7 +1,10 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import IconNextButtonBlack from '@/assets/svgs/output/IconNextButtonBlack';
+
+import CheckResultButton from '../components/CheckResultButton';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -16,7 +19,6 @@ interface MultipleChoiceScreenProps {
   onClose?: () => void;
 }
 
-// paddingTop removed from ScreenHeader; use SafeAreaView in parent screen
 export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
   questions,
   onComplete,
@@ -30,6 +32,7 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
     isAnswered,
     isLastQuestion,
     progress,
+    isCorrect,
     handleSelectAnswer,
     handleNext,
   } = useMultipleChoice({
@@ -41,64 +44,69 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
     return null;
   }
 
-  const optionLetters = ['A', 'B', 'C', 'D'];
-
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <ScreenHeader
-        title="Word Meaning"
-        subtitle="Multiple Choice"
-        onBack={onBack}
-        onClose={onClose}
-      />
-
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Progress */}
-        <ProgressBar current={progress.current} total={progress.total} className="mb-6" />
-
-        {/* Question Card */}
-        <QuestionCard
-          word={currentQuestion.word}
-          question={currentQuestion.question}
-          className="mb-6"
+    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
+      <View className="w-full">
+        <ScreenHeader
+          title="Word Meaning"
+          subtitle="Multiple Choice"
+          onBack={onBack}
+          onClose={onClose}
         />
+      </View>
 
-        {/* Options */}
-        <View className="mb-6">
-          {currentQuestion.options.map((option, index) => (
-            <OptionItem
-              key={index}
-              letter={optionLetters[index]}
-              text={option}
-              isSelected={selectedAnswer === option}
-              isCorrect={option === currentQuestion.correctAnswer}
-              isAnswered={isAnswered}
-              onPress={() => handleSelectAnswer(option)}
-            />
-          ))}
+      <View className="flex-1 bg-[#F8FAFC]">
+        <View className="w-full px-5 pt-4">
+          <View className="mb-6">
+            <ProgressBar current={progress.current} total={progress.total} />
+          </View>
         </View>
-      </ScrollView>
-      {/* Next Button fixed at bottom */}
-      {isAnswered && (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            padding: 16,
-            paddingBottom: insets.bottom,
-            backgroundColor: 'rgba(250,250,250,0.96)',
-          }}
+
+        <ScrollView
+          className="w-full flex-1"
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
         >
-          <PrimaryButton label={isLastQuestion ? 'Finish' : 'Next Question'} onPress={handleNext} />
-        </View>
-      )}
+          <View className="mb-8">
+            <QuestionCard word={currentQuestion.word} question={currentQuestion.question} />
+          </View>
+          <View className="w-full">
+            {currentQuestion.options.map((option, index) => (
+              <OptionItem
+                key={index}
+                text={option}
+                isSelected={selectedAnswer === option}
+                isCorrect={option === currentQuestion.correctAnswer}
+                isAnswered={isAnswered}
+                onPress={() => handleSelectAnswer(option)}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+
+      <View className="absolute bottom-[-25px] left-0 right-0 w-full">
+        {!isAnswered ? (
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            className="w-full border-t border-slate-200 bg-white px-3 pt-2"
+          >
+            <PrimaryButton
+              label="CHECK ANSWER"
+              onPress={handleNext}
+              disabled={!selectedAnswer}
+              rightIcon={<IconNextButtonBlack width={20} height={20} />}
+            />
+          </View>
+        ) : (
+          <CheckResultButton
+            status={isCorrect ? 'correct' : 'wrong'}
+            text={isLastQuestion ? 'FINISH' : 'NEXT QUESTION'}
+            showIconNext={true}
+            onPress={handleNext}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 };
