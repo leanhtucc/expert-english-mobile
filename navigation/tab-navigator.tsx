@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
@@ -55,45 +55,70 @@ function CustomTabBar({
   };
 
   return (
-    <View
-      style={[styles.tabBar, { paddingBottom: insets.bottom, backgroundColor: colors.background }]}
-    >
-      {state.routes.map((route: any, index: any) => {
-        const { options } = descriptors[route.key];
-        const isFocused = state.index === index;
+    <SafeAreaView edges={['bottom']} style={{ backgroundColor: colors.background }}>
+      {/* Solid background to cover gesture bar area */}
+      <View
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 56 + insets.bottom,
+          backgroundColor: colors.background,
+          zIndex: 0,
+        }}
+        pointerEvents="none"
+      />
+      <View
+        style={[
+          styles.tabBar,
+          {
+            height: 56 + insets.bottom,
+            backgroundColor: colors.background,
+            paddingBottom: 0,
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+        ]}
+      >
+        {state.routes.map((route: any, index: any) => {
+          const { options } = descriptors[route.key];
+          const isFocused = state.index === index;
 
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
 
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
-            onTabChange(route.name);
-          } else if (isFocused) {
-            onTabChange(route.name);
-          }
-        };
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+              onTabChange(route.name);
+            } else if (isFocused) {
+              onTabChange(route.name);
+            }
+          };
 
-        return (
-          <TouchableOpacity
-            key={route.key}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            testID={options.tabBarTestID}
-            onPress={onPress}
-            style={styles.tabItem}
-          >
-            <View style={styles.iconContainer}>{getIcon(route.name, isFocused)}</View>
-
-            {isFocused && <View style={[styles.tabUnderline, { backgroundColor: colors.tint }]} />}
-          </TouchableOpacity>
-        );
-      })}
-    </View>
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={options.tabBarTestID}
+              onPress={onPress}
+              style={styles.tabItem}
+            >
+              <View style={styles.iconContainer}>{getIcon(route.name, isFocused)}</View>
+              {isFocused && (
+                <View style={[styles.tabUnderline, { backgroundColor: colors.tint }]} />
+              )}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </SafeAreaView>
   );
 }
 

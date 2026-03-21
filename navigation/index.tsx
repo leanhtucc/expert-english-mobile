@@ -15,6 +15,7 @@ import { OnboardingScreen } from '@/screens/onboarding';
 import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
+import { VocabularyLearning } from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
 import TabNavigator from './tab-navigator';
@@ -50,6 +51,9 @@ export type RootStackParamList = {
   PersonalInformationScreen: undefined;
   ChangePasswordScreen: undefined;
   AIFeedback: { userAnswer: string; mode: string };
+
+  // Vocabulary Learning flow
+  VocabularyLearning: undefined;
 };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -150,6 +154,11 @@ export default function RootStack() {
         <Stack.Screen
           name="AIFeedback"
           component={AIFeedbackScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="VocabularyLearning"
+          component={VocabularyLearning}
           options={{ headerShown: false }}
         />
         <Stack.Screen
