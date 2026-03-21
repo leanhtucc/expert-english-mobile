@@ -7,8 +7,21 @@ import { SelectableCard } from '../components/SelectableCard';
 import { FIELD_OPTIONS } from '../constants/surveyConstants';
 import type { StepProps, UserField } from '../types/surveyTypes';
 
-export const Step2SelectField: React.FC<StepProps> = ({ answers, onUpdate, onNext }) => {
+export const Step2SelectField: React.FC<StepProps & { surveyData?: any }> = ({
+  answers,
+  onUpdate,
+  onNext,
+  surveyData,
+}) => {
   const selected = answers.field;
+
+  const options =
+    surveyData?.industries?.length > 0
+      ? surveyData.industries.map((opt: any) => ({
+          value: opt.value,
+          title: opt.label,
+        }))
+      : FIELD_OPTIONS;
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
@@ -21,7 +34,7 @@ export const Step2SelectField: React.FC<StepProps> = ({ answers, onUpdate, onNex
           {"We'll tailor your vocabulary and scenarios to your specific industry."}
         </Text>
 
-        {FIELD_OPTIONS.map(option => (
+        {options.map((option: any) => (
           <SelectableCard
             key={option.value}
             {...option}

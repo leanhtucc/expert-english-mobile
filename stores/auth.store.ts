@@ -1,109 +1,77 @@
+// Thêm import này
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { authApi } from '@/api';
-import { User } from '@/types/entities';
-import { logger } from '@/utils/logger';
+import type { UserInfo } from '@/types/entities/user.entity';
 
-/**
- * Auth Store Interface
- */
 interface AuthState {
-  user: User | null;
+  user: UserInfo | null;
   token: string | null;
+  email?: string;
+  accessToken?: string | null;
+  refreshToken?: string | null;
+  accessExpireAt?: number | null; // THÊM DÒNG NÀY
+  refreshExpireAt?: number | null; // THÊM DÒNG NÀY
   isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
 
-  // Actions
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
-  setUser: (user: User) => void;
-  setToken: (token: string) => void;
-  clearError: () => void;
+  // Cập nhật kiểu dữ liệu truyền vào
+  setAuthData: (data: {
+    accessToken: string;
+    refreshToken: string;
+    email?: string;
+    accessExpireAt: number;
+    refreshExpireAt: number;
+  }) => void;
+  clearAuth: () => void;
+  setUser: (user: UserInfo) => void;
+  setAccessToken: (token: string | null) => void;
+  setRefreshToken: (token: string | null) => void;
 }
 
-/**
- * Auth Store
- * Quản lý authentication state
- */
-export const useAuthStore = create<AuthState>(set => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  isLoading: false,
-  error: null,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    set => ({
+      user: null,
+      token: null,
+      email: '',
+      accessToken: null,
+      refreshToken: null,
+      accessExpireAt: null,
+      refreshExpireAt: null,
+      isAuthenticated: false,
 
-  login: async (email: string, password: string) => {
-    set({ isLoading: true, error: null });
+      // Cập nhật hàm set
+      setAuthData: data =>
+        set({
+          token: data.accessToken,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          accessExpireAt: data.accessExpireAt,
+          refreshExpireAt: data.refreshExpireAt,
+          email: data.email,
+          isAuthenticated: true,
+        }),
 
-    try {
-      const response = await authApi.login({ email, password });
+      clearAuth: () =>
+        set({
+          user: null,
+          token: null,
+          accessToken: null,
+          refreshToken: null,
+          accessExpireAt: null,
+          refreshExpireAt: null,
+          isAuthenticated: false,
+          email: '',
+        }),
 
-      set({
-        user: response.user,
-        token: response.token,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-
-      logger.info('User logged in successfully', { userId: response.user.id });
-    } catch (error: any) {
-      set({
-        error: error.message || 'Login failed',
-        isLoading: false,
-      });
-      logger.error('Login failed', error);
-      throw error;
+      setUser: user => set({ user, isAuthenticated: true }),
+      setAccessToken: token => set({ accessToken: token, token }),
+      setRefreshToken: token => set({ refreshToken: token }),
+    }),
+    {
+      name: 'auth-storage', // Tên key lưu trong AsyncStorage
+      storage: createJSONStorage(() => AsyncStorage),
     }
-  },
-
-  logout: async () => {
-    set({ isLoading: true });
-
-    try {
-      await authApi.logout();
-      set({
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
-      });
-      logger.info('User logged out');
-    } catch (error: any) {
-      logger.error('Logout failed', error);
-      set({ isLoading: false });
-    }
-  },
-
-  register: async (email: string, password: string, name: string) => {
-    set({ isLoading: true, error: null });
-
-    try {
-      const response = await authApi.register({ email, password, name, acceptTerms: true });
-
-      set({
-        user: response.user,
-        token: response.token,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-
-      logger.info('User registered successfully', { userId: response.user.id });
-    } catch (error: any) {
-      set({
-        error: error.message || 'Registration failed',
-        isLoading: false,
-      });
-      logger.error('Registration failed', error);
-      throw error;
-    }
-  },
-
-  setUser: (user: User) => set({ user, isAuthenticated: true }),
-
-  setToken: (token: string) => set({ token }),
-
-  clearError: () => set({ error: null }),
-}));
+  )
+);

@@ -22,7 +22,7 @@ export const LoginButton: React.FC<LoginButtonProps> = ({
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
-      className={`mt-6 flex-row items-center justify-center rounded-full py-6 ${
+      className={`mt-6 flex-row items-center justify-center rounded-full py-4 ${
         disabled || loading ? 'bg-red-300' : 'bg-red-600'
       }`}
       style={{

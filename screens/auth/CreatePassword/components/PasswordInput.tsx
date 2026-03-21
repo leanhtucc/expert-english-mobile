@@ -6,21 +6,19 @@ interface PasswordInputProps {
   onChangeText: (text: string) => void;
   placeholder?: string;
   error?: string;
+  onFocus?: () => void;
 }
 
 /**
  * Password input component
  */
-export const PasswordInput: React.FC<PasswordInputProps> = ({
-  value,
-  onChangeText,
-  placeholder = 'Enter your password',
-  error,
-}) => {
+export const PasswordInput = React.forwardRef<TextInput, PasswordInputProps>((props, ref) => {
+  const { value, onChangeText, placeholder = 'Enter your password', error, onFocus } = props;
   return (
     <View className="mb-4">
       <TextInput
-        className="rounded-2xl border border-gray-100 bg-gray-50 px-6 py-5 text-lg text-gray-900"
+        ref={ref}
+        className="rounded-3xl border border-gray-100 bg-white px-6 py-4 text-lg text-gray-900"
         style={{
           shadowColor: '#000',
           shadowOpacity: 0.04,
@@ -32,6 +30,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
         placeholderTextColor="#C0C0C0"
         value={value}
         onChangeText={onChangeText}
+        onFocus={onFocus}
         secureTextEntry
         autoCapitalize="none"
         autoComplete="password"
@@ -40,4 +39,6 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
       {error && <Text className="mt-2 px-1 text-sm text-red-500">{error}</Text>}
     </View>
   );
-};
+});
+
+PasswordInput.displayName = 'PasswordInput';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import { IconStreak } from '@/assets/svgs/output';
+import { IconStreak } from '@/components/icon';
 import { LeaderboardPlayer } from '@/data/mock-data';
 
 import { GOLD } from '../leaderboard.constants';

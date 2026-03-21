@@ -5,11 +5,14 @@ import {
 } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
+// eslint-disable-next-line import/no-named-as-default
 import CreatePasswordScreen from '@/screens/auth/CreatePassword';
 import { EnterEmailScreen } from '@/screens/auth/enterEmail';
+// eslint-disable-next-line import/no-named-as-default
 import LoginEmailScreen from '@/screens/auth/loginEmail';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
+import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
 import { VocabularyLearning } from '@/screens/vocabulary/vocabularyLearning';
@@ -27,8 +30,6 @@ export type TabNavigatorParamList = {
 export type RootStackParamList = {
   // Onboarding
   Onboarding: undefined;
-
-  // Auth flow
   Start: { step?: number } | undefined;
   Login: undefined;
   SignUp: undefined;
@@ -37,22 +38,18 @@ export type RootStackParamList = {
   OTP: { email: string; isRegister?: boolean; userData?: any };
   VerifyOTP: { email: string };
   ResetPassword: undefined;
-  CreatePassword: undefined;
+  CreatePassword: { email: string } | undefined;
   LoginEmail: undefined;
-  // Survey flow
   Survey: undefined;
   LearningPath: undefined;
   AIRoadmapLoading: undefined;
-
-  // Main flow
   InitialNavigator: undefined;
   PremiumInterstitial: undefined;
   TabNavigator: NavigatorScreenParams<TabNavigatorParamList> | { screen?: string };
   Modal: undefined;
-
-  // Speaking Practice flow
   PracticeSetup: undefined;
-  // SpeakingConversation: { mode: 'dual-explorer' | 'english-master' | 'translation-hero' }; // Removed
+  PersonalInformationScreen: undefined;
+  ChangePasswordScreen: undefined;
   AIFeedback: { userAnswer: string; mode: string };
 
   // Vocabulary Learning flow
@@ -89,7 +86,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="VocabularyLearning"
+        initialRouteName="InitialNavigator"
         screenOptions={{
           gestureEnabled: true,
           gestureDirection: 'horizontal',
@@ -142,6 +139,16 @@ export default function RootStack() {
         <Stack.Screen
           name="PracticeSetup"
           component={PracticeSetupScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PersonalInformationScreen"
+          component={PersonalInformationScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ChangePasswordScreen"
+          component={ChangePasswordScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

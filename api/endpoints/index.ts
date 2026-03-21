@@ -1,2 +1,2 @@
 export { authApi } from './auth.api';
-export { lessonsApi } from './lessons.api';
+export { surveyApi } from './survey.api';

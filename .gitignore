@@ -5,6 +5,7 @@
 .env.local
 .env.development
 .env.test
+.env.dev
 .env.production
 
 # dependencies

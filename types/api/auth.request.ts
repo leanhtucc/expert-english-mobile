@@ -1,45 +1,51 @@
-/**
- * Auth API Request Types
- */
-
-/**
- * Login request payload
- */
-export interface LoginRequest {
+export interface AuthSendOtpRequest {
   email: string;
-  password: string;
-  rememberMe?: boolean;
+  type: 'login' | 'signup';
 }
 
-/**
- * Register request payload
- */
+export interface LoginRequest {
+  platform: 'Web' | 'Mobile';
+  username: string;
+  password: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+export interface LogoutRequest {
+  refreshToken: string;
+}
+
+export interface SendOtpRequest {
+  email: string;
+  type: 'login' | 'signup';
+}
+
+export interface CheckOtpRequest {
+  email: string;
+  otp: string;
+}
+
+export interface LoginWithGoogleRequest {
+  idToken: string;
+}
+
 export interface RegisterRequest {
   email: string;
   password: string;
-  name: string;
-  acceptTerms: boolean;
+  verificationToken: string;
 }
-
-/**
- * Forgot password request
- */
-export interface ForgotPasswordRequest {
-  email: string;
+export interface UpdateProfileRequest {
+  fullname?: string;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  dob?: string;
+  gender?: string;
+  avatar?: string;
+  avatarUrl?: string;
 }
-
-/**
- * Reset password request
- */
-export interface ResetPasswordRequest {
-  token: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-/**
- * Refresh token request
- */
-export interface RefreshTokenRequest {
-  refreshToken: string;
+export interface ExchangePasswordRequest {
+  oldPass: string;
+  newPass: string;
 }

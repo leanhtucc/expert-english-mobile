@@ -5,16 +5,24 @@ interface EmailInputProps {
   value: string;
   onChangeText: (text: string) => void;
   error?: string;
+  editable?: boolean;
 }
 
 /**
  * Email input component
  */
-export const EmailInput: React.FC<EmailInputProps> = ({ value, onChangeText, error }) => {
+export const EmailInput: React.FC<EmailInputProps> = ({
+  value,
+  onChangeText,
+  error,
+  editable = true,
+}) => {
   return (
     <View className="mb-4">
       <TextInput
-        className="rounded-2xl border border-gray-100 bg-gray-50 px-6 py-5 text-lg text-gray-900"
+        className={`rounded-3xl border border-gray-100 px-6 py-4 text-lg ${
+          editable ? 'bg-white text-gray-900' : 'bg-gray-50 text-gray-500'
+        }`}
         style={{
           shadowColor: '#000',
           shadowOpacity: 0.04,
@@ -30,6 +38,7 @@ export const EmailInput: React.FC<EmailInputProps> = ({ value, onChangeText, err
         autoCapitalize="none"
         autoComplete="email"
         autoCorrect={false}
+        editable={editable}
       />
       {error && <Text className="mt-2 px-1 text-sm text-red-500">{error}</Text>}
     </View>

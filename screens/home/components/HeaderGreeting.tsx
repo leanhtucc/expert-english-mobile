@@ -9,9 +9,21 @@ interface HeaderGreetingProps {
   onNotificationPress?: () => void;
 }
 
+const getGreetingTime = () => {
+  const currentHour = new Date().getHours();
+
+  if (currentHour < 12) {
+    return 'Good morning,';
+  } else if (currentHour < 18) {
+    return 'Good afternoon,';
+  } else {
+    return 'Good evening,';
+  }
+};
+
 export const HeaderGreeting: React.FC<HeaderGreetingProps> = ({
-  name = 'Alex Rivera',
-  greeting = 'Good morning,',
+  name,
+  greeting = getGreetingTime(),
   onNotificationPress,
 }) => {
   return (

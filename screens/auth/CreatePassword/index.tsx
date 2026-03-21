@@ -1,18 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
+
+import { useAuth } from '@/hooks/useAuth';
 
 import {
   AuthHeader,
@@ -24,45 +28,28 @@ import {
 } from './components';
 
 type CreatePasswordScreenNavigationProp = StackNavigationProp<any>;
+type CreatePasswordScreenRouteProp = RouteProp<any, any>;
 
-/**
- * Màn hình đăng ký với Email và Password
- */
 export const CreatePasswordScreen: React.FC = () => {
   const navigation = useNavigation<CreatePasswordScreenNavigationProp>();
-  const [email, setEmail] = useState('');
+  const route = useRoute<CreatePasswordScreenRouteProp>();
+  const { email = '', verificationToken = '' } = route.params || {};
+
+  const { loading, registerNewAccount } = useAuth(); // Gọi Hook
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  // Validate email format
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  // Handle signup
   const handleSignup = async () => {
-    // Reset errors
-    setEmailError('');
     setPasswordError('');
     setConfirmPasswordError('');
-
     let hasError = false;
 
-    // Validate email
-    if (!email.trim()) {
-      setEmailError('Vui lòng nhập email');
-      hasError = true;
-    } else if (!isValidEmail(email)) {
-      setEmailError('Email không hợp lệ');
-      hasError = true;
-    }
-
-    // Validate password
     if (!password.trim()) {
       setPasswordError('Vui lòng nhập mật khẩu');
       hasError = true;
@@ -71,7 +58,6 @@ export const CreatePasswordScreen: React.FC = () => {
       hasError = true;
     }
 
-    // Validate confirm password
     if (!confirmPassword.trim()) {
       setConfirmPasswordError('Vui lòng nhập lại mật khẩu');
       hasError = true;
@@ -82,34 +68,21 @@ export const CreatePasswordScreen: React.FC = () => {
 
     if (hasError) return;
 
-    try {
-      setLoading(true);
+    // Đăng ký account qua Hook
+    const isSuccess = await registerNewAccount(email, password, verificationToken);
 
-      // TODO: Call API to signup
-      // const response = await authApi.signup({ email, password });
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Navigate to LoginEmail screen
-      navigation.navigate('LoginEmail');
-
-      console.log('Signup success:', { email, password });
-    } catch {
-      setEmailError('Email đã tồn tại hoặc có lỗi xảy ra');
-    } finally {
-      setLoading(false);
+    if (isSuccess) {
+      navigation.navigate('TabNavigator', {});
     }
   };
 
-  // Handle back button
-  const handleBack = () => {
-    navigation.goBack();
+  const handleConfirmPasswordFocus = () => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 300);
   };
 
-  // Check if form is valid
-  const isFormValid =
-    email.trim() !== '' && password.trim() !== '' && confirmPassword.trim() !== '';
+  const isFormValid = password.trim() !== '' && confirmPassword.trim() !== '';
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -117,56 +90,45 @@ export const CreatePasswordScreen: React.FC = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          ref={scrollViewRef}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 200 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <View className="flex-1 px-6">
-            {/* Back Button */}
             <TouchableOpacity
-              onPress={handleBack}
-              className="mt-10 h-10 w-10 items-center justify-center"
+              onPress={() => navigation.goBack()}
+              className="mt-9 h-10 w-10 items-center justify-center"
               activeOpacity={0.7}
             >
               <Ionicons name="chevron-back" size={30} color="#1F2937" />
             </TouchableOpacity>
 
-            {/* Main Content */}
-            <View className="mt-12 flex-1">
-              {/* Email Icon */}
+            <View className="mt-6 flex-1">
               <EmailIcon />
-
-              {/* Header */}
               <AuthHeader
                 title="Signup with Email"
                 subtitle="Please enter your email and password to login your account"
               />
-
-              {/* Email Input */}
-              <EmailInput value={email} onChangeText={setEmail} error={emailError} />
-
-              {/* New Password Input */}
+              <EmailInput value={email} onChangeText={() => {}} error={''} editable={false} />
               <PasswordInput
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter your new password"
                 error={passwordError}
               />
-
-              {/* Confirm Password Input */}
               <PasswordInput
+                ref={confirmPasswordRef}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Enter your password again"
                 error={confirmPasswordError}
+                onFocus={handleConfirmPasswordFocus}
               />
-
-              {/* Signup Button */}
               <SignupButton onPress={handleSignup} disabled={!isFormValid} loading={loading} />
-
-              {/* Terms and Privacy Policy */}
               <TermsText />
             </View>
           </View>

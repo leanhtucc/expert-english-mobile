@@ -24,13 +24,13 @@ export const ScoreBadge: React.FC<ScoreBadgeProps> = ({ label, score }) => {
   const statusText = getStatusText();
 
   return (
-    <View className="flex-1 rounded-full border border-gray-200 bg-white px-4 py-2">
-      <Text className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
+    <View className="flex-1 rounded-full border border-gray-200 bg-white px-3 py-2">
+      <Text className="mb-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">
         {label.toUpperCase()}
       </Text>
-      <View className="flex-row items-baseline gap-2">
-        <Text className="text-2xl font-bold text-gray-900">{score}%</Text>
-        <Text className="text-sm font-semibold" style={{ color: scoreColor }}>
+      <View className="flex-row items-baseline gap-1">
+        <Text className="text-xl font-bold text-gray-900">{score}%</Text>
+        <Text className="text-xs font-semibold" style={{ color: scoreColor }}>
           {statusText}
         </Text>
       </View>
