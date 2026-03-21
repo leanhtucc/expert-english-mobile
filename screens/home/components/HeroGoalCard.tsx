@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import { ImageMascoForHomesvg } from '@/components/icon';
+import { ImageMascoForHomes } from '@/components/icon';
 
 interface HeroGoalCardProps {
   level?: string;
@@ -33,7 +33,7 @@ export const HeroGoalCard: React.FC<HeroGoalCardProps> = ({
           className="overflow-hidden rounded-tl-[20px] rounded-br-3xl"
           style={{ marginRight: -20 }}
         >
-          <ImageMascoForHomesvg width={160} height={180} />
+          <ImageMascoForHomes width={160} height={180} />
         </View>
       </View>
     </View>
