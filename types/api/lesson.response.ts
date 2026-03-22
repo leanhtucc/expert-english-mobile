@@ -1,44 +1,31 @@
-import type { Lesson } from '../entities';
+import { CommonResponse } from '../common';
+import { PaginatedData } from './learningPath.response';
 
-/**
- * Lesson API Response Types
- */
-
-/**
- * Get lessons response
- */
-export interface GetLessonsResponse {
-  data: Lesson[];
-  total: number;
+export interface Vocabulary {
+  _id: string;
+  word: string;
+  meaning_vi: string;
+  meaning_en: string;
+  pos: string; // Part of speech (noun, verb...)
+  phonetic: string;
+  audio_url: string;
+  domain: string;
 }
 
-/**
- * Get single lesson response
- */
-export interface GetLessonResponse {
-  data: Lesson;
+export interface ExampleSentence {
+  _id: string;
+  vocab_id: string;
+  sentence_en: string;
+  sentence_vi: string;
 }
 
-/**
- * Create lesson response
- */
-export interface CreateLessonResponse {
-  data: Lesson;
-  message: string;
+export interface LessonVocabulary {
+  _id: string;
+  lesson_id: string;
+  vocab_id: string;
+  order_index: number;
 }
 
-/**
- * Update lesson response
- */
-export interface UpdateLessonResponse {
-  data: Lesson;
-  message: string;
-}
-
-/**
- * Delete lesson response
- */
-export interface DeleteLessonResponse {
-  message: string;
-  success: boolean;
-}
+export type LessonVocabularyResponse = CommonResponse<PaginatedData<LessonVocabulary>>;
+export type VocabularyDetailResponse = CommonResponse<Vocabulary>;
+export type ExampleSentenceResponse = CommonResponse<PaginatedData<ExampleSentence>>;

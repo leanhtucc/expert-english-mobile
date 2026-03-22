@@ -5,10 +5,8 @@ import {
 } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-// eslint-disable-next-line import/no-named-as-default
-import CreatePasswordScreen from '@/screens/auth/CreatePassword';
+import { CreatePasswordScreen } from '@/screens/auth/CreatePassword';
 import { EnterEmailScreen } from '@/screens/auth/enterEmail';
-// eslint-disable-next-line import/no-named-as-default
 import LoginEmailScreen from '@/screens/auth/loginEmail';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
@@ -86,7 +84,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="InitialNavigator"
+        initialRouteName="VocabularyLearning"
         screenOptions={{
           gestureEnabled: true,
           gestureDirection: 'horizontal',

@@ -87,28 +87,42 @@ export const useAuth = () => {
     }
   };
 
-  const registerNewAccount = async (email: string, password: string, verificationToken: string) => {
+  const registerNewAccount = async (username: string, email: string, password: string) => {
     setLoading(true);
     try {
-      const response = await authApi.register({ email, password, verificationToken });
+      // Gọi API với username và email riêng biệt
+      const response = await authApi.register({
+        platform: 'Mobile',
+        username: username, // Nhận từ tham số truyền vào
+        email: email,
+        password: password,
+      });
+
       const payload = (response.data as RegisterResponse).data;
 
       if (payload?.accessToken) {
+        // 1. Lưu token vào AuthStore
         setAuthData({
           accessToken: payload.accessToken,
           refreshToken: payload.refreshToken,
-          email,
+          email: email, // Lưu email để định danh
           accessExpireAt: payload.accessExpireAt,
           refreshExpireAt: payload.refreshExpireAt,
         });
+
+        // 2. Lấy thông tin Profile để check isSurvey
+        const user = await fetchUserInfo();
+
         showToast('Tạo tài khoản thành công!', 'success');
-        return true;
+
+        // Trả về user object để màn hình UI xử lý navigate
+        return user;
       }
-      return false;
+      return null;
     } catch (error: any) {
       console.log('🚨 LỖI GỌI API REGISTER:', error?.response?.data || error.message);
       showToast(error?.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản.', 'error');
-      return false;
+      return null;
     } finally {
       setLoading(false);
     }

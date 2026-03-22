@@ -3,21 +3,21 @@ import { Text, View } from 'react-native';
 
 import { IconCheckCourse, IconLockLession } from '@/components/icon';
 
+// Định nghĩa kiểu dữ liệu cho trạng thái bài học
 type RoadmapStatus = 'completed' | 'active' | 'locked';
 
 interface RoadmapItemData {
-  day: string;
-  title: string;
+  _id: string;
+  displayDate: string; // SAT • MAR 21 hoặc MON • TODAY
+  name_en: string;
   status: RoadmapStatus;
-  isLast?: boolean;
 }
 
-const ROADMAP_ITEMS: RoadmapItemData[] = [
-  { day: 'MON • JUL 10', title: 'Fundamentals & Jargon', status: 'completed' },
-  { day: 'TUE • TODAY', title: 'Vocabulary & Speaking', status: 'active' },
-  { day: 'WED • JUL 12', title: 'Email Etiquette & Tone', status: 'locked', isLast: true },
-];
+interface LearningRoadmapProps {
+  items: RoadmapItemData[];
+}
 
+// Component vẽ cái chấm tròn trạng thái (Dot)
 const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
   if (status === 'completed')
     return (
@@ -27,6 +27,7 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
         </View>
       </View>
     );
+
   if (status === 'active')
     return (
       <View className="h-10 w-10 items-center justify-center rounded-full bg-red-100">
@@ -35,6 +36,8 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
         </View>
       </View>
     );
+
+  // Mặc định là Locked
   return (
     <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-100">
       <View className="h-7 w-7 items-center justify-center rounded-full bg-gray-200">
@@ -44,49 +47,82 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
   );
 };
 
-const RoadmapItem: React.FC<RoadmapItemData> = ({ day, title, status, isLast }) => {
+// Component con cho từng dòng bài học
+const RoadmapItem: React.FC<RoadmapItemData & { isLast?: boolean }> = ({
+  displayDate,
+  name_en,
+  status,
+  isLast,
+}) => {
   const isActive = status === 'active';
   const isLocked = status === 'locked';
 
   return (
     <View className="flex-row">
-      {/* Left: dot + line */}
+      {/* Cột trái: Nút trạng thái và đường kẻ nối */}
       <View className="w-14 items-center">
         <RoadmapDot status={status} />
-        {!isLast && <View className="w-0.5 flex-1 bg-gray-200" style={{ minHeight: 24 }} />}
+        {!isLast && (
+          <View
+            className={`w-[2px] flex-1 ${isLocked ? 'bg-gray-100' : 'bg-red-100'}`}
+            style={{ minHeight: 30 }}
+          />
+        )}
       </View>
 
-      {/* Content card */}
+      {/* Cột phải: Card nội dung */}
       <View
-        className={`mb-4 ml-3 flex-1 rounded-2xl px-4 py-3 ${
-          isActive ? 'border border-[#C8102E] bg-red-50' : isLocked ? 'bg-gray-50' : 'bg-gray-50'
+        className={`mb-5 ml-2 flex-1 rounded-2xl px-4 py-4 shadow-sm ${
+          isActive ? 'border border-red-200 bg-red-50/50' : 'border border-gray-50 bg-white'
         }`}
       >
-        <View className="mb-1 flex-row items-center gap-1.5">
-          <Text
-            className={`text-[11px] font-semibold ${isActive ? 'text-[#C8102E]' : 'text-gray-400'}`}
-          >
-            {day}
-          </Text>
-        </View>
         <Text
-          className={`text-sm font-bold ${
-            isLocked ? 'text-gray-400' : isActive ? 'text-[#C8102E]' : 'text-gray-800'
+          className={`mb-1 text-[11px] font-bold uppercase tracking-wider ${
+            isActive ? 'text-[#C8102E]' : 'text-gray-400'
           }`}
         >
-          {title}
+          {displayDate}
+        </Text>
+
+        <Text
+          className={`text-[15px] font-bold ${
+            isLocked ? 'text-gray-400' : isActive ? 'text-gray-900' : 'text-gray-700'
+          }`}
+          numberOfLines={1}
+        >
+          {name_en}
         </Text>
       </View>
     </View>
   );
 };
 
-export const LearningRoadmap: React.FC = () => {
+// Component chính xuất ra ngoài
+export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items }) => {
+  // Nếu không có data, không render gì cả hoặc hiện thông báo trống
+  if (!items || items.length === 0) {
+    return (
+      <View className="mx-5 items-center py-10">
+        <Text className="text-gray-400">Chưa có lộ trình học tập.</Text>
+      </View>
+    );
+  }
+
   return (
-    <View className="mx-5">
-      <Text className="mb-4 text-base font-bold text-gray-900">Learning Roadmap</Text>
-      {ROADMAP_ITEMS.map((item, i) => (
-        <RoadmapItem key={i} {...item} isLast={i === ROADMAP_ITEMS.length - 1} />
+    <View className="mx-5 mb-10">
+      <View className="mb-5 flex-row items-center justify-between">
+        <Text className="text-lg font-bold text-gray-900">Learning Roadmap</Text>
+      </View>
+
+      {items.map((item, index) => (
+        <RoadmapItem
+          key={item._id}
+          _id={item._id}
+          displayDate={item.displayDate}
+          name_en={item.name_en}
+          status={item.status}
+          isLast={index === items.length - 1}
+        />
       ))}
     </View>
   );
