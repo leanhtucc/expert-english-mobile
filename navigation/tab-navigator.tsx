@@ -7,7 +7,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { IconHome, IconProfile, IconRanking, IconUserProfile } from '@/components/icon';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { HomeScreen, LeaderboardScreen } from '@/screens';
+import { HomeScreen } from '@/screens/home';
+import LeaderboardScreen from '@/screens/leaderboard';
 import { ProfileScreen } from '@/screens/profile';
 import { PracticeSetupScreen } from '@/screens/speakingSession';
 

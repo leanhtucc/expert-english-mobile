@@ -18,5 +18,5 @@ export const surveyApi = {
     apiClient.post<GenerateLearningPath4WeekResponse>('/survey/generate-learning-path'),
 
   generateLearningPath7day: () =>
-    apiClient.post<GenerateLearningPath7dayResponse>('/survey/generate-schedule-7days'),
+    apiClient.post<GenerateLearningPath7dayResponse>('/survey/generate-schedule-7days/async'),
 };

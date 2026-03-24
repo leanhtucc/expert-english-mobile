@@ -21,12 +21,12 @@ import { AuthHeader, EmailIcon, EmailInput, LoginButton, PasswordInput } from '.
 type LoginEmailScreenNavigationProp = StackNavigationProp<any>;
 type LoginEmailScreenRouteProp = RouteProp<any, any>;
 
-export const LoginEmailScreen: React.FC = () => {
+const LoginEmailScreen: React.FC = () => {
   const navigation = useNavigation<LoginEmailScreenNavigationProp>();
   const route = useRoute<LoginEmailScreenRouteProp>();
   const { email: initialEmail = '' } = route.params || {};
 
-  const { loading, loginWithEmail } = useAuth();
+  const { loading, loginWithEmail, fetchUserInfo } = useAuth();
 
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
@@ -58,10 +58,15 @@ export const LoginEmailScreen: React.FC = () => {
     const isSuccess = await loginWithEmail(email, password);
 
     if (isSuccess) {
-      navigation.navigate('Survey', {});
+      const user = await fetchUserInfo();
+
+      if (user && user.isSurvey) {
+        navigation.replace('TabNavigator', { screen: 'Home' });
+      } else {
+        navigation.navigate('Survey', {});
+      }
     }
   };
-
   const isFormValid = email.trim() !== '' && password.trim() !== '';
 
   return (

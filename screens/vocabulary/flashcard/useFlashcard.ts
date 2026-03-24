@@ -1,14 +1,23 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { Audio } from 'expo-av';
+
+import { learningApi } from '@/api/endpoints/learning.api';
+
+// ================= TYPES =================
 export interface FlashcardItem {
   id: string;
   word: string;
   phonetic: string;
-  definition: string;
-  example: string;
-  translation: string;
-  audioUrl?: string;
-  imageUrl?: string;
+  partOfSpeech: string;
+  definitionEn: string;
+  definitionVi: string;
+  exampleEn: string;
+  exampleVi: string;
+  audioUrl?: string | null;
+  imageUrl?: string | null;
+  isRemembered?: boolean;
+  rememberedCount?: number;
 }
 
 interface UseFlashcardProps {
@@ -16,15 +25,73 @@ interface UseFlashcardProps {
   onComplete?: () => void;
 }
 
+// ================= HELPERS =================
+const shuffle = <T>(arr: T[]): T[] => {
+  const cloned = [...arr];
+  for (let i = cloned.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
+  }
+  return cloned;
+};
+
+// ================= HOOK =================
 export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [queue, setQueue] = useState<FlashcardItem[]>([]);
+  const [currentCard, setCurrentCard] = useState<FlashcardItem | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [knownCards, setKnownCards] = useState<string[]>([]);
-  const [reviewCards, setReviewCards] = useState<string[]>([]);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const currentCard = flashcards[currentIndex];
-  const isLastCard = currentIndex === flashcards.length - 1;
+  // STATE lưu tổng số thẻ phải học trong session này
+  const [sessionTotal, setSessionTotal] = useState(0);
 
+  const soundRef = useRef<Audio.Sound | null>(null);
+
+  // ================= INIT QUEUE =================
+  useEffect(() => {
+    if (!flashcards.length) return;
+
+    const weak = flashcards.filter(c => (c.rememberedCount || 0) < 3);
+    const learning = flashcards.filter(
+      c => (c.rememberedCount || 0) >= 3 && (c.rememberedCount || 0) < 5
+    );
+    const mastered = flashcards.filter(c => c.isRemembered || (c.rememberedCount || 0) >= 5);
+
+    const mixedQueue = [
+      ...shuffle(weak),
+      ...shuffle(learning),
+      ...shuffle(mastered).slice(0, Math.ceil(mastered.length * 0.2)),
+    ];
+
+    setQueue(mixedQueue);
+    setCurrentCard(mixedQueue[0]);
+    setSessionTotal(mixedQueue.length); // LƯU LẠI TỔNG SỐ CỦA SESSION
+  }, [flashcards]);
+
+  // ================= CLEANUP AUDIO =================
+  useEffect(() => {
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, []);
+
+  // ================= NEXT CARD =================
+  const goToNextCard = useCallback(
+    (newQueue: FlashcardItem[]) => {
+      if (!newQueue.length) {
+        onComplete?.();
+        return;
+      }
+      setQueue(newQueue);
+      setCurrentCard(newQueue[0]);
+      setIsFlipped(false);
+    },
+    [onComplete]
+  );
+
+  // ================= ACTIONS =================
   const handleFlip = useCallback(() => {
     setIsFlipped(prev => !prev);
   }, []);
@@ -32,53 +99,110 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
   const handleKnowIt = useCallback(() => {
     if (!currentCard) return;
 
-    setKnownCards(prev => [...prev, currentCard.id]);
+    learningApi
+      .swipeFlashcard({
+        vocab_id: currentCard.id,
+        outcome: 'remembered',
+      })
+      .catch(() => null);
 
-    if (isLastCard) {
-      onComplete?.();
-    } else {
-      setCurrentIndex(prev => prev + 1);
-      setIsFlipped(false);
+    const count = currentCard.rememberedCount || 0;
+
+    let delay = 5;
+    if (count >= 2) delay = 8;
+    if (count >= 3) delay = 12;
+
+    const newQueue = queue.slice(1);
+
+    // THAY ĐỔI Ở ĐÂY: Nếu count < 4 thì nhét lại vào Queue (tăng lên thành 5 lần là Tốt nghiệp)
+    if (count < 4) {
+      const insertIndex = Math.min(delay, newQueue.length);
+      newQueue.splice(insertIndex, 0, {
+        ...currentCard,
+        rememberedCount: count + 1,
+      });
     }
-  }, [currentCard, isLastCard, onComplete]);
+    // NẾU COUNT >= 4 -> Thẻ bị văng ra khỏi Queue hoàn toàn -> Được tính là 1 điểm
+
+    goToNextCard(newQueue);
+  }, [currentCard, queue, goToNextCard]);
 
   const handleDontKnow = useCallback(() => {
     if (!currentCard) return;
 
-    setReviewCards(prev => [...prev, currentCard.id]);
+    learningApi
+      .swipeFlashcard({
+        vocab_id: currentCard.id,
+        outcome: 'not_remembered',
+      })
+      .catch(() => null);
 
-    if (isLastCard) {
-      onComplete?.();
-    } else {
-      setCurrentIndex(prev => prev + 1);
-      setIsFlipped(false);
+    const newQueue = queue.slice(1);
+
+    // Nhét lại vào vị trí gần để học lại ngay lập tức
+    const insertIndex = Math.min(2, newQueue.length);
+    newQueue.splice(insertIndex, 0, {
+      ...currentCard,
+      rememberedCount: 0, // Reset điểm nhớ
+    });
+
+    goToNextCard(newQueue);
+  }, [currentCard, queue, goToNextCard]);
+
+  // ================= AUDIO =================
+  const handlePlayAudio = useCallback(async () => {
+    if (!currentCard?.audioUrl || isPlaying) return;
+
+    try {
+      setIsPlaying(true);
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: currentCard.audioUrl },
+        { shouldPlay: true }
+      );
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.isLoaded && status.didJustFinish) {
+          sound.unloadAsync();
+          soundRef.current = null;
+          setIsPlaying(false);
+        }
+      });
+    } catch (err) {
+      console.log('🚨 Audio error:', err);
+      setIsPlaying(false);
     }
-  }, [currentCard, isLastCard, onComplete]);
+  }, [currentCard, isPlaying]);
 
-  const handlePlayAudio = useCallback(() => {
-    // Audio playback logic here
-    console.log('Playing audio for:', currentCard?.word);
-  }, [currentCard]);
+  // ================= PROGRESS TRIGER =================
+  const progress = useMemo(() => {
+    // SỐ THẺ ĐÃ HỌC XONG = TỔNG BAN ĐẦU - SỐ THẺ CÒN LẠI TRONG QUEUE
+    const completedCount = sessionTotal > 0 ? sessionTotal - queue.length : 0;
 
+    return {
+      current: completedCount,
+      total: sessionTotal,
+      percent: sessionTotal === 0 ? 0 : Math.round((completedCount / sessionTotal) * 100),
+    };
+  }, [sessionTotal, queue.length]); // Khai báo rõ dependency để React biết khi nào cần tính lại
+
+  // ================= RESET =================
   const reset = useCallback(() => {
-    setCurrentIndex(0);
-    setIsFlipped(false);
-    setKnownCards([]);
-    setReviewCards([]);
+    // Thường thì reset sẽ do component cha (VocabularyLearning) lo bằng cách đập đi xây lại
   }, []);
 
   return {
     currentCard,
-    currentIndex,
-    totalCards: flashcards.length,
     isFlipped,
-    isLastCard,
-    knownCards,
-    reviewCards,
-    progress: {
-      current: currentIndex + 1,
-      total: flashcards.length,
-    },
+    isPlaying,
+    progress,
+    queueLength: queue.length,
+
     handleFlip,
     handleKnowIt,
     handleDontKnow,

@@ -31,9 +31,12 @@ export interface LoginWithGoogleRequest {
 }
 
 export interface RegisterRequest {
-  email: string;
+  platform: 'Web' | 'Mobile';
   password: string;
-  verificationToken: string;
+  username: string;
+  email: string;
+  firstname?: string;
+  lastname?: string;
 }
 export interface UpdateProfileRequest {
   fullname?: string;

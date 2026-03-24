@@ -1,5 +1,5 @@
 export { mockFillBlankQuestions } from './mock-fill-blank';
-export { mockFlashcards } from './mock-flashcards';
+// export { mockFlashcards } from './mock-flashcards';
 export { mockImageQuizQuestions } from './mock-image-quiz';
 export {
   mockLessonResultAverage,

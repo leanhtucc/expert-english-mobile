@@ -5,17 +5,15 @@ import {
 } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-// eslint-disable-next-line import/no-named-as-default
-import CreatePasswordScreen from '@/screens/auth/CreatePassword';
+import { CreatePasswordScreen } from '@/screens/auth/CreatePassword';
 import { EnterEmailScreen } from '@/screens/auth/enterEmail';
-// eslint-disable-next-line import/no-named-as-default
 import LoginEmailScreen from '@/screens/auth/loginEmail';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import { OnboardingScreen } from '@/screens/onboarding';
 import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
-import { VocabularyLearning } from '@/screens/vocabulary/vocabularyLearning';
+import VocabularyLearning from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
 import TabNavigator from './tab-navigator';

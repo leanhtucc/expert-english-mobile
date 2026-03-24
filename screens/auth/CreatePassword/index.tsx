@@ -33,9 +33,9 @@ type CreatePasswordScreenRouteProp = RouteProp<any, any>;
 export const CreatePasswordScreen: React.FC = () => {
   const navigation = useNavigation<CreatePasswordScreenNavigationProp>();
   const route = useRoute<CreatePasswordScreenRouteProp>();
-  const { email = '', verificationToken = '' } = route.params || {};
+  const { email = '' } = route.params || {};
 
-  const { loading, registerNewAccount } = useAuth(); // Gọi Hook
+  const { loading } = useAuth(); // Gọi Hook
 
   const scrollViewRef = useRef<ScrollView>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
@@ -67,13 +67,6 @@ export const CreatePasswordScreen: React.FC = () => {
     }
 
     if (hasError) return;
-
-    // Đăng ký account qua Hook
-    const isSuccess = await registerNewAccount(email, password, verificationToken);
-
-    if (isSuccess) {
-      navigation.navigate('TabNavigator', {});
-    }
   };
 
   const handleConfirmPasswordFocus = () => {
