@@ -87,7 +87,7 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
                   <Text
                     numberOfLines={1}
                     adjustsFontSizeToFit
-                    className="text-center text-lg font-bold italic text-[#C70F2B]"
+                    className="text-center text-base font-bold italic text-[#C70F2B]"
                   >
                     {card.phonetic}
                   </Text>

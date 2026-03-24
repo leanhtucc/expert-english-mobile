@@ -40,6 +40,7 @@ export const useLessonFlow = (lessonId: string) => {
     try {
       setLoading(true);
       setError(null);
+      console.log('🚀 --- BẮT ĐẦU FETCH DATA CHO LESSON ID:', lessonId, '---');
 
       // 1. Lấy vocab IDs
       const vocabRes = await learningApi.getLessonVocabularies({
@@ -48,13 +49,16 @@ export const useLessonFlow = (lessonId: string) => {
       });
 
       const vocabItems = vocabRes.data.data?.result || [];
+      console.log(`📍 1. Đã lấy được Vocab IDs (Tổng: ${vocabItems.length}):`, vocabItems);
 
       if (vocabItems.length === 0) {
+        console.log('⚠️ Lesson này không có từ vựng nào.');
         setFlashcards([]);
         return;
       }
 
       // 2. Lấy detail + sentence
+      console.log('⏳ Đang gọi API lấy chi tiết từng từ vựng và câu ví dụ...');
       const fullDataPromises = vocabItems.map(async item => {
         const vocabId = item.vocab_id;
 
@@ -92,12 +96,16 @@ export const useLessonFlow = (lessonId: string) => {
 
       const resolvedFlashcards = await Promise.all(fullDataPromises);
 
+      // LOG KẾT QUẢ CUỐI CÙNG (JSON.stringify để in ra dạng cây đẹp mắt)
+      console.log('✅ 2. DỮ LIỆU ĐÃ MAP HOÀN CHỈNH:', JSON.stringify(resolvedFlashcards, null, 2));
+
       setFlashcards(resolvedFlashcards);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: any) {
+      console.error('🚨 LỖI LẤY DATA FLASHCARD:', err?.response?.data || err.message);
       setError('Không thể tải dữ liệu bài học');
     } finally {
       setLoading(false);
+      console.log('🏁 --- KẾT THÚC FETCH DATA ---');
     }
   }, [lessonId]);
 
