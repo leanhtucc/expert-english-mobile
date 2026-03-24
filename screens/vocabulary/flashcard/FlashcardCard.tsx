@@ -56,6 +56,7 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
   return (
     <TouchableOpacity activeOpacity={1} onPress={onFlip} className="w-full max-w-[340px]">
       <View className="relative h-[460px] w-full">
+        {/* MẶT TRƯỚC */}
         <Animated.View
           style={[
             styles.cardBase,
@@ -81,7 +82,7 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
               <Text className="text-center text-[36px] font-black leading-tight tracking-tight text-slate-900">
                 {card.word}
               </Text>
-              {card.phonetic && (
+              {card.phonetic ? (
                 <View className="w-full items-center rounded-full px-4 py-1.5">
                   <Text
                     numberOfLines={1}
@@ -91,7 +92,7 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
                     {card.phonetic}
                   </Text>
                 </View>
-              )}
+              ) : null}
             </View>
 
             {onPlayAudio && (
@@ -112,19 +113,17 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
           </View>
         </Animated.View>
 
+        {/* MẶT SAU */}
         <Animated.View
           style={[
             styles.cardBase,
             styles.shadow,
-            {
-              transform: [{ perspective: 1000 }, { rotateY: backRotateY }],
-              opacity: backOpacity,
-            },
+            { transform: [{ perspective: 1000 }, { rotateY: backRotateY }], opacity: backOpacity },
           ]}
           className="absolute inset-0 z-[-1] bg-white"
         >
           <View className="flex-1 p-8">
-            {/* Vietnamese Meaning Section */}
+            {/* Vietnamese Meaning */}
             <View className="mb-8 mt-2">
               <View className="mb-3 flex-row items-center">
                 <Text className="text-[11px] font-black uppercase tracking-[2px] text-[#94A3B8]">
@@ -132,36 +131,39 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
                 </Text>
               </View>
               <Text className="mb-2 text-2xl font-black text-[#C70F2B]">
-                {card.translation || 'Nghĩa: ' + card.word}
+                {card.definitionVi || 'Đang cập nhật...'}
               </Text>
               <Text className="text-[17px] font-medium leading-relaxed text-slate-600">
-                {card.definition}
+                {card.definitionEn}
               </Text>
             </View>
 
-            {/* Usage Example Section */}
+            {/* Usage Example */}
             <View>
               <View className="mb-4 flex-row items-center">
                 <Text className="text-[11px] font-black uppercase tracking-[2px] text-[#94A3B8]">
                   Usage Example
                 </Text>
               </View>
-              {card.example && (
+              {card.exampleEn ? (
                 <View className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
                   <Text className="text-[16px] italic leading-relaxed text-slate-700">
-                    {card.example.split(card.word).map((part, idx, arr) =>
-                      idx < arr.length - 1 ? (
-                        <React.Fragment key={idx}>
+                    {/* Bôi đỏ chữ đang học bất chấp viết hoa thường */}
+                    {card.exampleEn.split(new RegExp(`(${card.word})`, 'gi')).map((part, idx) =>
+                      part.toLowerCase() === card.word.toLowerCase() ? (
+                        <Text key={idx} className="font-extrabold text-[#C70F2B]">
                           {part}
-                          <Text className="font-extrabold text-[#C70F2B]">{card.word}</Text>
-                        </React.Fragment>
+                        </Text>
                       ) : (
-                        part
+                        <React.Fragment key={idx}>{part}</React.Fragment>
                       )
                     )}
                   </Text>
+                  {card.exampleVi ? (
+                    <Text className="mt-3 text-[14px] text-slate-500">{card.exampleVi}</Text>
+                  ) : null}
                 </View>
-              )}
+              ) : null}
             </View>
           </View>
         </Animated.View>
@@ -170,7 +172,6 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
   );
 };
 
-// Đưa các style tĩnh và shadow xuống đây để code gọn gàng, tăng hiệu năng
 const styles = StyleSheet.create({
   cardBase: {
     height: '100%',
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1F5F9',
     overflow: 'hidden',
-    backfaceVisibility: 'hidden', // Ẩn mặt lưng đi khi bị xoay ngược
+    backfaceVisibility: 'hidden',
   },
   shadow: {
     shadowColor: '#C70F2B',

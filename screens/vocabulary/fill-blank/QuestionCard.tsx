@@ -19,7 +19,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   hint,
 }) => {
   return (
-    <View className="w-full rounded-[24px] border border-slate-100 bg-white p-5 pt-4 shadow-sm">
+    <View className="w-full rounded-[24px] border border-slate-100 bg-white p-5 shadow-sm">
       {/* Câu hỏi có điền chỗ trống */}
       <Text className="mb-5 text-[18px] font-bold leading-snug text-[#1E293B]">
         {/* Phần trước khoảng trống */}

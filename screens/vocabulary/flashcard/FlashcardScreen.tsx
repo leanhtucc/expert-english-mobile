@@ -40,8 +40,8 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50" edges={['top', 'left', 'right']}>
-      <View className="flex-1 px-4">
+    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
+      <View className="mt-6 flex-1 px-3">
         <View>
           <ScreenHeader
             title="Vocabulary Flashcard"
@@ -49,7 +49,7 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
             onBack={onBack}
             onClose={onClose}
           />
-          <ProgressBar current={progress.current} total={progress.total} />
+          <ProgressBar current={progress.current} total={progress.total} variant="flashcard" />
         </View>
 
         <View className="w-full flex-1 items-center justify-center pb-6">

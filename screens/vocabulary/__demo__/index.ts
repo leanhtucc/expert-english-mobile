@@ -6,7 +6,7 @@
  */
 
 export { DemoFillBlankScreen } from './DemoFillBlankScreen';
-export { DemoFlashcardScreen } from './DemoFlashcardScreen';
+// export { DemoFlashcardScreen } from './DemoFlashcardScreen';
 export { DemoImageQuizScreen } from './DemoImageQuizScreen';
 export { DemoLessonResultScreen } from './DemoLessonResultScreen';
 export { DemoMatchTermsScreen } from './DemoMatchTermsScreen';

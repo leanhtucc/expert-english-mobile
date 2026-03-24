@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { DemoFillBlankScreen } from './DemoFillBlankScreen';
-import { DemoFlashcardScreen } from './DemoFlashcardScreen';
+// import { DemoFlashcardScreen } from './DemoFlashcardScreen';
 import { DemoImageQuizScreen } from './DemoImageQuizScreen';
 import { DemoLessonResultScreen } from './DemoLessonResultScreen';
 import { DemoMatchTermsScreen } from './DemoMatchTermsScreen';
@@ -15,7 +15,7 @@ type DemoScreenType =
   | 'multipleChoice'
   | 'imageQuiz'
   | 'matchTerms'
-  | 'fillBlank'
+  | 'ReviewSession'
   | 'reviewSession'
   | 'lessonResult';
 
@@ -57,11 +57,11 @@ const demoMenuItems: DemoMenuItem[] = [
     color: 'bg-orange-500',
   },
   {
-    key: 'fillBlank',
-    title: 'Fill in the Blank',
-    description: 'Complete sentences with vocabulary',
-    icon: '✏️',
-    color: 'bg-teal-500',
+    key: 'ReviewSession',
+    title: 'Review Session',
+    description: 'Review incorrect answers',
+    icon: '📚',
+    color: 'bg-red-500',
   },
   {
     key: 'reviewSession',
@@ -88,15 +88,13 @@ export const DemoNavigator: React.FC = () => {
 
   const renderScreen = () => {
     switch (currentScreen) {
-      case 'flashcard':
-        return <DemoFlashcardScreen />;
       case 'multipleChoice':
         return <DemoMultipleChoiceScreen />;
       case 'imageQuiz':
         return <DemoImageQuizScreen />;
       case 'matchTerms':
         return <DemoMatchTermsScreen />;
-      case 'fillBlank':
+      case 'ReviewSession':
         return <DemoFillBlankScreen />;
       case 'reviewSession':
         return <DemoReviewSessionScreen />;

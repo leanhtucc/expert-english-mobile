@@ -39,4 +39,10 @@ export const learningApi = {
 
   getExampleSentences: (params: GetPageRequest) =>
     apiClient.get<ExampleSentenceResponse>('/example-sentences/page', { params }),
+
+  swipeFlashcard: (data: { vocab_id: string; outcome: 'remembered' | 'not_remembered' }) =>
+    apiClient.post('/user-vocabulary-progress/flashcard/swipe', data),
+
+  resetLessonFlashcards: (data: { lesson_id: string }) =>
+    apiClient.post('/user-vocabulary-progress/flashcard/reset-lesson', data),
 };

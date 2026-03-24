@@ -13,7 +13,7 @@ import { OnboardingScreen } from '@/screens/onboarding';
 import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
-import { VocabularyLearning } from '@/screens/vocabulary/vocabularyLearning';
+import VocabularyLearning from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
 import TabNavigator from './tab-navigator';
@@ -84,7 +84,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="VocabularyLearning"
+        initialRouteName="InitialNavigator"
         screenOptions={{
           gestureEnabled: true,
           gestureDirection: 'horizontal',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 import { IconCheckCourse, IconLockLession } from '@/components/icon';
 
@@ -15,6 +15,7 @@ interface RoadmapItemData {
 
 interface LearningRoadmapProps {
   items: RoadmapItemData[];
+  onLessonPress?: (lessonId: string, status: RoadmapStatus) => void;
 }
 
 // Component vẽ cái chấm tròn trạng thái (Dot)
@@ -47,19 +48,20 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
   );
 };
 
-// Component con cho từng dòng bài học
-const RoadmapItem: React.FC<RoadmapItemData & { isLast?: boolean }> = ({
-  displayDate,
-  name_en,
-  status,
-  isLast,
-}) => {
+const RoadmapItem: React.FC<
+  RoadmapItemData & { isLast?: boolean; onPress?: (id: string, status: RoadmapStatus) => void }
+> = ({ _id, displayDate, name_en, status, isLast, onPress }) => {
   const isActive = status === 'active';
   const isLocked = status === 'locked';
 
   return (
-    <View className="flex-row">
-      {/* Cột trái: Nút trạng thái và đường kẻ nối */}
+    <TouchableOpacity
+      className="flex-row"
+      activeOpacity={isLocked ? 1 : 0.7} // Khóa thì không có hiệu ứng mờ khi bấm
+      onPress={() => onPress?.(_id, status)}
+    >
+      {/* ... (Giữ nguyên toàn bộ nội dung View Cột trái và Cột phải bên trong) ... */}
+      {/* Cột trái */}
       <View className="w-14 items-center">
         <RoadmapDot status={status} />
         {!isLast && (
@@ -70,7 +72,7 @@ const RoadmapItem: React.FC<RoadmapItemData & { isLast?: boolean }> = ({
         )}
       </View>
 
-      {/* Cột phải: Card nội dung */}
+      {/* Cột phải */}
       <View
         className={`mb-5 ml-2 flex-1 rounded-2xl px-4 py-4 shadow-sm ${
           isActive ? 'border border-red-200 bg-red-50/50' : 'border border-gray-50 bg-white'
@@ -83,7 +85,6 @@ const RoadmapItem: React.FC<RoadmapItemData & { isLast?: boolean }> = ({
         >
           {displayDate}
         </Text>
-
         <Text
           className={`text-[15px] font-bold ${
             isLocked ? 'text-gray-400' : isActive ? 'text-gray-900' : 'text-gray-700'
@@ -93,13 +94,11 @@ const RoadmapItem: React.FC<RoadmapItemData & { isLast?: boolean }> = ({
           {name_en}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
-// Component chính xuất ra ngoài
-export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items }) => {
-  // Nếu không có data, không render gì cả hoặc hiện thông báo trống
+export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items, onLessonPress }) => {
   if (!items || items.length === 0) {
     return (
       <View className="mx-5 items-center py-10">
@@ -122,6 +121,7 @@ export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items }) => {
           name_en={item.name_en}
           status={item.status}
           isLast={index === items.length - 1}
+          onPress={onLessonPress} // Truyền hàm xuống đây
         />
       ))}
     </View>

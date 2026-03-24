@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import { surveyApi } from '@/api';
+import { surveyApi } from '@/api/endpoints/survey.api';
 import {
   IconCheckCourse,
   IconLoadingBuildCourse,
@@ -41,48 +41,88 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute<any>();
 
-  // Lấy params
   const duration = route.params?.duration || 'standard';
-  const focusText = route.params?.focusText || '';
 
   const [progress, setProgress] = useState(0);
   const [seqIndex, setSeqIndex] = useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    console.log('\n=======================================');
-    console.log('🚀 [START] VÀO MÀN HÌNH LOADING AI');
-    console.log(`📌 Params nhận được - Duration: ${duration} | Focus: "${focusText}"`);
+  // Biến để đánh dấu khi nào API thực sự xong
+  const apiDataRef = useRef<any>(null);
+  const isApiFinished = useRef(false);
 
+  useEffect(() => {
     let isMounted = true;
 
+    // 1. INTERVAL TỐC ĐỘ VỪA PHẢI (Mục tiêu ~15-20 giây)
     const interval = setInterval(() => {
       setProgress(prev => {
-        const next = prev < 90 ? prev + Math.floor(Math.random() * 5) + 2 : 90;
+        let increment = 0;
+
+        // Mỗi 800ms tăng trung bình 4-6% -> ~15-18 giây sẽ chạm mốc 95%
+        if (prev < 50) {
+          // Giai đoạn 1: 0-50% (Chạy đều tay)
+          increment = 3 + Math.random() * 3;
+        } else if (prev < 90) {
+          // Giai đoạn 2: 50-90% (Chậm lại một chút để tạo cảm giác xử lý sâu)
+          increment = 1.5 + Math.random() * 2;
+        } else if (prev < 98) {
+          // Giai đoạn 3: 90-98% (Bò rất chậm để chờ tín hiệu API)
+          increment = 0.3 + Math.random() * 0.7;
+        } else {
+          // Treo nhẹ ở 99% nếu API chưa xong
+          increment = 0.05;
+        }
+
+        const next = Math.min(prev + increment, 99);
 
         Animated.timing(progressAnim, {
           toValue: next,
-          duration: 300,
+          duration: 700, // Animation dài hơn để thanh bar trôi mượt, không giật
           useNativeDriver: false,
         }).start();
 
-        if (next >= 30 && next < 70) setSeqIndex(1);
-        else if (next >= 70 && next < 100) setSeqIndex(2);
+        // Cập nhật Step UI theo tiến độ %
+        if (next >= 35 && next < 70) setSeqIndex(1);
+        else if (next >= 70 && next < 99) setSeqIndex(2);
 
-        if (next % 10 === 0 || next === 90) {
-          console.log(`⏳ Tiến trình giả lập: ${next}%`);
+        // ĐIỀU KIỆN KẾT THÚC: API Xong VÀ Progress đã bò tới sát nút (>= 98)
+        if (isApiFinished.current && next >= 98) {
+          finishLoading();
         }
 
         return next;
       });
-    }, 400);
+    }, 800); // Check mỗi 0.8 giây
+
+    const finishLoading = () => {
+      clearInterval(interval);
+      setSeqIndex(3); // Hiện trạng thái "Completed" cho tất cả các bước
+      setProgress(100);
+
+      // Hiệu ứng về đích 100% mượt mà
+      Animated.timing(progressAnim, {
+        toValue: 100,
+        duration: 1000,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: false,
+      }).start();
+
+      // Đợi thêm 1.5s để user kịp nhìn thấy kết quả 100% hoàn tất
+      setTimeout(() => {
+        if (isMounted) {
+          console.log('⏭️ [ĐIỀU HƯỚNG] Hoàn tất 100% lộ trình');
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'TabNavigator' as any }],
+          });
+        }
+      }, 1500);
+    };
 
     const generateCourse = async () => {
       try {
-        console.log(
-          `🌐 [API CALL] Đang gọi API cho lộ trình: ${duration === 'fast' ? '7 Ngày' : '4 Tuần'}...`
-        );
-
+        console.log('🌐 [API CALL] Bắt đầu gọi API...');
         let response;
         if (duration === 'fast') {
           response = await surveyApi.generateLearningPath7day();
@@ -92,47 +132,14 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
 
         if (!isMounted) return;
 
-        console.log('✅ [API THÀNH CÔNG] Dữ liệu trả về:', JSON.stringify(response.data, null, 2));
-
-        console.log('⏩ [TIẾN TRÌNH] Ép tiến trình lên 100%');
-        clearInterval(interval);
-        setProgress(100);
-        setSeqIndex(3);
-        Animated.timing(progressAnim, {
-          toValue: 100,
-          duration: 500,
-          useNativeDriver: false,
-        }).start();
-
-        setTimeout(() => {
-          console.log('⏭️ [ĐIỀU HƯỚNG] Chuyển sang TabNavigator (Màn Home)');
-          console.log('=======================================\n');
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'TabNavigator' as any }],
-          });
-        }, 800);
+        apiDataRef.current = response.data;
+        isApiFinished.current = true;
+        console.log('✅ [API THÀNH CÔNG] Dữ liệu đã sẵn sàng, chờ tiến trình đạt 100%...');
       } catch (error: any) {
         if (!isMounted) return;
         clearInterval(interval);
-
-        console.log(
-          '❌ [API THẤT BẠI] Lỗi sinh lộ trình:',
-          error?.response?.status,
-          error?.response?.data || error.message
-        );
-
-        if (error?.response?.status === 400) {
-          Alert.alert(
-            'Notice',
-            'User has not completed survey. Please return and complete the survey first.'
-          );
-        } else {
-          Alert.alert('Error', 'Failed to generate your learning path. Please try again.');
-        }
-
-        console.log('🔙 [ĐIỀU HƯỚNG] Trở về màn trước do lỗi');
-        console.log('=======================================\n');
+        console.error('❌ [API THẤT BẠI]', error.message);
+        Alert.alert('Error', 'Failed to generate your roadmap.');
         navigation.goBack();
       }
     };
@@ -142,10 +149,8 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
     return () => {
       isMounted = false;
       clearInterval(interval);
-      console.log('🧹 [CLEANUP] Unmount màn hình Loading');
     };
-  }, [duration, focusText, navigation, progressAnim]);
-
+  }, [duration, navigation, progressAnim]);
   const STATUS_DETAIL: Record<StepStatus, string> = {
     completed: 'Completed',
     in_progress: 'In Progress',

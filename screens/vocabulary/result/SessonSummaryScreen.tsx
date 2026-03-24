@@ -1,6 +1,10 @@
+// 1. Thêm import này
+import React from 'react';
 import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
+import { useNavigation } from '@react-navigation/native';
 
 import ImageSessionSummary from '@/assets/svgs/output/ImageSessionSummary';
 import { IconReview } from '@/components/icon';
@@ -21,7 +25,7 @@ interface LessonSummaryScreenProps {
   data: LessonSummaryData;
   onRestart?: () => void;
   onReviewWeak?: () => void;
-  onClose?: () => void;
+  onClose?: () => void; // Vẫn giữ lại prop này nếu sau này cần
 }
 
 export const SessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
@@ -31,6 +35,22 @@ export const SessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
   onClose,
 }) => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>(); // 2. Khởi tạo navigation
+
+  // 3. Viết hàm điều hướng về Home và xóa lịch sử stack học
+  const handleGoHome = () => {
+    // Nếu có truyền onClose từ component cha thì cứ gọi
+    if (onClose) {
+      onClose();
+    }
+
+    // Dùng reset để xóa sạch stack hiện tại, tránh việc user lướt ngược lại màn hình học
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Home' }], // Lưu ý: Đổi chữ 'Home' thành tên đúng của màn hình trang chủ trong file Navigation của bạn (VD: 'TabNavigator', 'Main',...)
+    });
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-[#F9FAFB]" edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" translucent={false} />
@@ -47,9 +67,11 @@ export const SessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
         }}
       >
         <View className="mb-10 w-full flex-row items-center">
-          <TouchableOpacity onPress={onClose} className="p-2">
+          {/* 4. Gắn hàm handleGoHome vào nút X */}
+          <TouchableOpacity onPress={handleGoHome} className="p-2">
             <MaterialIcons name="close" size={28} color="#222" />
           </TouchableOpacity>
+
           <View className="mr-[30px] flex-1 items-center">
             <Text className="text-lg font-semibold text-[#0F172A]">Session Summary</Text>
           </View>

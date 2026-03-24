@@ -37,7 +37,6 @@ export const OptionButton: React.FC<OptionButtonProps> = ({
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.7}
-      // ĐÃ THÊM `mb-2` VÀO ĐÂY ĐỂ ÉP BUỘC CÁC NÚT PHẢI CÁCH NHAU 8px
       className={`bg-white} mb-2 flex-row items-center justify-between rounded-2xl border-[1.5px] border-slate-200 px-5 py-6 ${
         disabled && !isCorrect && !isWrong ? 'opacity-60' : ''
       } ${className}`}
