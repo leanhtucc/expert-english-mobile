@@ -1,3 +1,5 @@
+import { Feather } from '@expo/vector-icons';
+
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,10 +13,11 @@ import { useProgress } from '../hooks/useProgress';
 // eslint-disable-next-line no-empty-pattern
 export const WeekUnlockScreen = ({}: any) => {
   const { data, loading } = useProgress();
+
   if (loading || !data) return null;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F6F3F2]">
+    <SafeAreaView className="flex-1 bg-[#FFF8F7]">
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
@@ -28,8 +31,9 @@ export const WeekUnlockScreen = ({}: any) => {
           Tuần 2 đã mở khóa!
         </Text>
 
+        {/* Lộ trình 4 tuần (Ngang) */}
         <View
-          className="mb-6 rounded-[24px] bg-white p-5 shadow-sm"
+          className="mb-8 rounded-[24px] bg-[#FFF0EF] p-5 pt-6 shadow-sm"
           style={{
             elevation: 3,
             shadowColor: '#000',
@@ -38,61 +42,81 @@ export const WeekUnlockScreen = ({}: any) => {
             shadowRadius: 12,
           }}
         >
-          <View className="mb-2 flex items-center justify-center">
-            <IconRoadmap width={20} height={20} />
-            <Text className="ml-2 text-[15px] font-extrabold text-[#2B1D1D]">Lộ trình 4 tuần</Text>
+          <View className="mb-2 flex-row items-center">
+            <IconRoadmap width={20} height={20} color="#C8102E" />
+            <Text className="ml-2 text-[16px] font-extrabold text-[#2B1D1D]">Lộ trình 4 tuần</Text>
           </View>
           <WeekTimeline items={data.weekTimeline} />
         </View>
 
-        <Text className="mb-4 text-[15px] font-extrabold text-[#2B1D1D]">Bài học tuần 2</Text>
+        <Text className="mb-4 text-[16px] font-extrabold text-[#2B1D1D]">Bài học tuần 2</Text>
 
-        {/* Vertical Timeline List */}
-        <View className="mb-8">
-          {data.weeklyLessons.map((lesson, index) => (
-            <View key={lesson.id} className="mb-4 flex-row">
-              {/* Cột Timeline */}
-              <View className="relative mr-4 items-center">
+        {/* ========================================== */}
+        {/* TRỤC DỌC BÀI HỌC (VERTICAL TIMELINE) */}
+        {/* ========================================== */}
+        <View className="mb-8 pl-1">
+          {data.weeklyLessons.map((lesson, index) => {
+            const isLast = index === data.weeklyLessons.length - 1;
+
+            return (
+              <View key={lesson.id} className="mb-4 flex-row">
+                {/* Cột Timeline bên trái - Tăng w-8 -> w-12 để chứa chấm to hơn */}
+                <View className="relative mr-4 w-12 items-center">
+                  {/* Đường dọc nối (Nằm dưới z-0) */}
+                  {!isLast && (
+                    // Điều chỉnh top-[36px] để đường kẻ xuất phát từ tâm của dấu chấm to 48px
+                    <View className="absolute top-[36px] bottom-[-24px] z-0 w-[2px] bg-[#E5E7EB]" />
+                  )}
+
+                  {/* Dấu chấm: PHÓNG TO ĐÁNG KỂ (Viền hồng h-12 w-12 (~48px), lõi đỏ h-30 w-30) */}
+                  {/* Điều chỉnh mt-[12px] để canh lề trên phù hợp với kích thước mới */}
+                  <View className="z-10 mt-[12px] h-12 w-12 items-center justify-center rounded-full bg-[#FCE4E4]">
+                    <View className="h-[35px] w-[35px] rounded-full bg-[#C8102E]" />
+                  </View>
+                </View>
+
+                {/* Nội dung bài học */}
                 <View
-                  className={`h-4 w-4 rounded-full ${lesson.isToday ? 'bg-[#D90429]' : 'border-4 border-white bg-[#D90429]/80 shadow-sm'}`}
-                />
-                {index !== data.weeklyLessons.length - 1 && (
-                  <View className="absolute top-4 bottom-[-16px] w-[2px] bg-[#F0EAEA]" />
-                )}
-              </View>
-              {/* Nội dung bài học */}
-              <View
-                className={`flex-1 rounded-[16px] p-4 ${lesson.isToday ? 'bg-white shadow-sm' : ''}`}
-                style={
-                  lesson.isToday
-                    ? {
-                        elevation: 2,
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.05,
-                        shadowRadius: 8,
-                      }
-                    : {}
-                }
-              >
-                <Text
-                  className={`text-[10px] font-bold tracking-widest ${lesson.isToday ? 'text-[#D90429]' : 'text-[#7A6F6F]'}`}
+                  className={`flex-1 rounded-[16px] p-4 ${
+                    lesson.isToday ? 'border border-[#C6102E33] bg-white' : 'bg-transparent'
+                  }`}
+                  style={
+                    lesson.isToday
+                      ? {
+                          elevation: 3,
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 4 },
+                          shadowOpacity: 0.06,
+                          shadowRadius: 12,
+                        }
+                      : {}
+                  }
                 >
-                  {lesson.day} • {lesson.date}
-                </Text>
-                <Text
-                  className={`mt-1 text-[15px] font-bold ${lesson.status === 'locked' ? 'text-[#A19B9A]' : 'text-[#2B1D1D]'}`}
-                >
-                  {lesson.title}
-                </Text>
+                  <Text
+                    className={`text-[11px] font-extrabold uppercase tracking-widest ${
+                      lesson.isToday ? 'text-[#C8102E]' : 'text-[#A19B9A]'
+                    }`}
+                  >
+                    {`${lesson.day} • ${lesson.date}`}
+                  </Text>
+                  <Text
+                    className={`mt-1 text-[16px] font-bold ${
+                      lesson.isToday ? 'text-[#1F2937]' : 'text-[#9CA3AF]'
+                    }`}
+                  >
+                    {lesson.title}
+                  </Text>
+                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
+        {/* ========================================== */}
 
+        {/* Nút bấm */}
         <PrimaryButton
           title="Bắt đầu ngay"
-          icon="arrow-right"
+          icon={<Feather name="arrow-right" size={18} color="white" />}
           onPress={() => console.log('Bắt đầu bài học')}
         />
       </ScrollView>

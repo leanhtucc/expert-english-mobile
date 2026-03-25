@@ -67,7 +67,7 @@ export const HomeScreen: React.FC = () => {
             title={todayLesson?.name_en}
             category={todayLesson?.lesson_type?.toUpperCase()}
             description={todayLesson?.name_vi}
-            onPress={() => handleLessonPress(todayLesson?._id, todayLesson?.status || 'active')}
+            onPress={() => navigation.navigate('VocabularyListScreen')}
           />
         </View>
 

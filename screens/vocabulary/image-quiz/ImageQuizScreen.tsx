@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,8 +9,6 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { ImageQuestion } from './ImageQuestion';
 import { OptionButton } from './OptionButton';
 import { ImageQuizQuestion, useImageQuiz } from './useImageQuiz';
-
-// <-- Import file này
 
 interface ImageQuizScreenProps {
   questions: ImageQuizQuestion[];
@@ -30,34 +28,47 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
     currentQuestion,
     selectedAnswer,
     isAnswered,
-    isCorrect, // Lấy thêm trạng thái Đúng/Sai từ hook
+    isCorrect,
     isLastQuestion,
     progress,
     handleSelectAnswer,
     handleNext,
+    resetAnswer,
   } = useImageQuiz({
     questions,
     onComplete,
   });
+
+  // LOGIC: KHI TRẢ LỜI SAI -> CHỜ 1.5 GIÂY RỒI RESET ĐỂ CHỌN LẠI
+  useEffect(() => {
+    // Sử dụng ReturnType để TypeScript tự động nhận diện đúng kiểu của môi trường hiện tại
+    let timer: ReturnType<typeof setTimeout>;
+
+    if (isAnswered && !isCorrect) {
+      timer = setTimeout(() => {
+        resetAnswer();
+      }, 1500);
+    }
+
+    // Luôn luôn trả về hàm dọn dẹp ở cuối để chiều lòng TypeScript
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isAnswered, isCorrect, resetAnswer]);
 
   if (!currentQuestion) {
     return null;
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
-      <View className="w-full bg-white">
-        <ScreenHeader
-          title="Image Quiz"
-          subtitle="Identify the vocabulary"
-          onBack={onBack}
-          onClose={onClose}
-        />
+    <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right']}>
+      <View className="z-10 w-full bg-white">
+        <ScreenHeader title="Industry Quiz" subtitle="" onBack={onBack} onClose={onClose} />
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
         <View className="w-full px-5 pt-5 pb-2">
-          <ProgressBar current={progress.current} total={progress.total} />
+          <ProgressBar current={progress.current} total={progress.total} variant="quiz" />
         </View>
 
         <ScrollView
@@ -69,7 +80,7 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
             <ImageQuestion imageUrl={currentQuestion.imageUrl} />
           </View>
 
-          <Text className="mb-8 px-2 text-center text-[18px] font-bold text-[#1E293B]">
+          <Text className="mb-8 px-2 text-center text-[18px] font-extrabold text-[#1E293B]">
             {currentQuestion.correctAnswer ||
               'Which specialized AI architecture is shown in this visualization?'}
           </Text>
@@ -89,26 +100,30 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
         </ScrollView>
       </View>
 
-      {/* DẢI NÚT ĐÁY MÀN HÌNH: CHUYỂN ĐỔI GIỮA NÚT SUBMIT BÌNH THƯỜNG VÀ CHECK RESULT */}
-      <View className="absolute bottom-[-25px] left-0 right-0 w-full">
-        {!isAnswered ? (
-          // Khi CHƯA CHỐT ĐÁP ÁN: Hiện Primary Button bình thường
+      {/* DẢI NÚT CHỈ HIỆN KHI CHƯA CHỐT HOẶC TRẢ LỜI SAI */}
+      {(!isAnswered || (isAnswered && !isCorrect)) && (
+        <View className="absolute bottom-0 left-0 right-0 z-40 w-full">
           <View
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}
             className="w-full border-t border-slate-200 bg-white px-5 pt-4"
           >
-            <PrimaryButton label="Submit Answer" onPress={handleNext} disabled={!selectedAnswer} />
+            <PrimaryButton
+              label="Submit Answer"
+              onPress={handleNext}
+              disabled={!selectedAnswer || (isAnswered && !isCorrect)}
+            />
           </View>
-        ) : (
-          // Khi ĐÃ CHỐT ĐÁP ÁN: Hiện thanh CheckResult bay lên
-          <CheckResultButton
-            status={isCorrect ? 'correct' : 'wrong'}
-            text={isLastQuestion ? 'Finish Quiz' : 'Next Question'}
-            showIconNext={true}
-            onPress={handleNext}
-          />
-        )}
-      </View>
+        </View>
+      )}
+
+      {/* MODAL TRẢ LỜI ĐÚNG ĐẶT RA NGOÀI ĐỂ OVERLAY CHE KÍN MÀN HÌNH */}
+      {isAnswered && isCorrect && (
+        <CheckResultButton
+          status="correct"
+          text={isLastQuestion ? 'Finish Quiz' : 'Next Question'}
+          onPress={handleNext}
+        />
+      )}
     </SafeAreaView>
   );
 };

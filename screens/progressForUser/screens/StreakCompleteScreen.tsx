@@ -41,7 +41,7 @@ export const StreakCompleteScreen = ({ navigation }: any) => {
           <Animated.View entering={FadeInDown.delay(400)} className="w-[100%] items-center">
             <PrimaryButton
               title="Xem thành tích của tôi"
-              icon={<IconSalesWhite width={25} height={25} color="#FFFFFF" />}
+              icon={<IconSalesWhite width={16} height={16} />}
               onPress={() => navigation.navigate('ProgressAnalysis')}
             />
             <TouchableOpacity

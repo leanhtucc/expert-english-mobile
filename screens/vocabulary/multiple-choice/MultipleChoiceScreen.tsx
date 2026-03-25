@@ -102,7 +102,6 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
           <CheckResultButton
             status={isCorrect ? 'correct' : 'wrong'}
             text={isLastQuestion ? 'FINISH' : 'NEXT QUESTION'}
-            showIconNext={true}
             onPress={handleNext}
           />
         )}

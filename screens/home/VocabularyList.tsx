@@ -182,7 +182,7 @@ const VocabularyItemExpanded = ({ item }: { item: Vocabulary }) => (
 
 export default function VocabularyListScreen() {
   const [isMeaningShown, setIsMeaningShown] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const toggleSwitch = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -279,6 +279,7 @@ export default function VocabularyListScreen() {
           activeOpacity={0.7}
           className="mt-3 w-full flex-row items-center justify-center rounded-[16px] border-[1.5px] bg-white py-4"
           style={{ borderColor: COLORS.primary }}
+          onPress={() => navigation.navigate('DemoImageQuizScreen')}
         >
           <IconReview width={20} height={20} color={COLORS.primary} />
           <Text className="ml-2 text-[16px] font-bold" style={{ color: COLORS.primary }}>

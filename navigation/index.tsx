@@ -3,7 +3,9 @@ import {
   NavigatorScreenParams,
   createNavigationContainerRef,
 } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { TransitionPresets, createStackNavigator } from '@react-navigation/stack';
+
+// NHỚ IMPORT TransitionPresets Ở ĐÂY
 
 import { CreatePasswordScreen } from '@/screens/auth/CreatePassword';
 import { EnterEmailScreen } from '@/screens/auth/enterEmail';
@@ -18,20 +20,19 @@ import { StreakCompleteScreen } from '@/screens/progressForUser/screens/StreakCo
 import { WeekUnlockScreen } from '@/screens/progressForUser/screens/WeekUnlockScreen';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
+import { DemoImageQuizScreen } from '@/screens/vocabulary/__demo__';
 import VocabularyLearning from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
 import TabNavigator from './tab-navigator';
 
-// Tab Navigator Param List
+// ... (Giữ nguyên phần export type param list và các hàm navigate, goBack, resetRoot) ...
 export type TabNavigatorParamList = {
   Home: undefined;
   Explore: undefined;
 };
 
-// Root Stack Param List
 export type RootStackParamList = {
-  // Onboarding
   Onboarding: undefined;
   Start: { step?: number } | undefined;
   Login: undefined;
@@ -58,9 +59,8 @@ export type RootStackParamList = {
   StreakComplete: undefined;
   ProgressAnalysis: undefined;
   WeekUnlock: undefined;
+  DemoImageQuizScreen: undefined;
   AIFeedback: { userAnswer: string; mode: string };
-
-  // Vocabulary Learning flow
   VocabularyLearning: undefined;
 };
 
@@ -94,10 +94,10 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="StreakComplete"
+        initialRouteName="InitialNavigator"
         screenOptions={{
-          gestureEnabled: true,
-          gestureDirection: 'horizontal',
+          headerShown: false,
+          gestureEnabled: false,
         }}
       >
         <Stack.Screen
@@ -140,14 +140,11 @@ export default function RootStack() {
           component={AIRoadmapLoadingScreen}
           options={{ headerShown: false, gestureEnabled: false }}
         />
-
         <Stack.Screen
           name="InitialNavigator"
           component={InitialNavigator}
           options={{ headerShown: false, gestureEnabled: false }}
         />
-
-        {/* Speaking Practice Screens */}
         <Stack.Screen
           name="PracticeSetup"
           component={PracticeSetupScreen}
@@ -186,23 +183,39 @@ export default function RootStack() {
         <Stack.Screen
           name="StreakComplete"
           component={StreakCompleteScreen}
-          options={{ headerShown: false, gestureEnabled: false }}
+          options={{
+            ...TransitionPresets.FadeFromBottomAndroid,
+          }}
         />
         <Stack.Screen
           name="ProgressAnalysis"
           component={ProgressAnalysisScreen}
-          options={{ headerShown: false, gestureEnabled: false }}
+          options={{
+            ...TransitionPresets.SlideFromRightIOS,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+          }}
         />
         <Stack.Screen
           name="WeekUnlock"
           component={WeekUnlockScreen}
-          options={{ headerShown: false, gestureEnabled: false }}
+          options={{
+            ...TransitionPresets.SlideFromRightIOS,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+          }}
         />
         <Stack.Screen
-          name="TabNavigator"
-          component={TabNavigator}
-          options={{ headerShown: false, gestureEnabled: false }}
+          name="DemoImageQuizScreen"
+          component={DemoImageQuizScreen}
+          options={{
+            ...TransitionPresets.ModalSlideFromBottomIOS,
+            gestureEnabled: true,
+            gestureDirection: 'vertical',
+          }}
         />
+
+        <Stack.Screen name="TabNavigator" component={TabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );
