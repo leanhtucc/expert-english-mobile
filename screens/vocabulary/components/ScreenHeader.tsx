@@ -42,7 +42,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
       </View>
 
       {/* Title */}
-      <View className="flex-1 items-center">
+      <View className="flex-1 items-center justify-center">
         <Text className="text-[17px] font-bold text-gray-800">{title}</Text>
         {typeof subtitle === 'string' ? (
           <Text className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-[#E11D48]">

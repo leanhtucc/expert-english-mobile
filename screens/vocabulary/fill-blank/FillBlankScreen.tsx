@@ -108,7 +108,6 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
           <CheckResultButton
             status={isCorrect ? 'correct' : 'wrong'}
             text={isLastQuestion ? 'Finish Quiz' : 'Next Question'}
-            showIconNext={true}
             onPress={handleNext}
           />
         )}

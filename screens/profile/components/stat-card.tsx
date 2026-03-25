@@ -24,14 +24,14 @@ export function StatCard({ value, label, icon, isDark }: StatCardProps) {
       }}
     >
       <View className="mb-2">{icon}</View>
+      <Text className="text-[11px] font-bold uppercase tracking-[1px]" style={{ color: '#9CA3AF' }}>
+        {label}
+      </Text>
       <Text
-        className="mb-1 text-[17px] font-extrabold"
+        className="mb-1 text-[20px] font-extrabold"
         style={{ color: isDark ? '#FFF' : '#111827' }}
       >
         {value}
-      </Text>
-      <Text className="text-[11px] font-bold uppercase tracking-[1px]" style={{ color: '#9CA3AF' }}>
-        {label}
       </Text>
     </View>
   );

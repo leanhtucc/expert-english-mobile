@@ -1,5 +1,6 @@
 import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Line, Polygon, Text as SvgText } from 'react-native-svg';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { LinearGradient } from 'expo-linear-gradient';
@@ -37,6 +38,39 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
   onClose,
 }) => {
   const insets = useSafeAreaInsets();
+  const accentColor = '#D32F2F';
+  const radarCenter = 130;
+  const radarRadius = 80;
+  const angles = [
+    -Math.PI / 2,
+    -Math.PI / 2 + (2 * Math.PI) / 5,
+    -Math.PI / 2 + (4 * Math.PI) / 5,
+    -Math.PI / 2 + (6 * Math.PI) / 5,
+    -Math.PI / 2 + (8 * Math.PI) / 5,
+  ];
+
+  const radarData = [
+    { label: 'Pronunciation', value: 85, dotColor: '#10B981' },
+    { label: 'Relevance', value: 85, dotColor: '#F97316' },
+    { label: 'Vocabulary', value: 68, dotColor: '#10B981' },
+    { label: 'Grammar', value: 94, dotColor: '#F97316' },
+    { label: 'Fluency', value: 72, dotColor: '#10B981' },
+  ];
+
+  const webs = [1, 0.8, 0.6, 0.4, 0.2].map(scale =>
+    angles
+      .map(
+        a =>
+          `${radarCenter + radarRadius * scale * Math.cos(a)},${radarCenter + radarRadius * scale * Math.sin(a)}`
+      )
+      .join(' ')
+  );
+
+  const dataPoints = radarData.map((item, i) => ({
+    x: radarCenter + radarRadius * (item.value / 100) * Math.cos(angles[i]),
+    y: radarCenter + radarRadius * (item.value / 100) * Math.sin(angles[i]),
+    ...item,
+  }));
   return (
     // Đổi thẻ bao ngoài cùng thành View để cấu hình nền tổng
     <View className="flex-1 bg-[#F9FAFB]">
@@ -122,6 +156,67 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
               value={data.timeSpent}
               valueOnTop={true}
             />
+          </View>
+          <View className="items-center justify-center">
+            <Svg width={260} height={260}>
+              {webs.map((points, index) => (
+                <Polygon
+                  key={index}
+                  points={points}
+                  stroke="#F3F4F6"
+                  strokeWidth="1.5"
+                  fill="none"
+                />
+              ))}
+              {angles.map((angle, index) => (
+                <Line
+                  key={index}
+                  x1={radarCenter}
+                  y1={radarCenter}
+                  x2={radarCenter + radarRadius * Math.cos(angle)}
+                  y2={radarCenter + radarRadius * Math.sin(angle)}
+                  stroke="#F3F4F6"
+                  strokeWidth="1.5"
+                />
+              ))}
+              <Polygon
+                points={dataPoints.map(p => `${p.x},${p.y}`).join(' ')}
+                fill={accentColor}
+                fillOpacity="0.1"
+                stroke={accentColor}
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+              />
+              {dataPoints.map((point, index) => (
+                <Circle key={index} cx={point.x} cy={point.y} r="4" fill={point.dotColor} />
+              ))}
+              {dataPoints.map((point, index) => {
+                const textR = radarRadius + 28;
+                return (
+                  <SvgText
+                    key={index}
+                    x={radarCenter + textR * Math.cos(angles[index])}
+                    y={radarCenter + textR * Math.sin(angles[index])}
+                    fontSize="12"
+                    fontWeight="600"
+                    fill="#4B5563"
+                    textAnchor="middle"
+                  >
+                    {point.label}
+                    <SvgText
+                      x={radarCenter + textR * Math.cos(angles[index])}
+                      y={radarCenter + textR * Math.sin(angles[index]) + 16}
+                      fontSize="13"
+                      fontWeight="bold"
+                      fill={accentColor}
+                      textAnchor="middle"
+                    >
+                      {point.value}%
+                    </SvgText>
+                  </SvgText>
+                );
+              })}
+            </Svg>
           </View>
 
           <View className="mt-auto w-full px-2">

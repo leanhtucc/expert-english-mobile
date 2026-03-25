@@ -1,5 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
-
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
@@ -11,22 +9,20 @@ interface Props {
   onShare?: () => void;
 }
 
-export const ProfileHeader = ({ title, onBack, onShare }: Props) => (
-  <View className="mt-5 flex-row items-center justify-between bg-white px-4 py-3">
+export const ProfileHeader = ({ title, onBack }: Props) => (
+  <View className="relative mt-5 flex-row items-center justify-between border-b border-gray-50 bg-white px-4 py-3">
     <TouchableOpacity
       onPress={onBack}
-      className="h-10 w-10 items-center justify-center"
+      className="z-10 h-10 w-10 items-center justify-center text-center"
       activeOpacity={0.7}
     >
       <IconBackPage width={16} height={16} />
     </TouchableOpacity>
-    <Text className="text-lg font-bold">{title}</Text>
-    <TouchableOpacity
-      onPress={onShare}
-      className="h-10 w-10 items-center justify-center"
-      activeOpacity={0.7}
-    >
-      <Ionicons name="share-social-outline" size={24} color="#1A1A2E" />
-    </TouchableOpacity>
+
+    <View className="absolute left-0 right-0 items-center justify-center">
+      <Text className="text-[18px] font-bold text-[#0F172A]">{title}</Text>
+    </View>
+
+    <View className="h-10 w-10" />
   </View>
 );

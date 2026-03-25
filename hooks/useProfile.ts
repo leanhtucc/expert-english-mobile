@@ -15,15 +15,15 @@ export function useProfile() {
     name: 'Alex Chen',
     email: 'alex.chen@example.com',
     avatar: 'https://picsum.photos/seed/alexchen/200/200',
-    level: 'Intermediate B1',
+    level: 'Level 24 • Advanced Learner',
   });
 
   const [stats] = useState<ProfileStats>({
-    streakDays: 18,
-    wordsLearned: 482,
+    streakDays: '42 Days',
+    wordsLearned: '1,250',
     studyMinutes: 20,
     lessonsFinished: 12,
-    totalXP: 12500,
+    totalXP: '8.4k',
   });
 
   const [goal] = useState<LearningGoal>({
