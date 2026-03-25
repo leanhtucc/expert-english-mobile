@@ -9,8 +9,13 @@ import { CreatePasswordScreen } from '@/screens/auth/CreatePassword';
 import { EnterEmailScreen } from '@/screens/auth/enterEmail';
 import LoginEmailScreen from '@/screens/auth/loginEmail';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
+import DetailedDayScreen from '@/screens/home/DetailLessionScreen';
+import VocabularyListScreen from '@/screens/home/VocabularyList';
 import { OnboardingScreen } from '@/screens/onboarding';
 import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
+import { ProgressAnalysisScreen } from '@/screens/progressForUser/screens/ProgressAnalysisScreen';
+import { StreakCompleteScreen } from '@/screens/progressForUser/screens/StreakCompleteScreen';
+import { WeekUnlockScreen } from '@/screens/progressForUser/screens/WeekUnlockScreen';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
 import VocabularyLearning from '@/screens/vocabulary/vocabularyLearning';
@@ -48,6 +53,11 @@ export type RootStackParamList = {
   PracticeSetup: undefined;
   PersonalInformationScreen: undefined;
   ChangePasswordScreen: undefined;
+  VocabularyListScreen: undefined;
+  DayDetailScreen: { dayId: string };
+  StreakComplete: undefined;
+  ProgressAnalysis: undefined;
+  WeekUnlock: undefined;
   AIFeedback: { userAnswer: string; mode: string };
 
   // Vocabulary Learning flow
@@ -84,7 +94,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="InitialNavigator"
+        initialRouteName="StreakComplete"
         screenOptions={{
           gestureEnabled: true,
           gestureDirection: 'horizontal',
@@ -93,76 +103,105 @@ export default function RootStack() {
         <Stack.Screen
           name="Onboarding"
           component={OnboardingScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="EnterEmail"
           component={EnterEmailScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="VerifyOTP"
           component={VerifyOTPScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="CreatePassword"
           component={CreatePasswordScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="LoginEmail"
           component={LoginEmailScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
-        <Stack.Screen name="Survey" component={SurveyScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="Survey"
+          component={SurveyScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
         <Stack.Screen
           name="LearningPath"
           component={LearningPathScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="AIRoadmapLoading"
           component={AIRoadmapLoadingScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
 
         <Stack.Screen
           name="InitialNavigator"
           component={InitialNavigator}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
 
         {/* Speaking Practice Screens */}
         <Stack.Screen
           name="PracticeSetup"
           component={PracticeSetupScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="PersonalInformationScreen"
           component={PersonalInformationScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="ChangePasswordScreen"
           component={ChangePasswordScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="AIFeedback"
           component={AIFeedbackScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="VocabularyLearning"
           component={VocabularyLearning}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="DayDetailScreen"
+          component={DetailedDayScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="VocabularyListScreen"
+          component={VocabularyListScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="StreakComplete"
+          component={StreakCompleteScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="ProgressAnalysis"
+          component={ProgressAnalysisScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="WeekUnlock"
+          component={WeekUnlockScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="TabNavigator"
           component={TabNavigator}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

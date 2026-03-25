@@ -3,23 +3,20 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import {
   IconCertificates,
-  IconClock,
-  IconLessionFinish,
   IconMoon,
-  IconPersonInfo,
   IconSignOut,
-  IconStreak,
+  IconStreakRed,
   IconWord,
   IconXp,
 } from '@/components/icon';
 import { useProfile } from '@/hooks/useProfile';
 
 import {
-  ActivityCard,
   AvatarSection,
   LearningGoalCard,
   MenuRow,
   ProfileHeader,
+  SkillProficiency,
   StatCard,
 } from '../components';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -42,7 +39,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
   };
 
   return (
-    <View className="flex-1 bg-[#F8F6F6]">
+    <View className="flex-1 bg-[#FFFFFF]">
       <ProfileHeader title="Profile" onBack={() => navigation.goBack()} onShare={() => {}} />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -53,12 +50,12 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           name={user.name}
           email={user.email}
           level={user.level}
-          onEdit={() => {}}
+          onEdit={() => navigation.navigate('PersonalInformationScreen')}
         />
         <View className="mx-4 mb-4 flex-row justify-between">
           <View className="w-[31%]">
             <StatCard
-              icon={<IconStreak width={26} height={26} color="#E53935" />}
+              icon={<IconStreakRed width={26} height={26} color="#E53935" />}
               value={stats.streakDays.toString()}
               label="DAYS"
               isDark={false}
@@ -83,20 +80,6 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             />
           </View>
         </View>
-        <View className="mx-4 mb-5 mt-2">
-          <Text className="mb-4 text-[20px] font-extrabold text-[#0F172A]">Activity Insights</Text>
-
-          <ActivityCard
-            icon={<IconClock width={20} height={20} color="#BE123C" />}
-            title="Study Time"
-            value={stats.studyMinutes + ' hrs'}
-          />
-          <ActivityCard
-            icon={<IconLessionFinish width={20} height={20} color="#4A90D9" />}
-            title="Lessons Finished"
-            value={stats.lessonsFinished.toString()}
-          />
-        </View>
         <View className="mx-4">
           <Text className="mb-4 text-[20px] font-extrabold text-[#0F172A]">Learning Goal</Text>
           <LearningGoalCard
@@ -104,6 +87,9 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             progress={goal.progress}
             onChange={() => {}}
           />
+        </View>
+        <View className="mx-4 mb-5 mt-2">
+          <SkillProficiency />
         </View>
         <View className="mx-4 mb-1 overflow-hidden rounded-3xl bg-white shadow-sm">
           <MenuRow
@@ -120,13 +106,6 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
         </View>
 
         <View className="mx-4 mb-8 overflow-hidden rounded-3xl bg-white shadow-sm">
-          <MenuRow
-            icon={<IconPersonInfo width={24} height={24} color="#4A5568" />}
-            label="Personal information"
-            onPress={() => navigation.navigate('PersonalInformationScreen')}
-            isDark={false}
-          />
-
           <View className="ml-[60px] h-[1px] bg-gray-100" />
 
           <MenuRow

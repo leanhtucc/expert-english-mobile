@@ -7,9 +7,9 @@ export interface UserProfile {
 }
 
 export interface ProfileStats {
-  streakDays: number;
-  wordsLearned: number;
-  totalXP: number;
+  streakDays: string;
+  wordsLearned: string;
+  totalXP: string;
   studyMinutes: number;
   lessonsFinished: number;
 }
