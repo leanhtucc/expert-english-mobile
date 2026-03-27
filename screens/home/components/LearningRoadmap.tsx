@@ -109,7 +109,7 @@ export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items, onLesso
   return (
     <View className="mx-5 mb-10">
       <View className="mb-5 flex-row items-center justify-between">
-        <Text className="text-lg font-bold text-gray-900">Learning Roadmap</Text>
+        <Text className="text-lg font-bold text-gray-900">Roadmap học tập</Text>
       </View>
 
       {items.map((item, index) => (

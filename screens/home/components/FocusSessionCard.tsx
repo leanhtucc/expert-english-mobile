@@ -24,9 +24,9 @@ export const FocusSessionCard: React.FC<FocusSessionCardProps> = ({
     <View className="mx-5">
       {/* Section header */}
       <View className="mb-3 flex-row items-center justify-between">
-        <Text className="text-base font-bold text-gray-900">Today&apos;s Focus</Text>
+        <Text className="text-base font-bold text-gray-900">Bài học hôm nay</Text>
         <Pressable onPress={onViewAll} hitSlop={8}>
-          <Text className="text-sm font-semibold text-[#C8102E]">View all</Text>
+          <Text className="text-sm font-semibold text-[#C8102E]">Xem tất cả</Text>
         </Pressable>
       </View>
 
@@ -74,7 +74,7 @@ export const FocusSessionCard: React.FC<FocusSessionCardProps> = ({
                 style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
                 className="rounded-full bg-[#C8102E] px-5 py-2"
               >
-                <Text className="text-sm font-bold text-white">Start Session</Text>
+                <Text className="text-sm font-bold text-white">Bắt đầu bài học</Text>
               </Pressable>
             </View>
           </View>

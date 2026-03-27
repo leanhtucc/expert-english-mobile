@@ -1,5 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
+
+import type { Theme } from '@/types/app.types';
 
 /**
  * App Store Interface
@@ -19,6 +22,10 @@ interface AppState {
 
   hapticEnabled: boolean;
   toggleHaptic: () => void;
+
+  // Theme (dark/light)
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
 }
 
 /**
@@ -43,11 +50,15 @@ export const useAppStore = create<AppState>()(
       // Haptic
       hapticEnabled: true,
       toggleHaptic: () => set({ hapticEnabled: !get().hapticEnabled }),
+
+      // Theme
+      theme: 'light',
+      setTheme: (theme: Theme) => set({ theme }),
     }),
     {
       name: 'app-storage',
       // Sử dụng AsyncStorage cho React Native
-      // storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );

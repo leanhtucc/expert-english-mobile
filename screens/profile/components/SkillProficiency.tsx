@@ -21,11 +21,11 @@ export const SkillProficiency = () => {
   ];
 
   const radarData = [
-    { label: 'Pronunciation', value: 85, dotColor: '#10B981' },
-    { label: 'Relevance', value: 85, dotColor: '#F97316' },
-    { label: 'Vocabulary', value: 68, dotColor: '#10B981' },
-    { label: 'Grammar', value: 94, dotColor: '#F97316' },
-    { label: 'Fluency', value: 72, dotColor: '#10B981' },
+    { label: 'Phát âm', value: 85, dotColor: '#10B981' },
+    { label: 'Liên quan', value: 85, dotColor: '#F97316' },
+    { label: 'Từ vựng', value: 68, dotColor: '#10B981' },
+    { label: 'Ngữ pháp', value: 94, dotColor: '#F97316' },
+    { label: 'Lưu loát', value: 72, dotColor: '#10B981' },
   ];
 
   const webs = [1, 0.8, 0.6, 0.4, 0.2].map(scale =>
@@ -45,13 +45,13 @@ export const SkillProficiency = () => {
 
   // --- 2. DỮ LIỆU LINE CHART (ĐÃ SỬA LẠI ĐỂ TEXT HIỂN THỊ) ---
   const lineData = [
-    { value: 72, label: 'MON', dataPointText: '72%' },
-    { value: 82, label: 'TUE', dataPointText: '82%' },
-    { value: 78, label: 'WED', dataPointText: '78%' },
-    { value: 83, label: 'THU', dataPointText: '83%' },
+    { value: 72, label: 'T2', dataPointText: '72%' },
+    { value: 82, label: 'T3', dataPointText: '82%' },
+    { value: 78, label: 'T4', dataPointText: '78%' },
+    { value: 83, label: 'T5', dataPointText: '83%' },
     {
       value: 85,
-      label: 'FRI',
+      label: 'T6',
       dataPointText: '85%',
       customDataPoint: () => (
         <View
@@ -67,13 +67,13 @@ export const SkillProficiency = () => {
       ),
       labelComponent: () => (
         <View style={{ alignItems: 'center' }}>
-          <Text style={{ fontSize: 11, fontWeight: 'bold', color: accentColor }}>FRI</Text>
+          <Text style={{ fontSize: 11, fontWeight: 'bold', color: accentColor }}>T6</Text>
           <View style={{ marginTop: 2, height: 2, width: 16, backgroundColor: accentColor }} />
         </View>
       ),
     },
-    { value: 83, label: 'SAT', dataPointText: '83%' },
-    { value: 78, label: 'SUN', dataPointText: '78%' },
+    { value: 83, label: 'T7', dataPointText: '83%' },
+    { value: 78, label: 'CN', dataPointText: '78%' },
   ];
 
   // Tính toán chia khoảng cách trục X để chữ MON và SUN không bị lẹm 2 bên
@@ -88,10 +88,10 @@ export const SkillProficiency = () => {
         <View className="mb-6 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <IconFeedBackRealTime width={20} height={20} color={accentColor} />
-            <Text className="ml-2 text-lg font-bold text-gray-800">Skill Proficiency</Text>
+            <Text className="ml-2 text-lg font-bold text-gray-800">Năng lực</Text>
           </View>
           <Text className="font-bold" style={{ color: accentColor }}>
-            OVERALL: 85%
+            TỔNG QUAN: 85%
           </Text>
         </View>
 

@@ -24,7 +24,17 @@ export const useAuth = () => {
       const payload = (response.data as SendOtpResponse).data;
       return payload?.exists;
     } catch (error: any) {
-      console.log('🚨 LỖI 500 CHI TIẾT:', error.response?.data);
+      console.log('🚨 LỖI 500 CHI TIẾT:', {
+        message: error.message,
+        config: error.config,
+        code: error.code,
+        request: error.request,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      console.log('🚨 FULL ERROR OBJECT:', error);
       showToast(error.response?.data?.message || 'Lỗi hệ thống (500)', 'error');
       return null;
     } finally {
@@ -62,9 +72,17 @@ export const useAuth = () => {
       return false;
     } catch (error: any) {
       const serverMessage = error?.response?.data?.message;
-
-      console.log('🚨 Login Error Details:', error?.response?.data || error.message);
-
+      console.log('🚨 Login Error Details:', {
+        message: error.message,
+        config: error.config,
+        code: error.code,
+        request: error.request,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      console.log('🚨 FULL ERROR OBJECT:', error);
       showToast(serverMessage || 'Tài khoản hoặc mật khẩu không chính xác', 'error');
       return false;
     } finally {
@@ -79,7 +97,17 @@ export const useAuth = () => {
       const payload = (response.data as checkOtpResponse).data;
       return payload?.verificationToken;
     } catch (error: any) {
-      console.log('🚨 LỖI GỌI API CHECK OTP:', error?.response?.data || error.message);
+      console.log('🚨 LỖI GỌI API CHECK OTP:', {
+        message: error.message,
+        config: error.config,
+        code: error.code,
+        request: error.request,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      console.log('🚨 FULL ERROR OBJECT:', error);
       showToast('Mã OTP không chính xác hoặc đã hết hạn.', 'error');
       return null;
     } finally {
@@ -120,7 +148,17 @@ export const useAuth = () => {
       }
       return null;
     } catch (error: any) {
-      console.log('🚨 LỖI GỌI API REGISTER:', error?.response?.data || error.message);
+      console.log('🚨 LỖI GỌI API REGISTER:', {
+        message: error.message,
+        config: error.config,
+        code: error.code,
+        request: error.request,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      console.log('🚨 FULL ERROR OBJECT:', error);
       showToast(error?.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản.', 'error');
       return null;
     } finally {
@@ -133,7 +171,17 @@ export const useAuth = () => {
       const userData = (response.data as UserProfileResponse).data;
       return userData;
     } catch (error: any) {
-      console.log('🚨 LỖI LẤY DATA USER:', error?.response?.data || error.message);
+      console.log('🚨 LỖI LẤY DATA USER:', {
+        message: error.message,
+        config: error.config,
+        code: error.code,
+        request: error.request,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      console.log('🚨 FULL ERROR OBJECT:', error);
       return null;
     }
   };
@@ -150,7 +198,17 @@ export const useAuth = () => {
       }
       return false;
     } catch (error: any) {
-      console.log('🚨 LỖI UPDATE USER:', error?.response?.data || error.message);
+      console.log('🚨 LỖI UPDATE USER:', {
+        message: error.message,
+        config: error.config,
+        code: error.code,
+        request: error.request,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      console.log('🚨 FULL ERROR OBJECT:', error);
       showToast(error?.response?.data?.message || 'Không thể cập nhật thông tin', 'error');
       return false;
     } finally {
@@ -168,7 +226,17 @@ export const useAuth = () => {
       }
       return false;
     } catch (error: any) {
-      console.log('🚨 LỖI ĐỔI MẬT KHẨU:', error?.response?.data || error.message);
+      console.log('🚨 LỖI ĐỔI MẬT KHẨU:', {
+        message: error.message,
+        config: error.config,
+        code: error.code,
+        request: error.request,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      console.log('🚨 FULL ERROR OBJECT:', error);
       showToast(error?.response?.data?.message || 'Không thể đổi mật khẩu lúc này', 'error');
       return false;
     } finally {
@@ -183,7 +251,17 @@ export const useAuth = () => {
       showToast('Tài khoản đã được xoá thành công!', 'success');
       return true;
     } catch (error: any) {
-      console.log('🚨 LỖI DELETE USER:', error?.response?.data || error.message);
+      console.log('🚨 LỖI DELETE USER:', {
+        message: error.message,
+        config: error.config,
+        code: error.code,
+        request: error.request,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      console.log('🚨 FULL ERROR OBJECT:', error);
       showToast(error?.response?.data?.message || 'Không thể xoá tài khoản lúc này', 'error');
       return false;
     } finally {
@@ -197,7 +275,17 @@ export const useAuth = () => {
       const { refreshToken } = useAuthStore.getState();
       await authApi.logout({ refreshToken: refreshToken ?? '' });
     } catch (error: any) {
-      console.log('🚨 LỖI GỌI API LOGOUT:', error?.response?.data || error.message);
+      console.log('🚨 LỖI GỌI API LOGOUT:', {
+        message: error.message,
+        config: error.config,
+        code: error.code,
+        request: error.request,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      console.log('🚨 FULL ERROR OBJECT:', error);
     } finally {
       clearAuth();
       setLoading(false);

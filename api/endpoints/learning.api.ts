@@ -44,6 +44,9 @@ export const learningApi = {
   swipeFlashcard: (data: { vocab_id: string; outcome: 'remembered' | 'not_remembered' }) =>
     apiClient.post('/user-vocabulary-progress/flashcard/swipe', data),
 
+  startFlashcardSession: (data: { lesson_id: string; session_size: number }) =>
+    apiClient.post('/user-vocabulary-progress/flashcard/session/start', data),
+
   resetLessonFlashcards: (data: { lesson_id: string }) =>
     apiClient.post('/user-vocabulary-progress/flashcard/reset-lesson', data),
   submitLesson: (data: PostSubmitLessonRequest) =>
