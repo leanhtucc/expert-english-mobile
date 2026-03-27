@@ -10,6 +10,7 @@ import {
   IconXp,
 } from '@/components/icon';
 import { useProfile } from '@/hooks/useProfile';
+import { useAppStore } from '@/stores';
 
 import {
   AvatarSection,
@@ -23,7 +24,9 @@ import { ConfirmModal } from '../components/ConfirmModal';
 
 export default function ProfileScreen({ navigation }: { navigation: any }) {
   const { user, stats, goal, logout } = useProfile();
-  const [darkMode, setDarkMode] = React.useState(false);
+  const theme = useAppStore(state => state.theme);
+  const setTheme = useAppStore(state => state.setTheme);
+  const isDark = theme === 'dark';
 
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
 
@@ -40,7 +43,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
   return (
     <View className="flex-1 bg-[#FFFFFF]">
-      <ProfileHeader title="Profile" onBack={() => navigation.goBack()} onShare={() => {}} />
+      <ProfileHeader title="Hồ sơ" onBack={() => navigation.goBack()} onShare={() => {}} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -57,7 +60,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             <StatCard
               icon={<IconStreakRed width={26} height={26} color="#E53935" />}
               value={stats.streakDays.toString()}
-              label="DAYS"
+              label="NGÀY"
               isDark={false}
             />
           </View>
@@ -66,7 +69,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             <StatCard
               icon={<IconWord width={26} height={26} color="#4A90D9" />}
               value={stats.wordsLearned.toString()}
-              label="WORDS"
+              label="TỪ"
               isDark={false}
             />
           </View>
@@ -81,7 +84,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
         <View className="mx-4">
-          <Text className="mb-4 text-[20px] font-extrabold text-[#0F172A]">Learning Goal</Text>
+          <Text className="mb-4 text-[20px] font-extrabold text-[#0F172A]">Mục tiêu học tập</Text>
           <LearningGoalCard
             minutes={goal.minutesPerDay}
             progress={goal.progress}
@@ -98,8 +101,8 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                 <IconCertificates width={22} height={22} color="#4A90D9" />
               </View>
             }
-            label="Certificates"
-            subtitle="0 Mastered Categories"
+            label="Chứng chỉ"
+            subtitle="0 danh mục đã hoàn thành"
             onPress={() => {}}
             isDark={false}
           />
@@ -110,19 +113,19 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
           <MenuRow
             icon={<IconMoon width={24} height={24} color="#4A5568" />}
-            label="Dark Appearance"
+            label="Chế độ tối"
             showChevron={false}
             right={
               <TouchableOpacity
-                onPress={() => setDarkMode(!darkMode)}
+                onPress={() => setTheme(isDark ? 'light' : 'dark')}
                 activeOpacity={0.85}
                 style={{
                   width: 50,
                   height: 28,
                   borderRadius: 14,
-                  backgroundColor: darkMode ? '#4CAF50' : '#E2E8F0',
+                  backgroundColor: isDark ? '#4CAF50' : '#E2E8F0',
                   justifyContent: 'center',
-                  alignItems: darkMode ? 'flex-start' : 'flex-end',
+                  alignItems: isDark ? 'flex-start' : 'flex-end',
                   paddingHorizontal: 2,
                 }}
               >
@@ -143,7 +146,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
           <MenuRow
             icon={<IconSignOut width={24} height={24} color="#E53935" />}
-            label="Logout"
+            label="Đăng xuất"
             textColor="#E53935"
             showChevron={false}
             onPress={() => setLogoutModalVisible(true)}
@@ -154,8 +157,8 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
       <ConfirmModal
         visible={isLogoutModalVisible}
         icon={<IconSignOut width={45} height={45} color="#FF3B30" />}
-        title="Logout"
-        description="Are you sure you want to log out of this device?"
+        title="Đăng xuất"
+        description="Bạn có chắc muốn đăng xuất khỏi thiết bị này không?"
         onCancel={() => setLogoutModalVisible(false)}
         onConfirm={handleLogoutConfirm}
       />

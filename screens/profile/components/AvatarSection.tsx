@@ -37,7 +37,7 @@ export const AvatarSection = ({ avatar, name, email, level, onEdit }: Props) => 
     </View>
     <View className="mt-2 flex-row items-center justify-center space-x-3">
       <TouchableOpacity className="mt-3 rounded-full bg-red-600 px-20 py-4" onPress={onEdit}>
-        <Text className="text-sm font-semibold text-white">Edit Profile</Text>
+        <Text className="text-sm font-semibold text-white">Chỉnh sửa hồ sơ</Text>
       </TouchableOpacity>
       <TouchableOpacity className="mt-3 rounded-full bg-gray-200 px-3 py-3">
         <Ionicons name="share-social-outline" size={24} color="#1A1A2E" />

@@ -11,8 +11,8 @@ interface HeroGoalCardProps {
 
 export const HeroGoalCard: React.FC<HeroGoalCardProps> = ({
   level = 'LEVEL B2',
-  title = 'Ready to crush your goals?',
-  subtitle = 'You have 3 lessons scheduled for today.',
+  title = 'Cùng bắt đầu học tiếng Anh ngay hôm nay!',
+  subtitle = 'Bạn có 3 bài học cho hôm nay.',
 }) => {
   return (
     <View className="mx-5 rounded-3xl bg-[#C8102E]">

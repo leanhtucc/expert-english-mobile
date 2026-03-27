@@ -74,7 +74,7 @@ const Header = ({ onBack }: { onBack: () => void }) => (
       <Feather name="arrow-left" size={24} color={COLORS.textMain} />
     </TouchableOpacity>
     <Text className="flex-1 text-center text-[20px] font-bold" style={{ color: COLORS.textMain }}>
-      Vocabulary List
+      Danh sách từ vựng
     </Text>
     <View className="h-10 w-10" />
   </View>
@@ -83,30 +83,39 @@ const Header = ({ onBack }: { onBack: () => void }) => (
 const TagBadge = ({ text }: { text: string; type?: 'pos' | 'status' }) => {
   let bgClass = 'bg-gray-100';
   let textClass = 'text-gray-600';
+  let displayText = text;
 
   if (text === 'NOUN') {
     bgClass = 'bg-[#E3F2FD]';
     textClass = 'text-[#1976D2]';
+    displayText = 'Danh từ';
   } else if (text === 'VERB') {
     bgClass = 'bg-[#E8F5E9]';
     textClass = 'text-[#388E3C]';
+    displayText = 'Động từ';
   } else if (text === 'ADJ') {
     bgClass = 'bg-[#F3E5F5]';
     textClass = 'text-[#7B1FA2]';
+    displayText = 'Tính từ';
   } else if (text === 'NEW') {
     bgClass = 'bg-[#FCF0F1]';
     textClass = 'text-[#3B2828]';
+    displayText = 'Mới';
   } else if (text === 'WEAK') {
     bgClass = 'bg-[#FFF9C4]';
     textClass = 'text-[#F57F17]';
+    displayText = 'Yếu';
   } else if (text === 'LEARNED') {
     bgClass = 'bg-[#E0F2F1]';
     textClass = 'text-[#00796B]';
+    displayText = 'Đã học';
   }
 
   return (
     <View className={`items-center justify-center rounded-[6px] px-2 py-0.5 ${bgClass} ml-2`}>
-      <Text className={`text-[10px] font-bold uppercase tracking-wider ${textClass}`}>{text}</Text>
+      <Text className={`text-[10px] font-bold uppercase tracking-wider ${textClass}`}>
+        {displayText}
+      </Text>
     </View>
   );
 };
@@ -382,7 +391,7 @@ export default function VocabularyListScreen() {
           onPress={() => navigation.navigate('DemoFlashcardScreen', { lessonId })}
         >
           <IconFlashCard width={20} height={20} color="#FFFFFF" />
-          <Text className="ml-2 text-[16px] font-bold text-white">Review with Flashcard</Text>
+          <Text className="ml-2 text-[16px] font-bold text-white">Ôn với Flashcard</Text>
         </TouchableOpacity>
 
         {/* Secondary Button */}
@@ -394,7 +403,7 @@ export default function VocabularyListScreen() {
         >
           <IconReview width={20} height={20} color={COLORS.primary} />
           <Text className="ml-2 text-[16px] font-bold" style={{ color: COLORS.primary }}>
-            Start Quiz
+            Bắt đầu câu đố
           </Text>
         </TouchableOpacity>
       </View>
