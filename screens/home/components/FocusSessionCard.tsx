@@ -54,7 +54,7 @@ export const FocusSessionCard: React.FC<FocusSessionCardProps> = ({
             {/* Avatars + count + Start button */}
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">
-                {[0, 1, 2].map(i => (
+                {[0, 1].map(i => (
                   <View
                     key={i}
                     className="h-7 w-7 rounded-full bg-gray-200"

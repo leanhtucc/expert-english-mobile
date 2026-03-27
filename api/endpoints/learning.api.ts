@@ -4,6 +4,7 @@ import {
   LearningPath,
   LearningPathPageResponse,
   LessonPageResponse,
+  RoadmapResponse,
 } from '@/types/api/learningPath.response';
 import {
   ExampleSentenceResponse,
@@ -20,6 +21,7 @@ export const learningApi = {
     apiClient.get<LearningPathPageResponse>('/learning-paths/page', { params }),
 
   getLearningPathDetail: (id: string) => apiClient.get<LearningPath>(`/learning-paths/${id}`),
+  getRoadmapData: () => apiClient.get<RoadmapResponse>('/roadmap/me'),
 
   // Giai đoạn 4: Module
   getModules: (params: GetPageRequest) =>
