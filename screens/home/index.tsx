@@ -64,10 +64,16 @@ export const HomeScreen: React.FC = () => {
         {/* Bài học Today động từ Lesson */}
         <View className="mt-6">
           <FocusSessionCard
-            title={todayLesson?.name_en}
-            category={todayLesson?.lesson_type?.toUpperCase()}
-            description={todayLesson?.name_vi}
-            onPress={() => navigation.navigate('VocabularyListScreen')}
+            title={'Industry Pitch Prep'}
+            category={'Speaking Mastery'}
+            description={
+              'Master 10 high-impact industry terms and practice your delivery style with AI feedback.'
+            }
+            onPress={() => {
+              console.log('🏠 [HomeScreen] Chuyển sang VocabList với lessonId:', todayLesson?._id);
+              // SỬA Ở ĐÂY: Truyền lessonId sang VocabularyListScreen
+              navigation.navigate('VocabularyListScreen', { lessonId: todayLesson?._id });
+            }}
           />
         </View>
 

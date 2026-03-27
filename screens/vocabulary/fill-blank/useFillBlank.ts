@@ -1,9 +1,10 @@
 import { useCallback, useState } from 'react';
 
+// 1. CẬP NHẬT LẠI INTERFACE CHO KHỚP DATA API
 export interface FillBlankQuestion {
-  id: string;
-  sentence: string;
-  blankIndex: number;
+  id?: string;
+  beforeBlank: string; // Đã cắt sẵn từ [BLANK]
+  afterBlank: string; // Đã cắt sẵn từ [BLANK]
   correctAnswer: string;
   options: string[];
   hint?: string;
@@ -18,68 +19,50 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [, setCorrectCount] = useState(0);
 
   const currentQuestion = questions[currentIndex];
+  // Vì truyền từng câu vào nên questions.length thường là 1
   const isLastQuestion = currentIndex === questions.length - 1;
   const isCorrect = selectedAnswer === currentQuestion?.correctAnswer;
 
-  const getSentenceParts = useCallback(() => {
-    if (!currentQuestion) return { before: '', after: '' };
-
-    const words = currentQuestion.sentence.split(' ');
-    const before = words.slice(0, currentQuestion.blankIndex).join(' ');
-    const after = words.slice(currentQuestion.blankIndex + 1).join(' ');
-
-    return { before, after };
-  }, [currentQuestion]);
-
-  // 1. KHI CHỌN ĐÁP ÁN: Chỉ lưu tạm đáp án, không khóa trạng thái (isAnswered)
   const handleSelectAnswer = useCallback(
     (answer: string) => {
-      // Nếu đã bấm nút Check Answer ở dưới đáy rồi thì mới không cho chọn lại
       if (isAnswered) return;
-
       setSelectedAnswer(answer);
     },
     [isAnswered]
   );
 
-  // 2. KHI BẤM NÚT DƯỚI ĐÁY: Tách làm 2 giai đoạn
   const handleNext = useCallback(() => {
-    // GIAI ĐOẠN 1: Bấm "Check Answer" -> Chốt đáp án, tính điểm, hiện thanh CheckResult bay lên
     if (!isAnswered) {
       setIsAnswered(true);
       if (selectedAnswer === currentQuestion.correctAnswer) {
         setCorrectCount(prev => prev + 1);
       }
-      return; // Dừng hàm lại tại đây, không nhảy sang câu mới vội
+      return;
     }
 
-    // GIAI ĐOẠN 2: Bấm "Next Question" trên thanh CheckResult -> Chuyển câu hoặc Finish
     if (isLastQuestion) {
-      const score = Math.round((correctCount / questions.length) * 100);
+      // Tính điểm
+      const score = selectedAnswer === currentQuestion.correctAnswer ? 100 : 0;
       onComplete?.(score);
     } else {
       setCurrentIndex(prev => prev + 1);
       setSelectedAnswer(null);
       setIsAnswered(false);
     }
-  }, [
-    isAnswered,
-    isLastQuestion,
-    correctCount,
-    selectedAnswer,
-    currentQuestion?.correctAnswer,
-    questions.length,
-    onComplete,
-  ]);
+  }, [isAnswered, isLastQuestion, selectedAnswer, currentQuestion?.correctAnswer, onComplete]);
 
   const reset = useCallback(() => {
     setCurrentIndex(0);
     setSelectedAnswer(null);
     setIsAnswered(false);
     setCorrectCount(0);
+  }, []);
+  const resetAnswer = useCallback(() => {
+    setSelectedAnswer(null);
+    setIsAnswered(false);
   }, []);
 
   return {
@@ -90,7 +73,11 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
     isAnswered,
     isCorrect,
     isLastQuestion,
-    sentenceParts: getSentenceParts(),
+    // Trả thẳng dữ liệu cắt câu ra cho UI
+    sentenceParts: {
+      before: currentQuestion?.beforeBlank || '',
+      after: currentQuestion?.afterBlank || '',
+    },
     progress: {
       current: currentIndex + 1,
       total: questions.length,
@@ -98,5 +85,6 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
     handleSelectAnswer,
     handleNext,
     reset,
+    resetAnswer,
   };
 };

@@ -1,10 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { IconNextButtonBlack } from '@/components/icon';
-
-import { CheckResultButton } from '../components';
+import CheckResultButton from '../components/CheckResultButton';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -17,12 +15,14 @@ interface FillBlankScreenProps {
   onComplete?: (score: number) => void;
   onBack?: () => void;
   onClose?: () => void;
+  progress?: { current: number; total: number };
 }
 
 export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
   questions,
   onComplete,
   onBack,
+  progress: externalProgress,
   onClose,
 }) => {
   const insets = useSafeAreaInsets();
@@ -31,43 +31,64 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
     selectedAnswer,
     isAnswered,
     isCorrect,
-    isLastQuestion,
+    progress: internalProgress,
     sentenceParts,
-    progress,
     handleSelectAnswer,
     handleNext,
+    resetAnswer,
   } = useFillBlank({
     questions,
     onComplete,
   });
 
+  // LOGIC: KHI TRẢ LỜI SAI -> CHỜ 1.5 GIÂY RỒI RESET ĐỂ CHỌN LẠI
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+
+    if (isAnswered && !isCorrect) {
+      timer = setTimeout(() => {
+        resetAnswer();
+      }, 1500);
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isAnswered, isCorrect, resetAnswer]);
+
+  // Cần thêm dependency cho useEffect thứ 2 để xoá state khi chuyển component (tuỳ chọn)
+  // Nhưng key bọc dưới View đã lo việc này
+
   if (!currentQuestion) return null;
 
+  const displayProgress = externalProgress || internalProgress;
+
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
-      {/* 1. HEADER */}
-      <View className="w-full bg-white">
+    <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
+      <View className="z-10 w-full bg-white">
         <ScreenHeader
-          title="Fill in the Blank"
-          subtitle="Complete the sentence"
+          title="Vocabulary Quiz"
+          subtitle="FILL IN THE BLANK"
           onBack={onBack}
           onClose={onClose}
         />
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
-        {/* 2. PROGRESS BAR */}
         <View className="w-full px-5 pt-4 pb-5">
-          <ProgressBar current={progress.current} total={progress.total} />
+          <ProgressBar
+            current={displayProgress.current}
+            total={displayProgress.total}
+            variant="quiz"
+          />
         </View>
 
-        {/* 3. CONTENT AREA */}
         <ScrollView
           className="w-full flex-1"
-          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 160 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 160 }}
           showsVerticalScrollIndicator={false}
         >
-          <View className="mb-6 w-full">
+          <View className="mb-8 w-full">
             <QuestionCard
               beforeBlank={sentenceParts.before}
               afterBlank={sentenceParts.after}
@@ -78,42 +99,39 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
             />
           </View>
 
+          {/* 🌟 Truyền Key độc nhất của câu hỏi xuống AnswerInput để ép render lại 🌟 */}
           <View className="w-full">
             <AnswerInput
+              // Thêm key ở đây
+              key={currentQuestion.id || sentenceParts.before}
               options={currentQuestion.options}
               selectedAnswer={selectedAnswer}
               correctAnswer={currentQuestion.correctAnswer}
-              isAnswered={isAnswered} // Khoá không cho bấm sau khi đã submit
+              isAnswered={isAnswered}
               onSelectAnswer={handleSelectAnswer}
             />
           </View>
         </ScrollView>
       </View>
 
-      {/* 4. BOTTOM BUTTON */}
-      <View className="absolute bottom-[-25px] left-0 right-0 w-full">
-        {!isAnswered ? (
+      {(!isAnswered || (isAnswered && !isCorrect)) && (
+        <View className="absolute bottom-0 left-0 right-0 z-40 w-full">
           <View
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}
             className="w-full border-t border-slate-200 bg-white px-5 pt-4"
           >
             <PrimaryButton
-              label="Check Answer"
+              label="Submit Answer"
               onPress={handleNext}
-              disabled={!selectedAnswer}
-              rightIcon={<IconNextButtonBlack width={20} height={20} />}
+              disabled={!selectedAnswer || (isAnswered && !isCorrect)}
             />
           </View>
-        ) : (
-          <CheckResultButton
-            status={isCorrect ? 'correct' : 'wrong'}
-            text={isLastQuestion ? 'Finish Quiz' : 'Next Question'}
-            onPress={handleNext}
-          />
-        )}
-      </View>
+        </View>
+      )}
+
+      {isAnswered && isCorrect && (
+        <CheckResultButton status="correct" text={'Next Question'} onPress={handleNext} />
+      )}
     </SafeAreaView>
   );
 };
-
-export default FillBlankScreen;

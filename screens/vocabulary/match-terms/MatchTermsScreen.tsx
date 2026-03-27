@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PrimaryButton } from '../components/PrimaryButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { TermItem } from './TermItem';
@@ -9,15 +10,17 @@ import { MatchPair, useMatchTerms } from './useMatchTerms';
 
 interface MatchTermsScreenProps {
   pairs: MatchPair[];
-  onComplete?: (accuracy: number) => void;
+  onComplete?: (score: number) => void;
   onBack?: () => void;
   onClose?: () => void;
+  progress?: { current: number; total: number };
 }
 
 export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
   pairs,
   onComplete,
   onBack,
+  progress: externalProgress,
   onClose,
 }) => {
   const insets = useSafeAreaInsets();
@@ -25,93 +28,98 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
     selectedTerm,
     selectedDefinition,
     matchedPairs,
-    accuracy,
-    progress,
+    wrongPair,
+    progress: internalProgress,
     isComplete,
     handleSelectTerm,
     handleSelectDefinition,
-    reset,
+    handleNext,
   } = useMatchTerms({
     pairs,
     onComplete,
   });
 
+  // Đảo lộn danh sách định nghĩa bên phải một lần duy nhất
   const shuffledDefinitions = useMemo(() => {
     return [...pairs].sort(() => Math.random() - 0.5);
   }, [pairs]);
 
-  // LOGIC ẨN ĐÁP ÁN: Lọc bỏ các cặp đã nối đúng (chúng sẽ tự động biến mất khỏi UI)
-  const visibleTerms = pairs.filter(p => !matchedPairs.includes(p.id));
-  const visibleDefs = shuffledDefinitions.filter(p => !matchedPairs.includes(p.id));
+  const displayProgress = externalProgress || internalProgress;
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
-      <View className="w-full bg-white">
+    <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
+      <View className="z-10 w-full bg-white">
         <ScreenHeader
           title="Vocabulary Quiz"
-          subtitle="LEVEL: PROFESSIONAL AI"
+          subtitle="MATCHING TERMS"
           onBack={onBack}
           onClose={onClose}
-          rightAction={
-            <TouchableOpacity className="rounded-full border border-red-200 px-4 py-1.5">
-              <Text className="text-[14px] font-bold text-[#E11D48]">Skip</Text>
-            </TouchableOpacity>
-          }
         />
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
         {/* Thanh Progress */}
         <View className="w-full px-5 pt-4 pb-2">
-          <View className="mb-2 flex-row items-center justify-between px-1">
-            <Text className="text-[13.5px] font-semibold text-slate-500">Matching Progress</Text>
-            <Text className="text-[13.5px] font-bold text-[#E11D48]">
-              {progress.current} / {progress.total}
-            </Text>
-          </View>
-          <ProgressBar current={progress.current} total={progress.total} />
+          <ProgressBar
+            current={displayProgress.current}
+            total={displayProgress.total}
+            variant="quiz"
+          />
         </View>
 
-        {/* ScrollView để chứa đáp án (càng nối đúng danh sách càng ngắn lại) */}
         <ScrollView
           className="w-full flex-1"
-          contentContainerStyle={{ paddingBottom: 120 }} // Đảm bảo cuộn không bị kẹt nút đáy
+          contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Tiêu đề & Hướng dẫn */}
+          {/* Tiêu đề */}
           <View className="items-center px-5 py-6">
-            <Text className="mb-2 text-[24px] font-black tracking-tight text-[#1E293B]">
+            <Text className="mb-2 text-[22px] font-black tracking-tight text-[#1E293B]">
               Connect the Terms
             </Text>
             <Text className="text-center text-[15px] text-slate-500">
-              Match the English AI terminology to its meaning.
+              Tap a word on the left, then tap its meaning on the right.
             </Text>
           </View>
 
-          {/* 2 Cột Chứa Đáp Án */}
-          <View className="w-full flex-row px-5">
+          {/* 2 Cột Chứa Đáp Án (Không bị ẩn đi nữa) */}
+          <View className="w-full flex-row px-4">
+            {/* Cột Trái (Terms) */}
             <View className="flex-1 pr-2">
-              {visibleTerms.map(pair => (
+              {pairs.map(item => (
                 <TermItem
-                  key={pair.id}
-                  id={pair.id}
-                  text={pair.term}
-                  isSelected={selectedTerm === pair.id}
-                  onPress={() => handleSelectTerm(pair.id)}
-                  type="term"
+                  key={`term-${item.id}`}
+                  text={item.term}
+                  status={
+                    matchedPairs.includes(item.id)
+                      ? 'matched'
+                      : wrongPair?.termId === item.id
+                        ? 'wrong'
+                        : selectedTerm === item.id
+                          ? 'selected'
+                          : 'none'
+                  }
+                  onPress={() => handleSelectTerm(item.id)}
                 />
               ))}
             </View>
 
+            {/* Cột Phải (Definitions) */}
             <View className="flex-1 pl-2">
-              {visibleDefs.map(pair => (
+              {shuffledDefinitions.map(item => (
                 <TermItem
-                  key={pair.id}
-                  id={pair.id}
-                  text={pair.definition}
-                  isSelected={selectedDefinition === pair.id}
-                  onPress={() => handleSelectDefinition(pair.id)}
-                  type="definition"
+                  key={`def-${item.id}`}
+                  text={item.definition}
+                  status={
+                    matchedPairs.includes(item.id)
+                      ? 'matched'
+                      : wrongPair?.defId === item.id
+                        ? 'wrong'
+                        : selectedDefinition === item.id
+                          ? 'selected'
+                          : 'none'
+                  }
+                  onPress={() => handleSelectDefinition(item.id)}
                 />
               ))}
             </View>
@@ -119,31 +127,18 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
         </ScrollView>
       </View>
 
-      {/* CỤM NÚT DƯỚI ĐÁY MÀN HÌNH (Giống Figma) */}
-      <View
-        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-        className="absolute bottom-[-25px] left-0 right-0 flex-row border-t border-slate-200 bg-white px-5 pt-4"
-      >
-        {/* Nút Reset */}
-        <TouchableOpacity
-          onPress={reset}
-          activeOpacity={0.7}
-          className="mr-3 h-[56px] flex-1 items-center justify-center rounded-2xl border-[2px] border-slate-200 bg-white"
+      {/* CỤM NÚT DƯỚI ĐÁY */}
+      <View className="absolute bottom-0 left-0 right-0 z-40 w-full">
+        <View
+          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+          className="w-full border-t border-slate-200 bg-white px-5 pt-4 shadow-[0_-4px_6px_rgba(0,0,0,0.05)]"
         >
-          <Text className="text-[16px] font-bold text-[#334155]">Reset</Text>
-        </TouchableOpacity>
-
-        {/* Nút Check Answers (Chỉ bật khi đã nối hết sạch đáp án) */}
-        <TouchableOpacity
-          onPress={() => onComplete?.(accuracy)}
-          disabled={!isComplete}
-          activeOpacity={0.8}
-          className={`h-[56px] flex-[2] items-center justify-center rounded-2xl ${
-            isComplete ? 'bg-[#E11D48]' : 'bg-[#f43f5e] opacity-80'
-          }`}
-        >
-          <Text className="text-[16px] font-bold uppercase text-white">Check Answers</Text>
-        </TouchableOpacity>
+          <PrimaryButton
+            label="Submit Answer"
+            onPress={handleNext}
+            disabled={!isComplete} // Nút mờ đi, chỉ cho bấm khi ĐÃ MATCH XONG TẤT CẢ
+          />
+        </View>
       </View>
     </SafeAreaView>
   );

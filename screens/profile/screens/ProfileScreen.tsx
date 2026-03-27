@@ -6,8 +6,8 @@ import {
   IconMoon,
   IconSignOut,
   IconStreakRed,
-  IconWord,
-  IconXp,
+  IconWordRed,
+  IconXpRed,
 } from '@/components/icon';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -64,7 +64,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
           <View className="w-[31%]">
             <StatCard
-              icon={<IconWord width={26} height={26} color="#4A90D9" />}
+              icon={<IconWordRed width={26} height={26} color="#4A90D9" />}
               value={stats.wordsLearned.toString()}
               label="WORDS"
               isDark={false}
@@ -73,7 +73,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
           <View className="w-[31%]">
             <StatCard
-              icon={<IconXp width={26} height={26} color="#F5A623" />}
+              icon={<IconXpRed width={26} height={26} color="#F5A623" />}
               value={stats.totalXP.toString()}
               label="XP"
               isDark={false}

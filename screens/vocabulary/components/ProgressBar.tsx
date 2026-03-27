@@ -1,7 +1,7 @@
-import { Feather } from '@expo/vector-icons';
-
 import React from 'react';
 import { Text, View } from 'react-native';
+
+import { IconStreakRed } from '@/components/icon';
 
 export type ProgressVariant = 'default' | 'flashcard' | 'quiz' | 'match' | 'review';
 
@@ -51,7 +51,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         <View className="mb-2 flex-row items-center justify-between">
           {showStreak ? (
             <View className="flex-row items-center">
-              <Feather name="zap" size={14} color="#E11D48" />
+              <IconStreakRed width={16} height={16} />
               <Text className="ml-1 text-[11px] font-bold uppercase tracking-wider text-[#E11D48]">
                 Streak {streak}
               </Text>
@@ -73,8 +73,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       return (
         <View className="mb-2 flex-row items-center justify-between">
           <Text className="text-[13.5px] font-semibold text-[#64748B]">Matching Progress</Text>
-          <Text className="text-[13.5px] font-bold text-[#E11D48]">
-            {current} / {total}
+          <Text className="text-[13.5px] font-bold text-[#94A3B8]">
+            Question {current} / {total}
           </Text>
         </View>
       );

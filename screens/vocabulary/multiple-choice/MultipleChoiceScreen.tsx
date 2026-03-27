@@ -1,22 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import IconNextButtonBlack from '@/assets/svgs/output/IconNextButtonBlack';
-
 import CheckResultButton from '../components/CheckResultButton';
+import { OptionButton } from '../components/OptionButton';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
-import { OptionItem } from './OptionItem';
 import { QuestionCard } from './QuestionCard';
 import { MultipleChoiceQuestion, useMultipleChoice } from './useMultipleChoice';
 
 interface MultipleChoiceScreenProps {
   questions: MultipleChoiceQuestion[];
-  onComplete?: (score: number) => void;
+  onComplete?: (score: number, userPick: string) => void;
   onBack?: () => void;
   onClose?: () => void;
+  progress?: { current: number; total: number };
 }
 
 export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
@@ -24,32 +23,50 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
   onComplete,
   onBack,
   onClose,
+  progress: externalProgress,
 }) => {
   const insets = useSafeAreaInsets();
   const {
     currentQuestion,
     selectedAnswer,
     isAnswered,
-    isLastQuestion,
-    progress,
+    progress: internalProgress,
     isCorrect,
     handleSelectAnswer,
     handleNext,
+    resetAnswer, // Nhận hàm reset từ hook
   } = useMultipleChoice({
     questions,
-    onComplete,
+    onComplete: onComplete ? (score: number) => onComplete(score, '') : undefined,
   });
+
+  // LOGIC: KHI TRẢ LỜI SAI -> CHỜ 1.5 GIÂY RỒI RESET ĐỂ CHỌN LẠI
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+
+    if (isAnswered && !isCorrect) {
+      timer = setTimeout(() => {
+        resetAnswer();
+      }, 1500);
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isAnswered, isCorrect, resetAnswer]);
 
   if (!currentQuestion) {
     return null;
   }
 
+  const displayProgress = externalProgress || internalProgress;
+
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
-      <View className="w-full">
+    <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
+      <View className="z-10 w-full bg-white">
         <ScreenHeader
-          title="Word Meaning"
-          subtitle="Multiple Choice"
+          title="Vocabulary Quiz"
+          subtitle="MULTIPLE CHOICE"
           onBack={onBack}
           onClose={onClose}
         />
@@ -58,23 +75,28 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
       <View className="flex-1 bg-[#F8FAFC]">
         <View className="w-full px-5 pt-4">
           <View className="mb-6">
-            <ProgressBar current={progress.current} total={progress.total} />
+            <ProgressBar
+              current={displayProgress.current}
+              total={displayProgress.total}
+              variant="quiz"
+            />
           </View>
         </View>
 
         <ScrollView
           className="w-full flex-1"
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 160 }}
           showsVerticalScrollIndicator={false}
         >
           <View className="mb-8">
-            <QuestionCard word={currentQuestion.word} question={currentQuestion.question} />
+            <QuestionCard question={currentQuestion.question} />
           </View>
-          <View className="w-full">
+
+          <View className="w-full" key={currentQuestion.id || currentQuestion.question}>
             {currentQuestion.options.map((option, index) => (
-              <OptionItem
+              <OptionButton
                 key={index}
-                text={option}
+                label={option}
                 isSelected={selectedAnswer === option}
                 isCorrect={option === currentQuestion.correctAnswer}
                 isAnswered={isAnswered}
@@ -85,27 +107,26 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
         </ScrollView>
       </View>
 
-      <View className="absolute bottom-[-25px] left-0 right-0 w-full">
-        {!isAnswered ? (
+      {/* DẢI NÚT CHỈ HIỆN KHI CHƯA CHỐT HOẶC TRẢ LỜI SAI */}
+      {(!isAnswered || (isAnswered && !isCorrect)) && (
+        <View className="absolute bottom-0 left-0 right-0 z-40 w-full">
           <View
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-            className="w-full border-t border-slate-200 bg-white px-3 pt-2"
+            className="w-full border-t border-slate-200 bg-white px-5 pt-4"
           >
             <PrimaryButton
-              label="CHECK ANSWER"
+              label="Submit Answer"
               onPress={handleNext}
-              disabled={!selectedAnswer}
-              rightIcon={<IconNextButtonBlack width={20} height={20} />}
+              disabled={!selectedAnswer || (isAnswered && !isCorrect)}
             />
           </View>
-        ) : (
-          <CheckResultButton
-            status={isCorrect ? 'correct' : 'wrong'}
-            text={isLastQuestion ? 'FINISH' : 'NEXT QUESTION'}
-            onPress={handleNext}
-          />
-        )}
-      </View>
+        </View>
+      )}
+
+      {/* MODAL TRẢ LỜI ĐÚNG ĐẶT RA NGOÀI ĐỂ OVERLAY CHE KÍN MÀN HÌNH */}
+      {isAnswered && isCorrect && (
+        <CheckResultButton status="correct" text={'Next Question'} onPress={handleNext} />
+      )}
     </SafeAreaView>
   );
 };

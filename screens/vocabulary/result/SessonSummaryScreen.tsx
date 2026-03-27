@@ -25,6 +25,8 @@ interface LessonSummaryScreenProps {
   data: LessonSummaryData;
   onRestart?: () => void;
   onReviewWeak?: () => void;
+  primaryActionText?: string; // Thêm prop này nếu muốn tùy chỉnh text nút chính
+  onPrimaryAction?: () => void; // Thêm prop này nếu muốn tùy chỉnh hành động nút chính
   onClose?: () => void; // Vẫn giữ lại prop này nếu sau này cần
 }
 
