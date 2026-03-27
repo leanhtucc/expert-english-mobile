@@ -20,8 +20,6 @@ import { StreakCompleteScreen } from '@/screens/progressForUser/screens/StreakCo
 import { WeekUnlockScreen } from '@/screens/progressForUser/screens/WeekUnlockScreen';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
-import { DemoImageQuizScreen, DemoLessonResultScreen } from '@/screens/vocabulary/__demo__';
-import { DemoFlashcardScreen } from '@/screens/vocabulary/__demo__/DemoFlashcardScreen';
 import VocabularyLearning from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
@@ -60,9 +58,6 @@ export type RootStackParamList = {
   StreakComplete: undefined;
   ProgressAnalysis: undefined;
   WeekUnlock: undefined;
-  DemoImageQuizScreen: undefined;
-  DemoFlashcardScreen: { lessonId: string };
-  DemoLessonResultScreen: { lessonId?: string } | undefined;
   AIFeedback: { userAnswer: string; mode: string };
   VocabularyLearning: undefined;
 };
@@ -206,33 +201,6 @@ export default function RootStack() {
             ...TransitionPresets.SlideFromRightIOS,
             gestureEnabled: true,
             gestureDirection: 'horizontal',
-          }}
-        />
-        <Stack.Screen
-          name="DemoImageQuizScreen"
-          component={DemoImageQuizScreen}
-          options={{
-            ...TransitionPresets.ModalSlideFromBottomIOS,
-            gestureEnabled: true,
-            gestureDirection: 'vertical',
-          }}
-        />
-        <Stack.Screen
-          name="DemoFlashcardScreen"
-          component={DemoFlashcardScreen}
-          options={{
-            ...TransitionPresets.ModalSlideFromBottomIOS,
-            gestureEnabled: true,
-            gestureDirection: 'vertical',
-          }}
-        />
-        <Stack.Screen
-          name="DemoLessonResultScreen"
-          component={DemoLessonResultScreen}
-          options={{
-            ...TransitionPresets.ModalSlideFromBottomIOS,
-            gestureEnabled: true,
-            gestureDirection: 'vertical',
           }}
         />
 

@@ -1,4 +1,4 @@
-import { GetPageRequest } from '@/types/api/learningPath.request';
+import { GetPageRequest, PostSubmitLessonRequest } from '@/types/api/learningPath.request';
 import {
   LearningModulePageResponse,
   LearningPath,
@@ -8,6 +8,7 @@ import {
 import {
   ExampleSentenceResponse,
   LessonVocabularyResponse,
+  SubmitLessonResponse,
   VocabularyDetailResponse,
 } from '@/types/api/lesson.response';
 
@@ -48,4 +49,13 @@ export const learningApi = {
 
   resetLessonFlashcards: (data: { lesson_id: string }) =>
     apiClient.post('/user-vocabulary-progress/flashcard/reset-lesson', data),
+  submitLesson: (data: PostSubmitLessonRequest) =>
+    apiClient.post<SubmitLessonResponse>('/user-exercise-attempts', data),
+  generateLesson: (lessonId: string) =>
+    apiClient.post('/exercises/generate-for-lesson', {
+      lesson_id: lessonId,
+      limit: 10,
+    }),
+  // THÊM HÀM NÀY VÀO: Hàm này chuyên dùng để lấy mảng câu hỏi
+  getExercisesPage: (params: any) => apiClient.get('/exercises/page', { params }),
 };

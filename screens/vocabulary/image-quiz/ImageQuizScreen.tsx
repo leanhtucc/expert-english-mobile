@@ -2,12 +2,11 @@ import React, { useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CheckResultButton } from '../components';
+import { CheckResultButton, OptionButton } from '../components';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ImageQuestion } from './ImageQuestion';
-import { OptionButton } from './OptionButton';
 import { ImageQuizQuestion, useImageQuiz } from './useImageQuiz';
 
 interface ImageQuizScreenProps {
@@ -15,6 +14,7 @@ interface ImageQuizScreenProps {
   onComplete?: (results: any) => void;
   onBack?: () => void;
   onClose?: () => void;
+  progress?: { current: number; total: number };
 }
 
 export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
@@ -22,6 +22,7 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
   onComplete,
   onBack,
   onClose,
+  progress: externalProgress,
 }) => {
   const insets = useSafeAreaInsets();
   const {
@@ -30,7 +31,7 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
     isAnswered,
     isCorrect,
     isLastQuestion,
-    progress,
+    progress: internalProgress,
     handleSelectAnswer,
     handleNext,
     resetAnswer,
@@ -59,16 +60,20 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
   if (!currentQuestion) {
     return null;
   }
-
+  const displayProgress = externalProgress || internalProgress;
   return (
-    <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right']}>
+    <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
       <View className="z-10 w-full bg-white">
         <ScreenHeader title="Industry Quiz" subtitle="" onBack={onBack} onClose={onClose} />
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
         <View className="w-full px-5 pt-5 pb-2">
-          <ProgressBar current={progress.current} total={progress.total} variant="quiz" />
+          <ProgressBar
+            current={displayProgress.current}
+            total={displayProgress.total}
+            variant="quiz"
+          />
         </View>
 
         <ScrollView
@@ -85,10 +90,10 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
               'Which specialized AI architecture is shown in this visualization?'}
           </Text>
 
-          <View className="w-full">
+          <View className="w-full" key={currentQuestion.id}>
             {currentQuestion.options.map((option, index) => (
               <OptionButton
-                key={index}
+                key={`${currentQuestion.id}-${index}`}
                 label={option}
                 isSelected={selectedAnswer === option}
                 isCorrect={option === currentQuestion.correctAnswer}

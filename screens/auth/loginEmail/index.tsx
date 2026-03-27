@@ -58,13 +58,11 @@ const LoginEmailScreen: React.FC = () => {
     const isSuccess = await loginWithEmail(email, password);
 
     if (isSuccess) {
-      const user = await fetchUserInfo();
+      // Vẫn lấy thông tin user để lưu vào Auth Context/State
+      await fetchUserInfo();
 
-      if (user && user.isSurvey) {
-        navigation.replace('TabNavigator', { screen: 'Home' });
-      } else {
-        navigation.navigate('Survey', {});
-      }
+      // Bỏ logic check isSurvey, ĐI THẲNG VÀO MÀN SURVEY
+      navigation.navigate('Survey', {});
     }
   };
   const isFormValid = email.trim() !== '' && password.trim() !== '';

@@ -6,9 +6,12 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
-// <-- Import Gradient
-
-import { IconLearningGoal, IconStreakRed, ImageResultLession } from '@/components/icon';
+import {
+  IconLearningGoal,
+  IconStreakRed,
+  IconVoiceBlack,
+  ImageResultLession,
+} from '@/components/icon';
 
 import { ResultStatCard } from '../components';
 
@@ -26,12 +29,17 @@ interface LessonSummaryScreenProps {
   onRestart?: () => void;
   onReviewWeak?: () => void;
   onClose?: () => void;
+  // 🌟 BỔ SUNG 2 PROPS NÀY ĐỂ FIX LỖI TYPESCRIPT 🌟
+  primaryActionText?: string;
+  onPrimaryAction?: () => void;
 }
 
 export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
   data,
   onRestart,
   onClose,
+  primaryActionText = 'Start Speaking', // Gán giá trị mặc định nếu ko truyền
+  onPrimaryAction, // Nhận hàm từ component cha
 }) => {
   const insets = useSafeAreaInsets();
   const accentColor = '#D32F2F';
@@ -67,8 +75,8 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
     y: radarCenter + radarRadius * (item.value / 100) * Math.sin(angles[i]),
     ...item,
   }));
+
   return (
-    // Đổi thẻ bao ngoài cùng thành View để cấu hình nền tổng
     <View className="flex-1 bg-[#F9FAFB]">
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
 
@@ -97,7 +105,6 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
         >
           {/* Header */}
           <View className="mb-10 w-full flex-row items-center">
-            {/* Nút Close bọc trong hình tròn trắng giống Figma */}
             <TouchableOpacity
               onPress={onClose}
               className="h-10 w-10 items-center justify-center rounded-full border border-gray-100 bg-white shadow-sm"
@@ -105,7 +112,6 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
               <MaterialIcons name="close" size={24} color="#0F172A" />
             </TouchableOpacity>
 
-            {/* Chữ Header viết hoa và in đậm */}
             <View className="mr-[40px] flex-1 items-center">
               <Text className="text-[16px] font-extrabold uppercase tracking-wider text-[#C6102E]">
                 Lesson Summary
@@ -123,8 +129,8 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
           <Text className="mb-2 text-center text-3xl font-bold text-[#0F172A]">Spectacular!</Text>
 
           <Text className="mb-10 text-center text-[15px] text-[#64748B]">
-            You&apos;ve mastered <Text className="font-bold text-[#C6102E]">15 new</Text> industry
-            terms.
+            You&apos;ve mastered{' '}
+            <Text className="font-bold text-[#C6102E]">{data.totalWords} new</Text> industry terms.
           </Text>
 
           {/* Stats Row */}
@@ -132,8 +138,8 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
             <ResultStatCard
               className="mx-1.5 flex-1"
               icon={<IconStreakRed width={24} height={24} />}
-              label="STREAK" // Sửa lại thành in hoa cho giống thiết kế
-              value={data.streak ?? data.totalWords}
+              label="STREAK"
+              value={data.totalWords}
               valueOnTop={true}
             />
 
@@ -216,14 +222,17 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
           </View>
 
           <View className="mt-auto w-full px-2">
+            {/* 🌟 SỬA LẠI NÚT NÀY ĐỂ NHẬN HÀM VÀ CHỮ TỪ COMPONENT CHA 🌟 */}
             <TouchableOpacity
-              onPress={onRestart}
+              onPress={onPrimaryAction || onRestart} // Gọi onPrimaryAction (Submit API), nếu ko có thì gọi onRestart
               activeOpacity={0.8}
               className="flex-row items-center justify-center rounded-2xl bg-[#C6102E] px-5 py-[16px] shadow-md"
             >
-              {/* <IconVoiceBlack width={20} height={20} className="mr-2" /> */}
-              <MaterialIcons name="arrow-back" size={24} color="white" className="mr-2" />
-              <Text className="ml-2 text-[17px] font-bold text-white">Go back</Text>
+              {/* Nếu chữ ko phải "Lưu kết quả & Thoát" thì mới hiện icon micro (tránh lạc quẻ) */}
+              {primaryActionText === 'Start Speaking' && (
+                <IconVoiceBlack width={20} height={20} className="mr-2" />
+              )}
+              <Text className="text-[17px] font-bold text-white">{primaryActionText}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

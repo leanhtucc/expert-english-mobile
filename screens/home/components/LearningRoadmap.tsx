@@ -60,7 +60,6 @@ const RoadmapItem: React.FC<
       activeOpacity={isLocked ? 1 : 0.7} // Khóa thì không có hiệu ứng mờ khi bấm
       onPress={() => onPress?.(_id, status)}
     >
-      {/* ... (Giữ nguyên toàn bộ nội dung View Cột trái và Cột phải bên trong) ... */}
       {/* Cột trái */}
       <View className="w-14 items-center">
         <RoadmapDot status={status} />
