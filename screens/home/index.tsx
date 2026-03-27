@@ -10,7 +10,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 
 import { IconRobot } from '@/components/icon';
 import { useAuth } from '@/hooks/useAuth';
-import { useLearningData } from '@/hooks/useLearningData';
+import { useRoadmapData } from '@/hooks/useRoadmapData';
+import { useAuthStore } from '@/stores/auth.store';
 import { useToastStore } from '@/stores/toast.store';
 
 import { FocusSessionCard, HeaderGreeting, HeroGoalCard, LearningRoadmap } from './components';
@@ -19,23 +20,48 @@ export const HomeScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<any>>();
   const showToast = useToastStore(state => state.showToast);
   const { fetchUserInfo } = useAuth();
-  const { loading, currentPath, roadmap, todayLesson } = useLearningData();
   const [userName, setUserName] = useState<string>('Learner');
+  const accessToken = useAuthStore(state => state.accessToken);
+  const { loading, data } = useRoadmapData(accessToken || '');
 
   useEffect(() => {
     fetchUserInfo().then(user => user && setUserName(user.username));
   }, [fetchUserInfo]);
 
-  // HÀM XỬ LÝ KHI BẤM VÀO 1 BÀI HỌC
+  // Xử lý khi bấm vào bài học
   const handleLessonPress = (lessonId: string, status: string) => {
     if (status === 'locked') {
       showToast('Vui lòng hoàn thành các bài học trước đó!');
       return;
     }
-    // SỬA Ở ĐÂY: Chuyển hướng sang màn hình chi tiết ngày học (DayDetailScreen)
-    // Truyền kèm lessonId để màn hình kia biết lấy dữ liệu của ngày nào
-    navigation.navigate('DayDetailScreen', { lessonId: lessonId });
+    navigation.navigate('VocabularyListScreen', { lessonId });
   };
+
+  // Map dữ liệu cho LearningRoadmap
+  let roadmapItems: any[] = [];
+  let todayLesson: any = null;
+  let currentPath: any = null;
+  if (data) {
+    console.log('Roadmap data:', data);
+    currentPath = data.learning_path;
+    // Lấy module hiện tại (is_current) hoặc module đầu tiên
+    const currentModule = data.learning_modules.find(m => m.is_current) || data.learning_modules[0];
+    if (currentModule) {
+      roadmapItems = (currentModule.lessons || []).map((lesson, idx) => {
+        let status: 'completed' | 'active' | 'locked' = 'locked';
+        // Đơn giản: bài đầu là active, còn lại locked (có thể sửa logic nếu có trường is_completed)
+        if (lesson.is_current || idx === 0) status = 'active';
+        return {
+          _id: lesson._id,
+          displayDate: lesson.name_en,
+          name_en: lesson.name_en,
+          status,
+        };
+      });
+      todayLesson =
+        (currentModule.lessons || []).find(l => l.is_current) || currentModule.lessons[0];
+    }
+  }
 
   if (loading) {
     return (
@@ -72,7 +98,7 @@ export const HomeScreen: React.FC = () => {
         </View>
 
         <View>
-          <LearningRoadmap items={roadmap} onLessonPress={handleLessonPress} />
+          <LearningRoadmap items={roadmapItems} onLessonPress={handleLessonPress} />
         </View>
 
         <View className="mx-4 mt-2 items-center rounded-[24px] bg-[#FCF0F1] py-8">

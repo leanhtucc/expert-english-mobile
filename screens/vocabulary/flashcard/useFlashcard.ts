@@ -25,16 +25,6 @@ interface UseFlashcardProps {
   onComplete?: () => void;
 }
 
-// ================= HELPERS =================
-const shuffle = <T>(arr: T[]): T[] => {
-  const cloned = [...arr];
-  for (let i = cloned.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
-  }
-  return cloned;
-};
-
 // ================= HOOK =================
 export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
   const [queue, setQueue] = useState<FlashcardItem[]>([]);
@@ -46,26 +36,28 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
   const [sessionTotal, setSessionTotal] = useState(0);
 
   const soundRef = useRef<Audio.Sound | null>(null);
+  const isCompletingRef = useRef(false);
+
+  const completeSession = useCallback(() => {
+    if (isCompletingRef.current) return;
+    isCompletingRef.current = true;
+    setCurrentCard(null);
+    setIsFlipped(false);
+    onComplete?.();
+  }, [onComplete]);
 
   // ================= INIT QUEUE =================
   useEffect(() => {
     if (!flashcards.length) return;
 
-    const weak = flashcards.filter(c => (c.rememberedCount || 0) < 3);
-    const learning = flashcards.filter(
-      c => (c.rememberedCount || 0) >= 3 && (c.rememberedCount || 0) < 5
-    );
-    const mastered = flashcards.filter(c => c.isRemembered || (c.rememberedCount || 0) >= 5);
+    isCompletingRef.current = false;
 
-    const mixedQueue = [
-      ...shuffle(weak),
-      ...shuffle(learning),
-      ...shuffle(mastered).slice(0, Math.ceil(mastered.length * 0.2)),
-    ];
+    // Học toàn bộ từ của lesson, không cắt ngẫu nhiên số lượng.
+    const fullQueue = [...flashcards];
 
-    setQueue(mixedQueue);
-    setCurrentCard(mixedQueue[0]);
-    setSessionTotal(mixedQueue.length); // LƯU LẠI TỔNG SỐ CỦA SESSION
+    setQueue(fullQueue);
+    setCurrentCard(fullQueue[0]);
+    setSessionTotal(fullQueue.length);
   }, [flashcards]);
 
   // ================= CLEANUP AUDIO =================
@@ -77,77 +69,97 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
     };
   }, []);
 
-  // ================= NEXT CARD =================
-  const goToNextCard = useCallback(
-    (newQueue: FlashcardItem[]) => {
-      if (!newQueue.length) {
-        onComplete?.();
-        return;
-      }
-      setQueue(newQueue);
-      setCurrentCard(newQueue[0]);
-      setIsFlipped(false);
-    },
-    [onComplete]
-  );
-
   // ================= ACTIONS =================
   const handleFlip = useCallback(() => {
     setIsFlipped(prev => !prev);
   }, []);
 
   const handleKnowIt = useCallback(() => {
-    if (!currentCard) return;
+    if (!currentCard || isCompletingRef.current) return;
 
+    const swipePayload = {
+      vocab_id: currentCard.id,
+      outcome: 'remembered' as const,
+    };
+    console.log('📤 [FLASHCARD SWIPE] Request:', swipePayload);
     learningApi
-      .swipeFlashcard({
-        vocab_id: currentCard.id,
-        outcome: 'remembered',
+      .swipeFlashcard(swipePayload)
+      .then(res => {
+        console.log('📥 [FLASHCARD SWIPE] Response:', res?.data);
+        return res;
       })
-      .catch(() => null);
-
-    const count = currentCard.rememberedCount || 0;
-
-    let delay = 5;
-    if (count >= 2) delay = 8;
-    if (count >= 3) delay = 12;
-
-    const newQueue = queue.slice(1);
-
-    // THAY ĐỔI Ở ĐÂY: Nếu count < 4 thì nhét lại vào Queue (tăng lên thành 5 lần là Tốt nghiệp)
-    if (count < 4) {
-      const insertIndex = Math.min(delay, newQueue.length);
-      newQueue.splice(insertIndex, 0, {
-        ...currentCard,
-        rememberedCount: count + 1,
+      .catch(err => {
+        console.log('⚠️ [FLASHCARD SWIPE] Error:', err?.response?.data || err?.message);
+        return null;
       });
-    }
-    // NẾU COUNT >= 4 -> Thẻ bị văng ra khỏi Queue hoàn toàn -> Được tính là 1 điểm
 
-    goToNextCard(newQueue);
-  }, [currentCard, queue, goToNextCard]);
+    setQueue(prevQueue => {
+      const count = Number(currentCard.rememberedCount || 0);
+
+      let delay = 5;
+      if (count >= 2) delay = 8;
+      if (count >= 3) delay = 12;
+
+      const newQueue = prevQueue.slice(1);
+
+      if (count < 4) {
+        const insertIndex = Math.min(delay, newQueue.length);
+        newQueue.splice(insertIndex, 0, {
+          ...currentCard,
+          rememberedCount: count + 1,
+        });
+      }
+
+      if (!newQueue.length) {
+        completeSession();
+        return [];
+      }
+
+      setCurrentCard(newQueue[0]);
+      setIsFlipped(false);
+      return newQueue;
+    });
+  }, [completeSession, currentCard]);
 
   const handleDontKnow = useCallback(() => {
-    if (!currentCard) return;
+    if (!currentCard || isCompletingRef.current) return;
 
+    const swipePayload = {
+      vocab_id: currentCard.id,
+      outcome: 'not_remembered' as const,
+    };
+    console.log('📤 [FLASHCARD SWIPE] Request:', swipePayload);
     learningApi
-      .swipeFlashcard({
-        vocab_id: currentCard.id,
-        outcome: 'not_remembered',
+      .swipeFlashcard(swipePayload)
+      .then(res => {
+        console.log('📥 [FLASHCARD SWIPE] Response:', res?.data);
+        return res;
       })
-      .catch(() => null);
+      .catch(err => {
+        console.log('⚠️ [FLASHCARD SWIPE] Error:', err?.response?.data || err?.message);
+        return null;
+      });
 
-    const newQueue = queue.slice(1);
+    setQueue(prevQueue => {
+      const newQueue = prevQueue.slice(1);
 
-    // Nhét lại vào vị trí gần để học lại ngay lập tức
-    const insertIndex = Math.min(2, newQueue.length);
-    newQueue.splice(insertIndex, 0, {
-      ...currentCard,
-      rememberedCount: 0, // Reset điểm nhớ
+      // Nhét lại vào vị trí gần để học lại ngay lập tức
+      const insertIndex = Math.min(2, newQueue.length);
+      newQueue.splice(insertIndex, 0, {
+        ...currentCard,
+        rememberedCount: 0,
+      });
+
+      if (!newQueue.length) {
+        completeSession();
+        return [];
+      }
+
+      setCurrentCard(newQueue[0]);
+      setIsFlipped(false);
+      return newQueue;
     });
-
-    goToNextCard(newQueue);
-  }, [currentCard, queue, goToNextCard]);
+  }, [completeSession, currentCard]);
 
   // ================= AUDIO =================
   const handlePlayAudio = useCallback(async () => {

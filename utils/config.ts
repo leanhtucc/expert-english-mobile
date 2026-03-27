@@ -11,7 +11,7 @@ export const ENV = {
   ENVIRONMENT: process.env.EXPO_PUBLIC_ENVIRONMENT || 'development',
 
   // API Configuration
-  API_URL: process.env.EXPO_PUBLIC_API_URL || 'https://api.example.com',
+  API_URL: process.env.EXPO_PUBLIC_API_URL || 'https://prolingo-be.iuptit.com',
   API_TIMEOUT: parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '30000', 10),
 
   // Feature Flags
