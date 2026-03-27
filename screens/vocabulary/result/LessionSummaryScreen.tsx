@@ -1,3 +1,4 @@
+import React from 'react';
 import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Polygon, Text as SvgText } from 'react-native-svg';
@@ -7,12 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 // <-- Import Gradient
 
-import {
-  IconLearningGoal,
-  IconStreakRed,
-  IconVoiceBlack,
-  ImageResultLession,
-} from '@/components/icon';
+import { IconLearningGoal, IconStreakRed, ImageResultLession } from '@/components/icon';
 
 import { ResultStatCard } from '../components';
 
@@ -137,7 +133,7 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
               className="mx-1.5 flex-1"
               icon={<IconStreakRed width={24} height={24} />}
               label="STREAK" // Sửa lại thành in hoa cho giống thiết kế
-              value={data.totalWords}
+              value={data.streak ?? data.totalWords}
               valueOnTop={true}
             />
 
@@ -225,8 +221,9 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
               activeOpacity={0.8}
               className="flex-row items-center justify-center rounded-2xl bg-[#C6102E] px-5 py-[16px] shadow-md"
             >
-              <IconVoiceBlack width={20} height={20} className="mr-2" />
-              <Text className="text-[17px] font-bold text-white">Start Speaking</Text>
+              {/* <IconVoiceBlack width={20} height={20} className="mr-2" /> */}
+              <MaterialIcons name="arrow-back" size={24} color="white" className="mr-2" />
+              <Text className="ml-2 text-[17px] font-bold text-white">Go back</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

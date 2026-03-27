@@ -1,5 +1,13 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Animated,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import { FlashcardItem } from './useFlashcard';
@@ -122,7 +130,12 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
           ]}
           className="absolute inset-0 z-[-1] bg-white"
         >
-          <View className="flex-1 p-8">
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ padding: 32, paddingBottom: 40 }}
+            showsVerticalScrollIndicator={false}
+            bounces={true}
+          >
             {/* Vietnamese Meaning */}
             <View className="mb-8 mt-2">
               <View className="mb-3 flex-row items-center">
@@ -165,7 +178,7 @@ export const FlashcardCard: React.FC<FlashcardCardProps> = ({
                 </View>
               ) : null}
             </View>
-          </View>
+          </ScrollView>
         </Animated.View>
       </View>
     </TouchableOpacity>

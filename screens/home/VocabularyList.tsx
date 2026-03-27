@@ -1,6 +1,6 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -12,13 +12,16 @@ import {
   UIManager,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useNavigation } from '@react-navigation/native';
+import { Audio } from 'expo-av';
 
+import { useNavigation, useRoute } from '@react-navigation/native';
+
+import { apiConfig } from '@/api';
 import { IconFlashCard, IconReview, IconVoiceVocab } from '@/components/icon';
-
-import { MOCK_DATA } from './constants/dataHome.constants';
+import { useLessonVocabulary } from '@/hooks/useLessonVocabulary';
+import { useAuthStore } from '@/stores/auth.store';
 
 // --- BẬT LAYOUT ANIMATION CHO ANDROID ---
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -34,6 +37,9 @@ const COLORS = {
   textMain: '#222222',
   textSub: '#777777',
 };
+
+const DEFAULT_VOCAB_IMAGE =
+  'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1200&auto=format&fit=crop';
 // --- KIỂU DỮ LIỆU ---
 interface Vocabulary {
   id: string;
@@ -45,7 +51,14 @@ interface Vocabulary {
   translation: string;
   status: 'NEW' | 'WEAK' | 'LEARNED';
   image: string;
+  audioUrl?: string | null;
 }
+
+const resolveAudioUrl = (url?: string | null) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${apiConfig.baseURL}${url}`;
+};
 
 // ==========================================
 // CÁC COMPONENTS PHỤ
@@ -61,7 +74,7 @@ const Header = ({ onBack }: { onBack: () => void }) => (
       <Feather name="arrow-left" size={24} color={COLORS.textMain} />
     </TouchableOpacity>
     <Text className="flex-1 text-center text-[20px] font-bold" style={{ color: COLORS.textMain }}>
-      Vocabulary List
+      Danh sách từ vựng
     </Text>
     <View className="h-10 w-10" />
   </View>
@@ -70,38 +83,53 @@ const Header = ({ onBack }: { onBack: () => void }) => (
 const TagBadge = ({ text }: { text: string; type?: 'pos' | 'status' }) => {
   let bgClass = 'bg-gray-100';
   let textClass = 'text-gray-600';
+  let displayText = text;
 
   if (text === 'NOUN') {
     bgClass = 'bg-[#E3F2FD]';
     textClass = 'text-[#1976D2]';
+    displayText = 'Danh từ';
   } else if (text === 'VERB') {
     bgClass = 'bg-[#E8F5E9]';
     textClass = 'text-[#388E3C]';
+    displayText = 'Động từ';
   } else if (text === 'ADJ') {
     bgClass = 'bg-[#F3E5F5]';
     textClass = 'text-[#7B1FA2]';
+    displayText = 'Tính từ';
   } else if (text === 'NEW') {
     bgClass = 'bg-[#FCF0F1]';
     textClass = 'text-[#3B2828]';
+    displayText = 'Mới';
   } else if (text === 'WEAK') {
     bgClass = 'bg-[#FFF9C4]';
     textClass = 'text-[#F57F17]';
+    displayText = 'Yếu';
   } else if (text === 'LEARNED') {
     bgClass = 'bg-[#E0F2F1]';
     textClass = 'text-[#00796B]';
+    displayText = 'Đã học';
   }
 
   return (
     <View className={`items-center justify-center rounded-[6px] px-2 py-0.5 ${bgClass} ml-2`}>
-      <Text className={`text-[10px] font-bold uppercase tracking-wider ${textClass}`}>{text}</Text>
+      <Text className={`text-[10px] font-bold uppercase tracking-wider ${textClass}`}>
+        {displayText}
+      </Text>
     </View>
   );
 };
 
-const VocabularyItemCompact = ({ item }: { item: Vocabulary }) => (
+const VocabularyItemCompact = ({
+  item,
+  onPlayAudio,
+}: {
+  item: Vocabulary;
+  onPlayAudio: (item: Vocabulary) => void;
+}) => (
   <View className="mb-3 flex-row items-center rounded-[16px] border border-[#F0EAEA] bg-white p-3 shadow-sm">
     <Image
-      source={{ uri: item.image }}
+      source={{ uri: item.image || DEFAULT_VOCAB_IMAGE }}
       className="mr-3 h-[60px] w-[60px] rounded-[12px] bg-gray-100"
     />
 
@@ -118,11 +146,7 @@ const VocabularyItemCompact = ({ item }: { item: Vocabulary }) => (
     </View>
 
     <View className="flex-row items-center">
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={() => console.log('play audio')}
-        className="p-2"
-      >
+      <TouchableOpacity activeOpacity={0.7} onPress={() => onPlayAudio(item)} className="p-2">
         <IconVoiceVocab width={20} height={20} color={COLORS.primary} />
       </TouchableOpacity>
       <TagBadge text={item.status} />
@@ -130,11 +154,17 @@ const VocabularyItemCompact = ({ item }: { item: Vocabulary }) => (
   </View>
 );
 
-const VocabularyItemExpanded = ({ item }: { item: Vocabulary }) => (
+const VocabularyItemExpanded = ({
+  item,
+  onPlayAudio,
+}: {
+  item: Vocabulary;
+  onPlayAudio: (item: Vocabulary) => void;
+}) => (
   <View className="mb-4 rounded-[20px] border border-[#FCE4E4] bg-white p-4 shadow-sm">
     <View className="flex-row">
       <Image
-        source={{ uri: item.image }}
+        source={{ uri: item.image || DEFAULT_VOCAB_IMAGE }}
         className="mr-4 h-[60px] w-[60px] rounded-[14px] bg-gray-100"
       />
 
@@ -153,7 +183,7 @@ const VocabularyItemExpanded = ({ item }: { item: Vocabulary }) => (
       <View className="flex-row items-center pt-1">
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={() => console.log('play audio')}
+          onPress={() => onPlayAudio(item)}
           className="h-8 w-8 items-center justify-center rounded-full"
           style={{ backgroundColor: '#A91220' }}
         >
@@ -182,7 +212,44 @@ const VocabularyItemExpanded = ({ item }: { item: Vocabulary }) => (
 
 export default function VocabularyListScreen() {
   const [isMeaningShown, setIsMeaningShown] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const lessonId = route.params?.lessonId;
+  const accessToken = useAuthStore(state => state.accessToken);
+  const {
+    loading,
+    error,
+    vocabList: rawVocabList,
+  } = useLessonVocabulary(lessonId, accessToken || '');
+
+  // Map dữ liệu từ API sang interface Vocabulary của UI
+  const vocabList: Vocabulary[] = (rawVocabList || []).map(item => {
+    const v = item.vocabulary;
+    const example = item.example_sentences?.[0]?.sentence_en || '';
+    const translation = item.example_sentences?.[0]?.sentence_vi || '';
+    return {
+      id: v._id,
+      word: v.word,
+      type: v.part_of_speech?.toUpperCase() || '',
+      phonetic: v.phonetic || '',
+      meaning: v.definition_en || '',
+      example,
+      translation,
+      status: 'NEW', // Có thể sửa nếu backend trả về trạng thái học
+      image: v.image_url || DEFAULT_VOCAB_IMAGE,
+      audioUrl: resolveAudioUrl(v.audio_url),
+    };
+  });
+
+  useEffect(() => {
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, []);
 
   const toggleSwitch = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -194,6 +261,35 @@ export default function VocabularyListScreen() {
     }
   };
 
+  const handlePlayAudio = async (item: Vocabulary) => {
+    if (!item.audioUrl) {
+      console.log(`[VocabularyList] Không có audio cho từ: ${item.word}`);
+      return;
+    }
+
+    try {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+
+      const { sound } = await Audio.Sound.createAsync({ uri: item.audioUrl }, { shouldPlay: true });
+
+      soundRef.current = sound;
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.isLoaded && status.didJustFinish) {
+          sound.unloadAsync();
+          soundRef.current = null;
+        }
+      });
+    } catch (err) {
+      console.log('[VocabularyList] Lỗi phát audio:', err);
+    }
+  };
+
+  if (error) {
+    console.log('VocabularyListScreen error:', error);
+  }
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.bg }}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -248,30 +344,54 @@ export default function VocabularyListScreen() {
         </View>
       </View>
 
-      <FlatList
-        data={MOCK_DATA}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 160 }}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) =>
-          isMeaningShown ? (
-            <VocabularyItemExpanded item={item} />
-          ) : (
-            <VocabularyItemCompact item={item} />
-          )
-        }
-      />
+      {loading ? (
+        <View className="flex-1 items-center justify-center">
+          <Text style={{ color: COLORS.textMain, fontSize: 16 }}>
+            Đang tải danh sách từ vựng...
+          </Text>
+        </View>
+      ) : error ? (
+        <View className="flex-1 items-center justify-center">
+          <Text style={{ color: 'red', fontSize: 16 }}>{error}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={vocabList}
+          keyExtractor={(item, index) => (item.id ? String(item.id) : String(index))}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 160 }}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) =>
+            isMeaningShown ? (
+              <VocabularyItemExpanded
+                item={item}
+                onPlayAudio={handlePlayAudio}
+                key={item.id || undefined}
+              />
+            ) : (
+              <VocabularyItemCompact
+                item={item}
+                onPlayAudio={handlePlayAudio}
+                key={item.id || undefined}
+              />
+            )
+          }
+        />
+      )}
 
       {/* FIXED BOTTOM BUTTONS */}
-      <View className="absolute bottom-6 left-0 right-0 border-t border-[#F0EAEA] bg-white px-5 py-4 pb-8">
+      <View
+        className="absolute bottom-0 left-0 right-0 mb-2 border-t border-[#F0EAEA] bg-white px-5 pt-4"
+        style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+      >
         {/* Primary Button */}
         <TouchableOpacity
           activeOpacity={0.85}
           className="w-full flex-row items-center justify-center rounded-[16px] py-4 shadow-md"
           style={{ backgroundColor: COLORS.primary, shadowColor: COLORS.primary }}
+          onPress={() => navigation.navigate('DemoFlashcardScreen', { lessonId })}
         >
           <IconFlashCard width={20} height={20} color="#FFFFFF" />
-          <Text className="ml-2 text-[16px] font-bold text-white">Review with Flashcard</Text>
+          <Text className="ml-2 text-[16px] font-bold text-white">Ôn với Flashcard</Text>
         </TouchableOpacity>
 
         {/* Secondary Button */}
@@ -279,11 +399,11 @@ export default function VocabularyListScreen() {
           activeOpacity={0.7}
           className="mt-3 w-full flex-row items-center justify-center rounded-[16px] border-[1.5px] bg-white py-4"
           style={{ borderColor: COLORS.primary }}
-          onPress={() => navigation.navigate('DemoImageQuizScreen')}
+          onPress={() => navigation.navigate('DemoImageQuizScreen', { lessonId })}
         >
           <IconReview width={20} height={20} color={COLORS.primary} />
           <Text className="ml-2 text-[16px] font-bold" style={{ color: COLORS.primary }}>
-            Start Quiz
+            Bắt đầu câu đố
           </Text>
         </TouchableOpacity>
       </View>

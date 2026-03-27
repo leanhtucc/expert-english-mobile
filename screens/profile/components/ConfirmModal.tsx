@@ -72,7 +72,7 @@ export const ConfirmModal = ({ visible, icon, title, description, onCancel, onCo
                   onPress={onCancel}
                   activeOpacity={0.7}
                 >
-                  <Text className="text-[16px] font-bold text-black">Cancel</Text>
+                  <Text className="text-[16px] font-bold text-black">Hủy</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -80,7 +80,7 @@ export const ConfirmModal = ({ visible, icon, title, description, onCancel, onCo
                   onPress={onConfirm}
                   activeOpacity={0.7}
                 >
-                  <Text className="text-[16px] font-bold text-white">Confirm</Text>
+                  <Text className="text-[16px] font-bold text-white">Xác nhận</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>

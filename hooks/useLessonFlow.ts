@@ -57,6 +57,23 @@ export const useLessonFlow = (lessonId: string) => {
         return;
       }
 
+      // Khởi tạo flashcard session theo lesson, lấy toàn bộ từ để học.
+      const sessionPayload = {
+        lesson_id: lessonId,
+        session_size: vocabItems.length,
+      };
+      console.log('📤 [FLASHCARD SESSION START] Request:', sessionPayload);
+      await learningApi
+        .startFlashcardSession(sessionPayload)
+        .then(res => {
+          console.log('📥 [FLASHCARD SESSION START] Response:', res?.data);
+          return res;
+        })
+        .catch(err => {
+          console.log('⚠️ [FLASHCARD SESSION START] Error:', err?.response?.data || err?.message);
+          return null;
+        });
+
       // 2. Lấy detail + sentence
       console.log('⏳ Đang gọi API lấy chi tiết từng từ vựng và câu ví dụ...');
       const fullDataPromises = vocabItems.map(async item => {
