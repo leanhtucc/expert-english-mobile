@@ -1,66 +1,51 @@
-import { useColorScheme as useRNColorScheme } from 'react-native';
+import { Colors } from '@/constants/theme';
+
+import { useColorScheme } from './use-color-scheme';
 
 /**
- * Theme Hook
- * Returns current theme mode and colors
+ * Chế độ sáng/tối theo cài đặt app (light / dark / system).
  */
 export function useTheme() {
-  const systemColorScheme = useRNColorScheme();
-
-  // Determine actual theme based on setting
-  const isDark = systemColorScheme === 'dark';
-
+  const scheme = useColorScheme() ?? 'light';
+  const isDark = scheme === 'dark';
   return {
     isDark,
     isLight: !isDark,
-    theme: isDark ? 'dark' : 'light',
+    theme: scheme as 'light' | 'dark',
   };
 }
 
-/**
- * Get themed color
- * Returns appropriate color based on theme
- */
 export function useThemedColor(lightColor: string, darkColor: string): string {
   const { isDark } = useTheme();
   return isDark ? darkColor : lightColor;
 }
 
 /**
- * Theme Colors Hook
- * Returns theme-aware color palette
+ * Bảng màu đồng bộ với `constants/theme` + toggle Profile.
  */
 export function useThemeColors() {
-  const { isDark } = useTheme();
+  const scheme = useColorScheme() ?? 'light';
+  const c = Colors[scheme];
 
   return {
-    // Background
-    background: isDark ? '#0A0A0A' : '#FFFFFF',
-    surface: isDark ? '#171717' : '#F5F5F5',
-    card: isDark ? '#262626' : '#FFFFFF',
-
-    // Text
+    background: c.background,
+    surface: c.surface,
+    card: c.card,
     text: {
-      primary: isDark ? '#FAFAFA' : '#0A0A0A',
-      secondary: isDark ? '#A3A3A3' : '#525252',
-      tertiary: isDark ? '#737373' : '#737373',
-      disabled: isDark ? '#525252' : '#D4D4D4',
+      primary: c.text,
+      secondary: c.muted,
+      tertiary: c.muted,
+      disabled: c.muted,
     },
-
-    // Brand
-    primary: '#0091F5',
+    primary: c.tint,
     secondary: '#8B5CF6',
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',
-
-    // Border
-    border: isDark ? '#262626' : '#E5E5E5',
-    divider: isDark ? '#171717' : '#F5F5F5',
-
-    // Interactive
-    hover: isDark ? '#262626' : '#F5F5F5',
-    pressed: isDark ? '#404040' : '#E5E5E5',
-    focus: '#0091F5',
+    border: c.border,
+    divider: c.borderMuted,
+    hover: c.surface,
+    pressed: c.border,
+    focus: c.tint,
   };
 }

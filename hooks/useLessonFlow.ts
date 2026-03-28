@@ -1,7 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { Audio } from 'expo-av';
 
 import { apiConfig } from '@/api';
 import { learningApi } from '@/api/endpoints/learning.api';
+
+const PRELOAD_AUDIO_COUNT = 6;
+
+const LOG = '[useLessonFlow]';
 
 // ================= HELPER =================
 const resolveAudioUrl = (url?: string | null) => {
@@ -33,6 +39,10 @@ export const useLessonFlow = (lessonId: string) => {
   const [loading, setLoading] = useState(true);
   const [flashcards, setFlashcards] = useState<FlashcardData[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const audioModeReadyRef = useRef<Promise<void> | null>(null);
+  const preloadedSoundsRef = useRef<Map<string, Audio.Sound>>(new Map());
 
   const fetchLessonData = useCallback(async () => {
     if (!lessonId) return;
@@ -130,5 +140,120 @@ export const useLessonFlow = (lessonId: string) => {
     fetchLessonData();
   }, [fetchLessonData]);
 
-  return { loading, flashcards, error, refetch: fetchLessonData };
+  useEffect(() => {
+    audioModeReadyRef.current = Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    }).catch(e => {
+      console.log(`${LOG} setAudioModeAsync:`, e);
+    });
+
+    const preloadedMap = preloadedSoundsRef.current;
+
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+      preloadedMap.forEach(s => {
+        s.unloadAsync().catch(() => null);
+      });
+      preloadedMap.clear();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!flashcards?.length) return;
+
+    const urls = [
+      ...new Set(
+        flashcards
+          .slice(0, PRELOAD_AUDIO_COUNT)
+          .map(f => f.audioUrl)
+          .filter(Boolean)
+      ),
+    ] as string[];
+
+    let cancelled = false;
+
+    (async () => {
+      await audioModeReadyRef.current;
+      if (cancelled) return;
+
+      for (const uri of urls) {
+        if (cancelled || preloadedSoundsRef.current.has(uri)) continue;
+        try {
+          const { sound } = await Audio.Sound.createAsync(
+            { uri },
+            { shouldPlay: false, volume: 1 }
+          );
+          if (cancelled) {
+            await sound.unloadAsync();
+            continue;
+          }
+          preloadedSoundsRef.current.set(uri, sound);
+        } catch {
+          // URL lỗi — lúc bấm sẽ thử createAsync lại
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [flashcards]);
+
+  const playAudio = useCallback(async (audioUrl: string | null | undefined) => {
+    if (!audioUrl) {
+      console.log(`${LOG} Không có URL audio`);
+      return;
+    }
+    try {
+      if (!audioModeReadyRef.current) {
+        audioModeReadyRef.current = Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+        }).catch(e => {
+          console.log(`${LOG} setAudioModeAsync:`, e);
+        });
+      }
+      await audioModeReadyRef.current;
+
+      const preloaded = preloadedSoundsRef.current.get(audioUrl);
+
+      if (soundRef.current) {
+        const prev = soundRef.current;
+        await prev.stopAsync().catch(() => null);
+        const prevIsPreloaded = [...preloadedSoundsRef.current.values()].includes(prev);
+        if (!prevIsPreloaded) {
+          await prev.unloadAsync().catch(() => null);
+        }
+        soundRef.current = null;
+      }
+
+      if (preloaded) {
+        soundRef.current = preloaded;
+        await preloaded.setPositionAsync(0);
+        await preloaded.playAsync();
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync({ uri: audioUrl }, { shouldPlay: true });
+      soundRef.current = sound;
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.isLoaded && status.didJustFinish) {
+          sound.unloadAsync().catch(() => null);
+          if (soundRef.current === sound) soundRef.current = null;
+        }
+      });
+    } catch (err) {
+      console.log(`${LOG} Lỗi phát audio:`, err);
+    }
+  }, []);
+
+  return { loading, flashcards, error, refetch: fetchLessonData, playAudio };
 };

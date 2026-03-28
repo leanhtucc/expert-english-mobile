@@ -9,12 +9,20 @@ import { ChatBubbleUser } from './ChatBubbleUser';
 interface ScenarioCardProps {
   scenario: ScenarioPreview;
   mode: PracticeMode;
+  /** Chỉ màn Nâng cao: tô màu phát âm theo từ */
+  showWordFeedback?: boolean;
+  /** false khi người học chưa nói (ẩn bubble trả lời). */
+  showUserBubble?: boolean;
 }
 
-export const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario, mode }) => {
+export const ScenarioCard: React.FC<ScenarioCardProps> = ({
+  scenario,
+  mode,
+  showWordFeedback = false,
+  showUserBubble = true,
+}) => {
   return (
     <View>
-      {/* AI Question */}
       <ChatBubbleAI
         message={{
           id: '1',
@@ -22,26 +30,29 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario, mode }) =>
           text: scenario.question,
           translation: scenario.translation,
           timestamp: Date.now(),
-          score: scenario.progress,
         }}
         role={scenario.role}
         showAvatar={true}
         mode={mode}
       />
 
-      {/* User Example Answer */}
-      <ChatBubbleUser
-        message={{
-          id: '2',
-          role: 'user',
-          text: scenario.exampleAnswer,
-          translation: scenario.exampleAnswerTranslation,
-          timestamp: Date.now(),
-        }}
-        role="YOUR RESPONSE"
-        showAvatar={true}
-        mode={mode}
-      />
+      {showUserBubble ? (
+        <ChatBubbleUser
+          message={{
+            id: '2',
+            role: 'user',
+            text: scenario.exampleAnswer,
+            translation: scenario.exampleAnswerTranslation,
+            timestamp: Date.now(),
+            score: scenario.progress,
+            pronunciationSegments: scenario.pronunciationSegments,
+          }}
+          role="BẠN"
+          showAvatar={true}
+          mode={mode}
+          showWordFeedback={showWordFeedback}
+        />
+      ) : null}
     </View>
   );
 };

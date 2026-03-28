@@ -12,6 +12,8 @@ export interface ChatMessage {
   audioUrl?: string;
   score?: number;
   timestamp: number;
+  /** Từng đoạn để tô màu phát âm (Nâng cao) */
+  pronunciationSegments?: HighlightedText[];
 }
 
 export interface ScenarioPreview {
@@ -21,6 +23,8 @@ export interface ScenarioPreview {
   progress: number;
   exampleAnswer: string;
   exampleAnswerTranslation?: string;
+  /** Gợi ý phát âm từng từ (màn Nâng cao) */
+  pronunciationSegments?: HighlightedText[];
 }
 
 export interface AIFeedback {

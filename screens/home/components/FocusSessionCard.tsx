@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { IconNotificationUser } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 interface FocusSessionCardProps {
   category?: string;
@@ -20,36 +21,53 @@ export const FocusSessionCard: React.FC<FocusSessionCardProps> = ({
   onPress,
   onViewAll,
 }) => {
+  const { colors, isDark } = useAppTheme();
+
   return (
     <View className="mx-5">
-      {/* Section header */}
       <View className="mb-3 flex-row items-center justify-between">
-        <Text className="text-base font-bold text-gray-900">Bài học hôm nay</Text>
+        <Text className="text-base font-bold" style={{ color: colors.text }}>
+          Bài học hôm nay
+        </Text>
         <Pressable onPress={onViewAll} hitSlop={8}>
           <Text className="text-sm font-semibold text-[#C8102E]">Xem tất cả</Text>
         </Pressable>
       </View>
 
-      {/* Card */}
       <Pressable
         onPress={onPress}
         style={({ pressed }) => [
           { opacity: pressed ? 0.92 : 1 },
-          { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
+          {
+            shadowColor: '#000',
+            shadowOpacity: isDark ? 0.25 : 0.06,
+            shadowRadius: 8,
+            elevation: 3,
+            backgroundColor: colors.card,
+            borderColor: colors.border,
+            borderWidth: 1,
+            borderRadius: 16,
+            padding: 16,
+          },
         ]}
-        className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
       >
-        {/* Top row: icon left | category + title + description right */}
         <View className="mb-3 flex-row items-start gap-3">
-          <View className="h-14 w-14 items-center justify-center rounded-2xl bg-red-50">
+          <View
+            className="h-14 w-14 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: isDark ? colors.surface : '#FEF2F2' }}
+          >
             <IconNotificationUser width={32} height={32} />
           </View>
           <View className="flex-1">
             <Text className="mb-0.5 text-[11px] font-bold tracking-widest text-[#C8102E]">
               {category}
             </Text>
-            <Text className="mb-1 text-base font-bold text-gray-900">{title}</Text>
-            <Text className="mb-3 text-sm leading-5 text-gray-500">{description}</Text>
+            <Text className="mb-1 text-base font-bold" style={{ color: colors.text }}>
+              {title}
+            </Text>
+            <Text className="mb-3 text-sm leading-5" style={{ color: colors.muted }}>
+              {description}
+            </Text>
 
             {/* Avatars + count + Start button */}
             <View className="flex-row items-center justify-between">
@@ -57,8 +75,11 @@ export const FocusSessionCard: React.FC<FocusSessionCardProps> = ({
                 {[0, 1].map(i => (
                   <View
                     key={i}
-                    className="h-7 w-7 rounded-full bg-gray-200"
-                    style={{ marginLeft: i === 0 ? 0 : -8 }}
+                    className="h-7 w-7 rounded-full"
+                    style={{
+                      marginLeft: i === 0 ? 0 : -8,
+                      backgroundColor: isDark ? colors.border : '#E5E7EB',
+                    }}
                   />
                 ))}
                 <View

@@ -65,7 +65,7 @@ export const AIFeedbackScreen: React.FC = () => {
             onPress={() => navigation.goBack()}
             className="h-8 w-8 items-center justify-center rounded-full bg-gray-100"
           >
-            <IconBackButton width={15} height={15} color="#000" />
+            <IconBackButton width={15} height={15} iconColor="#000" />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-900">Practice Setup</Text>
           <View className="h-8 w-8" />

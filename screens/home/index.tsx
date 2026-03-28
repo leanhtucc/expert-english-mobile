@@ -1,15 +1,19 @@
 import { MaterialIcons } from '@expo/vector-icons';
 
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StatusBar, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { StatusBar } from 'expo-status-bar';
 
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 import { IconRobot } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoadmapData } from '@/hooks/useRoadmapData';
+import { CARD_BG_DARK } from '@/screens/profile/constants/profile.constants';
 import { useAuthStore } from '@/stores/auth.store';
 import { useToastStore } from '@/stores/toast.store';
 import { RoadmapLesson, RoadmapModule, RoadmapPath } from '@/types/api/learningPath.response';
@@ -17,6 +21,7 @@ import { RoadmapLesson, RoadmapModule, RoadmapPath } from '@/types/api/learningP
 import { FocusSessionCard, HeaderGreeting, HeroGoalCard, LearningRoadmap } from './components';
 
 export const HomeScreen: React.FC = () => {
+  const { colors, isDark } = useAppTheme();
   const navigation = useNavigation<StackNavigationProp<any>>();
   const showToast = useToastStore(state => state.showToast);
   const { fetchUserInfo } = useAuth();
@@ -78,8 +83,14 @@ export const HomeScreen: React.FC = () => {
   // ==========================================
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-gray-50">
-        <View className="mb-10 h-20 w-20 items-center justify-center rounded-full bg-red-50">
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: colors.background }}
+      >
+        <View
+          className="mb-10 h-20 w-20 items-center justify-center rounded-full"
+          style={{ backgroundColor: isDark ? colors.surface : '#FEF2F2' }}
+        >
           <IconRobot width={200} height={200} />
         </View>
         <ActivityIndicator size="small" color="#C8102E" />
@@ -88,8 +99,8 @@ export const HomeScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+    <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -122,24 +133,32 @@ export const HomeScreen: React.FC = () => {
           <LearningRoadmap items={roadmapItems} onLessonPress={handleLessonPress} />
         </View>
 
-        {/* Thẻ Khoá Module Tiếp Theo (Giữ nguyên) */}
-        <View className="mx-4 mt-1 items-center rounded-[24px] bg-[#FCF0F1] py-8">
+        <View
+          className="mx-4 mt-1 items-center rounded-[24px] py-8"
+          style={{
+            backgroundColor: isDark ? CARD_BG_DARK : '#FCF0F1',
+          }}
+        >
           <View
-            className="mb-4 h-[52px] w-[52px] items-center justify-center rounded-full bg-white"
+            className="mb-4 h-[52px] w-[52px] items-center justify-center rounded-full"
             style={{
+              backgroundColor: isDark ? colors.surfaceElevated : '#FFFFFF',
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.05,
+              shadowOpacity: isDark ? 0.35 : 0.05,
               shadowRadius: 10,
               elevation: 2,
             }}
           >
-            <MaterialIcons name="lock" size={24} color="#4A3B39" />
+            <MaterialIcons name="lock" size={24} color={isDark ? colors.text : '#4A3B39'} />
           </View>
-          <Text className="mb-2 text-[18px] font-bold text-[#4A3B39]">
+          <Text className="mb-2 text-[18px] font-bold" style={{ color: colors.text }}>
             Mở khóa Module Tiếp Theo
           </Text>
-          <Text className="text-[11px] font-bold uppercase tracking-[1.5px] text-[#8C7A78]">
+          <Text
+            className="text-[11px] font-bold uppercase tracking-[1.5px]"
+            style={{ color: colors.muted }}
+          >
             Hoàn thành Module hiện tại để tiếp tục
           </Text>
         </View>
