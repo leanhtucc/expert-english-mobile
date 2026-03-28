@@ -14,7 +14,12 @@ import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import DetailedDayScreen from '@/screens/home/DetailLessionScreen';
 import VocabularyListScreen from '@/screens/home/VocabularyList';
 import { OnboardingScreen } from '@/screens/onboarding';
-import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
+import RenewalScreen from '@/screens/onboarding/RenewalScreen';
+import {
+  CertificatesScreen,
+  ChangePasswordScreen,
+  PersonalInformationScreen,
+} from '@/screens/profile';
 import { ProgressAnalysisScreen } from '@/screens/progressForUser/screens/ProgressAnalysisScreen';
 import { StreakCompleteScreen } from '@/screens/progressForUser/screens/StreakCompleteScreen';
 import { WeekUnlockScreen } from '@/screens/progressForUser/screens/WeekUnlockScreen';
@@ -58,6 +63,8 @@ export type RootStackParamList = {
   StreakComplete: undefined;
   ProgressAnalysis: undefined;
   WeekUnlock: undefined;
+  Certificates: undefined;
+  RenewalScreen: undefined;
   AIFeedback: { userAnswer: string; mode: string };
   VocabularyLearning: undefined;
 };
@@ -92,7 +99,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="InitialNavigator"
+        initialRouteName="StreakComplete"
         screenOptions={{
           headerShown: false,
           gestureEnabled: false,
@@ -203,7 +210,20 @@ export default function RootStack() {
             gestureDirection: 'horizontal',
           }}
         />
-
+        <Stack.Screen
+          name="Certificates"
+          component={CertificatesScreen}
+          options={{
+            ...TransitionPresets.SlideFromRightIOS,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+          }}
+        />
+        <Stack.Screen
+          name="RenewalScreen"
+          component={RenewalScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
         <Stack.Screen name="TabNavigator" component={TabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>

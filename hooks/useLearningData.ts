@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { learningApi } from '@/api/endpoints/learning.api';
-import { LearningPath } from '@/types/api/learningPath.response';
+import { RoadmapLesson, RoadmapModule, RoadmapPath } from '@/types/api/learningPath.response';
 
-// Helper format date: Giữ nguyên logic của bạn
-const formatRoadmapDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
+// HÀM TẠO NGÀY GIẢ LẬP ĐỂ UI ĐẸP NHƯ THIẾT KẾ
+// Tính toán ngày dựa vào khoảng cách so với bài đang học (Hôm nay)
+const getSimulatedDate = (activeIndex: number, currentIndex: number) => {
+  const date = new Date();
+  const diff = currentIndex - activeIndex; // 0: Hôm nay, -1: Hôm qua, 1: Ngày mai
+  date.setDate(date.getDate() + diff);
+
   const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const months = [
     'JAN',
@@ -23,102 +25,111 @@ const formatRoadmapDate = (dateString: string) => {
     'NOV',
     'DEC',
   ];
+
   const dayName = days[date.getDay()];
   const monthName = months[date.getMonth()];
   const dayNum = date.getDate();
-  return isToday ? `${dayName} • TODAY` : `${dayName} • ${monthName} ${dayNum}`;
+
+  if (diff === 0) return `${dayName} • TODAY`;
+  return `${dayName} • ${monthName} ${dayNum}`;
 };
 
 export const useLearningData = () => {
   const [loading, setLoading] = useState(true);
-  const [currentPath, setCurrentPath] = useState<LearningPath | null>(null);
+  const [currentPath, setCurrentPath] = useState<RoadmapPath | null>(null);
+  const [modules, setModules] = useState<any[]>([]);
   const [roadmap, setRoadmap] = useState<any[]>([]);
-  const [todayLesson, setTodayLesson] = useState<any | null>(null);
+  const [todayLesson, setTodayLesson] = useState<RoadmapLesson | null>(null);
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('🚀 --- START LOAD DATA ---');
+      console.log('🚀 --- START LOAD ROADMAP DATA ---');
 
-      // BƯỚC 1: Lấy Learning Path đang active
-      const pathRes = await learningApi.getLearningPaths({
-        condition: JSON.stringify({ is_active: true }),
-        limit: 1,
-      });
+      // GỌI DUY NHẤT 1 API: /roadmap/me
+      const res = await learningApi.getRoadmapData();
+      const roadmapData = res.data?.data;
 
-      // Lưu ý: Cấu trúc res.data.data.result
-      const path = pathRes.data?.data?.result?.[0];
-      if (!path) {
-        console.warn('⚠️ No active path found');
-        return;
-      }
-      setCurrentPath(path);
-
-      // BƯỚC 2: Lấy Module đầu tiên của Path này
-      const moduleRes = await learningApi.getModules({
-        condition: JSON.stringify({ path_id: path._id }),
-        sort: JSON.stringify({ order_index: 1 }),
-        limit: 1,
-      });
-
-      const firstModule = moduleRes.data?.data?.result?.[0];
-      if (!firstModule) {
-        console.warn('⚠️ No module found for this path');
-        return;
-      }
-
-      // BƯỚC 3: Lấy danh sách Lessons (QUAN TRỌNG: Cần limit > 1)
-      const lessonRes = await learningApi.getLessons({
-        condition: JSON.stringify({ module_id: firstModule._id }),
-        sort: JSON.stringify({ order_index: 1 }),
-        limit: 20, // Lấy dư ra để đảm bảo hiện đủ 7 ngày hoặc nhiều hơn
-        page: 1,
-      });
-
-      // Log để debug chính xác cấu trúc mảng
-      console.log('📍 3. Raw Lessons Data:', lessonRes.data);
-
-      const lessons = lessonRes.data?.data?.result || [];
-
-      if (lessons.length === 0) {
-        console.warn('⚠️ Lesson list is empty');
+      if (!roadmapData || !roadmapData.learning_path) {
+        console.warn('⚠️ Không tìm thấy lộ trình học tập!');
         setRoadmap([]);
+        setModules([]);
         return;
       }
 
-      // BƯỚC 4: Format Roadmap
-      const formattedRoadmap = lessons.map((lesson: any, index: number) => {
-        let status: 'completed' | 'active' | 'locked' = 'locked';
+      // 1. SET LEARNING PATH
+      setCurrentPath(roadmapData.learning_path);
 
-        // Logic chuẩn cho người mới gen lộ trình:
-        // Bài đầu tiên (index 0) sẽ là bài đang học (active)
-        // Các bài sau (index > 0) sẽ bị khóa (locked)
-        if (index === 0) {
-          status = 'active';
-        } else {
-          status = 'locked';
+      // 2. XỬ LÝ MODULES (THANH NGANG)
+      const rawModules = roadmapData.learning_modules || [];
+      let foundCurrentModule = false;
+
+      const formattedModules = rawModules.map((mod: RoadmapModule, index: number) => {
+        let status: 'completed' | 'current' | 'locked' = 'locked';
+        if (mod.is_current) {
+          status = 'current';
+          foundCurrentModule = true;
+        } else if (!foundCurrentModule) {
+          status = 'completed';
         }
 
-        // Sau này khi Backend trả về trường is_completed, bạn sẽ sửa thành:
-        // if (lesson.is_completed) status = 'completed';
-        // else if (isNextToLearn) status = 'active';
-
         return {
-          ...lesson,
-          displayDate: formatRoadmapDate(lesson.created_at),
-          status: status,
+          id: mod._id,
+          number: index + 1,
+          label: status === 'current' ? 'Đang học' : `Tuần ${index + 1}`,
+          status,
         };
       });
 
-      console.log('✅ Final Roadmap (Count):', formattedRoadmap.length);
-      setRoadmap(formattedRoadmap);
+      // FAKE DATA: Đảm bảo luôn hiện ít nhất 4 cụm "Tuần" cho đẹp mắt
+      while (formattedModules.length < 4) {
+        const nextIndex = formattedModules.length;
+        formattedModules.push({
+          id: `fake-locked-mod-${nextIndex}`,
+          number: nextIndex + 1,
+          label: `Tuần ${nextIndex + 1}`,
+          status: 'locked',
+        });
+      }
+      setModules(formattedModules);
 
-      // Tìm bài học hôm nay (thường là bài 'active')
-      const activeLesson =
-        formattedRoadmap.find(item => item.status === 'active') || formattedRoadmap[0];
-      setTodayLesson(activeLesson);
+      // 3. XỬ LÝ LESSONS (DẢI DỌC)
+      const currentModule = rawModules.find((m: RoadmapModule) => m.is_current) || rawModules[0];
+
+      if (currentModule && currentModule.lessons && currentModule.lessons.length > 0) {
+        // Tìm ra index của bài đang học để làm mốc thời gian
+        let activeIndex = currentModule.lessons.findIndex((l: RoadmapLesson) => l.is_current);
+        if (activeIndex === -1) activeIndex = 0; // Nếu không có, gán bài đầu là TODAY
+
+        const formattedRoadmap = currentModule.lessons.map((lesson: RoadmapLesson, idx: number) => {
+          let status: 'completed' | 'active' | 'locked' = 'locked';
+
+          if (idx < activeIndex) {
+            status = 'completed';
+          } else if (idx === activeIndex) {
+            status = 'active';
+          }
+
+          return {
+            ...lesson,
+            _id: lesson._id,
+            name_en: lesson.name_vi || lesson.name_en,
+            displayDate: getSimulatedDate(activeIndex, idx), // Tạo ngày MON * JUL 10
+            status: status,
+          };
+        });
+
+        setRoadmap(formattedRoadmap);
+
+        // Tìm bài học Focus cho tấm thẻ to ở trên cùng
+        const activeLesson =
+          formattedRoadmap.find((l: any) => l.status === 'active') || formattedRoadmap[0];
+        setTodayLesson(activeLesson);
+      } else {
+        setRoadmap([]);
+      }
     } catch (error: any) {
-      console.error('🚨 API ERROR:', error?.response?.data || error.message);
+      console.error('🚨 API ERROR /roadmap/me:', error?.response?.data || error.message);
     } finally {
       setLoading(false);
       console.log('🏁 --- END LOAD DATA ---');
@@ -129,5 +140,5 @@ export const useLearningData = () => {
     loadData();
   }, [loadData]);
 
-  return { loading, currentPath, roadmap, todayLesson, refresh: loadData };
+  return { loading, currentPath, modules, roadmap, todayLesson, refresh: loadData };
 };

@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -22,30 +22,51 @@ type EnterEmailScreenNavigationProp = StackNavigationProp<any>;
 
 export const EnterEmailScreen: React.FC = () => {
   const navigation = useNavigation<EnterEmailScreenNavigationProp>();
-  const { loading } = useAuth(); // Sử dụng Hook
+  const { loading, sendEmailOTP } = useAuth(); // Sử dụng Hook
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
-  // // Validate email format
-  // const isValidEmail = (email: string): boolean => {
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //   return emailRegex.test(email);
-  // };
+  // Tùy chọn: Validate email format
+  const isValidEmail = (emailStr: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(emailStr);
+  };
 
   // Handle submit
   const handleSubmit = async () => {
     setError('');
 
-    if (!email.trim()) {
-      setError('Vui lòng nhập email hoặc tài khoản');
+    const formattedEmail = email.trim();
+
+    if (!formattedEmail) {
+      setError('Vui lòng nhập email của bạn.');
       return;
     }
 
-    // ĐI TẮT: Bỏ qua gọi API sendEmailOTP, nhảy thẳng tới màn hình Login
-    // Leader bảo dùng admin/admin nên ta truyền chuỗi vừa nhập sang màn sau
-    navigation.navigate('LoginEmail', { email: email.trim() });
+    if (!isValidEmail(formattedEmail)) {
+      setError('Email không đúng định dạng.');
+      return;
+    }
+
+    // 1. Gọi API Send OTP để kiểm tra sự tồn tại
+    const isExist = await sendEmailOTP(formattedEmail);
+
+    // Nếu lỗi API (trả về null) thì dừng
+    if (isExist === null) return;
+
+    // 2. CHIA NHÁNH LOGIC:
+    if (isExist === true) {
+      // TÀI KHOẢN ĐÃ TỒN TẠI -> Nhảy sang màn Đăng Nhập
+      console.log('🔄 Email đã tồn tại. Chuyển sang màn Đăng nhập.');
+      navigation.navigate('LoginEmail', { email: formattedEmail });
+    } else {
+      // CHƯA CÓ TÀI KHOẢN (API ĐÃ GỬI OTP) -> Nhảy sang màn Nhập OTP
+      console.log('✉️ Email mới. Chuyển sang màn Xác thực OTP.');
+      navigation.navigate('VerifyOTP', { email: formattedEmail });
+    }
   };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
@@ -71,7 +92,7 @@ export const EnterEmailScreen: React.FC = () => {
               <LoginIcon />
               <LoginHeader
                 title="Your Email"
-                subtitle="Please enter your email address to recover your password."
+                subtitle="Please enter your email address to continue."
               />
               <EmailInput value={email} onChangeText={setEmail} error={error} />
               <SubmitButton onPress={handleSubmit} disabled={!email.trim()} loading={loading} />
