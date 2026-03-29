@@ -9,6 +9,7 @@ import {
   IconWordRed,
   IconXpRed,
 } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { useProfile } from '@/hooks/useProfile';
 import { useAppStore } from '@/stores';
 
@@ -24,9 +25,8 @@ import { ConfirmModal } from '../components/ConfirmModal';
 
 export default function ProfileScreen({ navigation }: { navigation: any }) {
   const { user, stats, goal, logout } = useProfile();
-  const theme = useAppStore(state => state.theme);
   const setTheme = useAppStore(state => state.setTheme);
-  const isDark = theme === 'dark';
+  const { colors, isDark } = useAppTheme();
 
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
 
@@ -42,7 +42,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
   };
 
   return (
-    <View className="flex-1 bg-[#FFFFFF]">
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
       <ProfileHeader title="Hồ sơ" onBack={() => navigation.goBack()} onShare={() => {}} />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -70,7 +70,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
               icon={<IconWordRed width={26} height={26} color="#4A90D9" />}
               value={stats.wordsLearned.toString()}
               label="TỪ"
-              isDark={false}
+              isDark={isDark}
             />
           </View>
 
@@ -79,12 +79,14 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
               icon={<IconXpRed width={26} height={26} color="#F5A623" />}
               value={stats.totalXP.toString()}
               label="XP"
-              isDark={false}
+              isDark={isDark}
             />
           </View>
         </View>
         <View className="mx-4">
-          <Text className="mb-4 text-[20px] font-extrabold text-[#0F172A]">Mục tiêu học tập</Text>
+          <Text className="mb-4 text-[20px] font-extrabold" style={{ color: colors.text }}>
+            Mục tiêu học tập
+          </Text>
           <LearningGoalCard
             minutes={goal.minutesPerDay}
             progress={goal.progress}
@@ -94,7 +96,10 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
         <View className="mx-4 mb-5 mt-2">
           <SkillProficiency />
         </View>
-        <View className="mx-4 mb-1 overflow-hidden rounded-3xl bg-white shadow-sm">
+        <View
+          className="mx-4 mb-1 overflow-hidden rounded-3xl shadow-sm"
+          style={{ backgroundColor: colors.card }}
+        >
           <MenuRow
             icon={
               <View className="h-10 w-10 items-center justify-center rounded-xl bg-[#F0F5FF]">
@@ -110,8 +115,11 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           />
         </View>
 
-        <View className="mx-4 mb-8 overflow-hidden rounded-3xl bg-white shadow-sm">
-          <View className="ml-[60px] h-[1px] bg-gray-100" />
+        <View
+          className="mx-4 mb-8 mt-4 overflow-hidden rounded-3xl shadow-sm"
+          style={{ backgroundColor: colors.card }}
+        >
+          <View className="ml-[60px] h-[1px]" style={{ backgroundColor: colors.borderMuted }} />
 
           <MenuRow
             icon={<IconMoon width={24} height={24} color="#4A5568" />}
@@ -136,15 +144,15 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                     width: 24,
                     height: 24,
                     borderRadius: 12,
-                    backgroundColor: '#fff',
+                    backgroundColor: colors.surfaceElevated,
                   }}
                 />
               </TouchableOpacity>
             }
-            isDark={false}
+            isDark={isDark}
           />
 
-          <View className="h-[1px] w-full bg-gray-100" />
+          <View className="h-[1px] w-full" style={{ backgroundColor: colors.borderMuted }} />
 
           <MenuRow
             icon={<IconSignOut width={24} height={24} color="#E53935" />}
@@ -152,7 +160,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             textColor="#E53935"
             showChevron={false}
             onPress={() => setLogoutModalVisible(true)}
-            isDark={false}
+            isDark={isDark}
           />
         </View>
       </ScrollView>

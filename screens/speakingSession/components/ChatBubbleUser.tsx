@@ -8,26 +8,39 @@ import Animated, {
 import React, { useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { IconAvatar2, IconMicrophone } from '@/components/icon';
-import { ChatMessage, PracticeMode } from '@/types/speaking.types';
+import { IconAvatar2, IconPLay, IconPlayVoice, IconSpeedSpeaking } from '@/components/icon';
+import { ChatMessage, HighlightedText, PracticeMode } from '@/types/speaking.types';
+
+import { ProgressBar } from './ProgressBar';
 
 interface ChatBubbleUserProps {
   message: ChatMessage;
   showAvatar?: boolean;
   role?: string;
   mode?: PracticeMode;
+  /** Hiển thị tô màu từng từ (Nâng cao) */
+  showWordFeedback?: boolean;
 }
+
+const PINK_BG = '#FFF0EF';
+const PINK_BORDER = '#FCE4E4';
 
 export const ChatBubbleUser: React.FC<ChatBubbleUserProps> = ({
   message,
   showAvatar = true,
   role = 'FRONTEND DEVELOPER',
   mode = 'dual-explorer',
+  showWordFeedback = false,
 }) => {
   const showEnglish = mode !== 'translation-hero';
   const showVietnamese = mode !== 'english-master';
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(20);
+
+  const segments: HighlightedText[] | undefined =
+    showWordFeedback && message.pronunciationSegments?.length
+      ? message.pronunciationSegments
+      : undefined;
 
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 300 });
@@ -42,12 +55,29 @@ export const ChatBubbleUser: React.FC<ChatBubbleUserProps> = ({
     transform: [{ translateY: translateY.value }],
   }));
 
+  const renderEnglish = () => {
+    if (segments && segments.length > 0) {
+      // Một Text cha + Text con lồng nhau → chảy inline, xuống dòng đúng cả câu (tránh flex-row tách từng cụm).
+      return (
+        <Text className="mb-2 text-[15px] font-semibold leading-6">
+          {segments.map((seg, index) => (
+            <Text key={index} style={{ color: seg.isCorrect ? '#059669' : '#DC2626' }}>
+              {seg.text}
+            </Text>
+          ))}
+        </Text>
+      );
+    }
+    return (
+      <Text className="mb-2 text-[15px] font-semibold leading-6 text-gray-900">{message.text}</Text>
+    );
+  };
+
   return (
-    <Animated.View style={animatedStyle} className="mb-3">
-      {/* Header with Role and Avatar - Outside the card */}
+    <Animated.View style={animatedStyle} className="mb-4">
       {showAvatar && (
         <View className="mb-2 flex-row items-center justify-end">
-          <Text className="mr-3 text-sm font-bold uppercase tracking-wide text-red-600">
+          <Text className="mr-3 text-xs font-bold uppercase tracking-wide text-[#D32F2F]">
             {role}
           </Text>
           <View className="h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-800">
@@ -56,31 +86,52 @@ export const ChatBubbleUser: React.FC<ChatBubbleUserProps> = ({
         </View>
       )}
 
-      {/* Message bubble */}
       <View className="items-end">
-        <View className="max-w-[85%] rounded-bl-3xl rounded-br-3xl rounded-tl-3xl bg-red-500 px-6 py-5 shadow-md">
-          {showEnglish && (
-            <Text className="text-base font-medium leading-6 text-white">{message.text}</Text>
-          )}
+        <View
+          className="min-w-0 max-w-[92%] rounded-3xl border px-4 py-4 shadow-sm"
+          style={{ backgroundColor: PINK_BG, borderColor: PINK_BORDER }}
+        >
+          {showEnglish && renderEnglish()}
 
           {showVietnamese && message.translation && (
             <Text
               className={
                 mode === 'translation-hero'
-                  ? 'text-base font-medium leading-6 text-white'
-                  : `text-sm italic leading-5 text-white opacity-90 ${showEnglish ? 'mt-3' : ''}`
+                  ? 'text-[15px] font-semibold leading-6 text-gray-900'
+                  : 'text-[13px] leading-5 text-gray-500'
               }
             >
-              &ldquo;{message.translation}&rdquo;
+              {message.translation}
             </Text>
           )}
 
-          {/* Microphone icon at bottom left */}
-          <View className="mt-4">
-            <TouchableOpacity className="h-10 w-10 items-center justify-center self-start rounded-full bg-white">
-              <IconMicrophone width={20} height={20} color="#3B82F6" />
+          <View className="mt-3 flex-row flex-wrap items-center gap-2">
+            <TouchableOpacity className="h-9 w-9 items-center justify-center" hitSlop={8}>
+              <IconPlayVoice width={20} height={20} color="#D32F2F" />
+            </TouchableOpacity>
+            <View className="flex-row items-center gap-0.5">
+              <IconSpeedSpeaking width={18} height={18} color="#6B7280" />
+              <Text className="text-xs font-semibold text-gray-600">0.75x</Text>
+            </View>
+            <TouchableOpacity
+              className="h-8 w-8 items-center justify-center rounded-full bg-white/90"
+              hitSlop={8}
+            >
+              <IconPLay width={12} height={12} color="#D32F2F" />
             </TouchableOpacity>
           </View>
+          {message.score !== undefined && (
+            <View className="mt-3 w-full min-w-0 self-stretch" style={{ maxWidth: '100%' }}>
+              <ProgressBar
+                progress={message.score}
+                height={6}
+                showLabel
+                fillColor="#22c55e"
+                trackColor="#E5E7EB"
+                labelColor="#16a34a"
+              />
+            </View>
+          )}
         </View>
       </View>
     </Animated.View>

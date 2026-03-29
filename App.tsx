@@ -7,6 +7,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import RootStack from '@/navigation';
@@ -28,21 +30,30 @@ if (__DEV__) {
 }
 
 function App() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() ?? 'light';
+  const palette = Colors[colorScheme];
 
   // You can add font loading, network check, etc. here
   const isLoaded = true;
 
   if (!isLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].tint} />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: palette.background,
+        }}
+      >
+        <ActivityIndicator size="large" color={palette.tint} />
       </View>
     );
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: palette.background }}>
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <SafeAreaProvider>
         <KeyboardProvider>
           <RootStack />

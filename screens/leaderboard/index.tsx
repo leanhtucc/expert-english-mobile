@@ -6,15 +6,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ImageLinearBackground } from '@/components/icon';
 import { mockLeaderboard } from '@/data/mock-data';
-import { useTheme } from '@/hooks/use-theme';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 import { LeaderboardRow, PodiumColumn } from './components';
 
 export default function LeaderboardScreen() {
   const insets = useSafeAreaInsets();
-  const { isDark } = useTheme();
+  const { colors, isDark } = useAppTheme();
 
-  const bgColor = isDark ? '#13141A' : '#FFFFFF';
+  const bgColor = colors.background;
 
   const top3 = mockLeaderboard.filter(p => p.rank <= 3);
   const rest = mockLeaderboard.filter(p => p.rank > 3);
@@ -35,9 +35,9 @@ export default function LeaderboardScreen() {
         style={{ paddingTop: insets.top + 4, height: 48 + insets.top + 4 }}
       >
         <TouchableOpacity className="h-10 w-10 items-center justify-center" activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={24} color="#1A1A2E" />
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text className="text-[18px] font-bold" style={{ color: '#1A1A2E' }}>
+        <Text className="text-[18px] font-bold" style={{ color: colors.text }}>
           Leaderboard
         </Text>
         <TouchableOpacity
@@ -45,7 +45,7 @@ export default function LeaderboardScreen() {
           activeOpacity={0.7}
           onPress={handleShare}
         >
-          <Ionicons name="share-social-outline" size={24} color="#1A1A2E" />
+          <Ionicons name="share-social-outline" size={24} color={colors.text} />
         </TouchableOpacity>
       </View>
 

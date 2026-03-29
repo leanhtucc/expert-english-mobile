@@ -7,6 +7,8 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { IconNotifiRed, IconUserProfileAvatar } from '@/components/icon';
+import { IconNotification, IconUserProfile } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 interface HeaderGreetingProps {
   name?: string;
@@ -65,6 +67,38 @@ export const HeaderGreeting: React.FC<HeaderGreetingProps> = ({
           </View>
         </TouchableOpacity>
       </View>
+  const { colors, isDark } = useAppTheme();
+
+  return (
+    <View className="flex-row items-center justify-between px-5 py-4">
+      <View className="flex-row items-center gap-3">
+        <View
+          className="h-11 w-11 items-center justify-center rounded-full border"
+          style={{
+            borderColor: isDark ? colors.border : '#FECACA',
+            backgroundColor: isDark ? colors.surface : '#FEE2E2',
+          }}
+        >
+          <IconUserProfile width={26} height={26} />
+        </View>
+        <View>
+          <Text className="text-xs" style={{ color: colors.muted }}>
+            {greeting}
+          </Text>
+          <Text className="text-base font-bold" style={{ color: colors.text }}>
+            {name}
+          </Text>
+        </View>
+      </View>
+
+      <TouchableOpacity
+        onPress={onNotificationPress}
+        className="h-11 w-11 items-center justify-center rounded-full"
+        style={{ backgroundColor: isDark ? colors.surface : '#F3F4F6' }}
+        activeOpacity={0.7}
+      >
+        <IconNotification width={22} height={22} iconColor={isDark ? '#FFFFFF' : '#334155'} />
+      </TouchableOpacity>
     </View>
   );
 };

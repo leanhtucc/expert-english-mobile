@@ -1,3 +1,4 @@
+import { EXERCISES_ROUTES } from '@/types/api/exercises.routes';
 import { GetPageRequest, PostSubmitLessonRequest } from '@/types/api/learningPath.request';
 import {
   LearningModulePageResponse,
@@ -12,6 +13,8 @@ import {
   SubmitLessonResponse,
   VocabularyDetailResponse,
 } from '@/types/api/lesson.response';
+import { GenerateSpeakingForLessonRequest } from '@/types/api/speakingExercise.request';
+import type { ExercisesByLessonApiResponse } from '@/types/api/speakingExercise.response';
 
 import { apiClient } from '../client';
 
@@ -58,6 +61,17 @@ export const learningApi = {
       lesson_id: lessonId,
       limit: 10,
     }),
+
+  getExercisesByLesson: (lessonId: string) =>
+    apiClient.get<ExercisesByLessonApiResponse>(EXERCISES_ROUTES.exercisesByLessonPath(lessonId)),
+
+  generateSpeakingForLesson: (data: GenerateSpeakingForLessonRequest) =>
+    apiClient.post(EXERCISES_ROUTES.generateSpeakingForLesson, data),
+
+  /** multipart/form-data: audio_file, vocab_id, reference_text, lesson_id (tuỳ chọn) */
+  submitSpeakingPronunciation: (formData: FormData) =>
+    apiClient.postForm<unknown>(EXERCISES_ROUTES.submitSpeakingPronunciation, formData),
+
   // THÊM HÀM NÀY VÀO: Hàm này chuyên dùng để lấy mảng câu hỏi
   getExercisesPage: (params: any) => apiClient.get('/exercises/page', { params }),
 };
