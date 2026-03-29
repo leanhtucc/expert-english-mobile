@@ -25,6 +25,7 @@ import { StreakCompleteScreen } from '@/screens/progressForUser/screens/StreakCo
 import { WeekUnlockScreen } from '@/screens/progressForUser/screens/WeekUnlockScreen';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
+import { RecordingScreen } from '@/screens/vocabulary/recording/RecordingScreen';
 import VocabularyLearning from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
@@ -65,6 +66,7 @@ export type RootStackParamList = {
   WeekUnlock: undefined;
   Certificates: undefined;
   RenewalScreen: undefined;
+  RecordingScreen: undefined;
   AIFeedback: { userAnswer: string; mode: string };
   VocabularyLearning: undefined;
 };
@@ -99,7 +101,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined}>
       <Stack.Navigator
-        initialRouteName="StreakComplete"
+        initialRouteName="RecordingScreen"
         screenOptions={{
           headerShown: false,
           gestureEnabled: false,
@@ -200,6 +202,11 @@ export default function RootStack() {
             gestureEnabled: true,
             gestureDirection: 'horizontal',
           }}
+        />
+        <Stack.Screen
+          name="RecordingScreen"
+          component={RecordingScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="WeekUnlock"

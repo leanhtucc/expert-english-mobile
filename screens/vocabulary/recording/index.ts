@@ -1,5 +1,3 @@
-export { MicrophoneButton } from './MicrophoneButton';
-export { RecordingScreen } from './RecordingScreen';
-export { useRecording } from './useRecording';
-export type { RecordingState } from './useRecording';
-export { WaveAnimation } from './WaveAnimation';
+export * from './RecordingScreen';
+// Tuỳ chọn: export thêm các types nếu cần dùng ở ngoài
+export * from './types';

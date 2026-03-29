@@ -1,66 +1,81 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 
-interface WaveAnimationProps {
-  isActive: boolean;
-  className?: string;
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+
+interface WaveformProps {
+  isRecording: boolean;
+  barCount?: number;
 }
 
-export const WaveAnimation: React.FC<WaveAnimationProps> = ({ isActive }) => {
-  const wave1 = useRef(new Animated.Value(0.3)).current;
-  const wave2 = useRef(new Animated.Value(0.5)).current;
-  const wave3 = useRef(new Animated.Value(0.7)).current;
+const BAR_WIDTH = 4;
+const MAX_HEIGHT = 40;
+
+const WaveBar = ({ isRecording }: { delay: number; isRecording: boolean }) => {
+  const scale = useSharedValue(0.3);
 
   useEffect(() => {
-    if (isActive) {
-      const createAnimation = (value: Animated.Value, delay: number) => {
-        return Animated.loop(
-          Animated.sequence([
-            Animated.timing(value, {
-              toValue: 1,
-              duration: 800,
-              delay,
-              useNativeDriver: true,
-            }),
-            Animated.timing(value, {
-              toValue: 0.3,
-              duration: 800,
-              useNativeDriver: true,
-            }),
-          ])
-        );
-      };
-
-      const animations = Animated.parallel([
-        createAnimation(wave1, 0),
-        createAnimation(wave2, 200),
-        createAnimation(wave3, 400),
-      ]);
-
-      animations.start();
-
-      return () => {
-        animations.stop();
-      };
+    if (isRecording) {
+      scale.value = withRepeat(
+        withTiming(Math.random() * 1 + 0.5, {
+          duration: 400 + Math.random() * 300,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        -1,
+        true
+      );
+    } else {
+      scale.value = withTiming(0.2);
     }
+  }, [isRecording, scale]);
 
-    wave1.setValue(0.3);
-    wave2.setValue(0.5);
-    wave3.setValue(0.7);
-    return undefined;
-  }, [isActive, wave1, wave2, wave3]);
-
-  if (!isActive) {
-    return null;
-  }
+  const style = useAnimatedStyle(() => {
+    return {
+      transform: [{ scaleY: scale.value }],
+      opacity: 0.9,
+    };
+  });
 
   return (
-    <View className="flex-row items-center justify-center space-x-2">
-      <Animated.View className="h-16 w-1 rounded-full bg-red-500" style={{ opacity: wave1 }} />
-      <Animated.View className="h-24 w-1 rounded-full bg-red-500" style={{ opacity: wave2 }} />
-      <Animated.View className="h-20 w-1 rounded-full bg-red-500" style={{ opacity: wave3 }} />
-      <Animated.View className="h-28 w-1 rounded-full bg-red-500" style={{ opacity: wave1 }} />
-      <Animated.View className="h-16 w-1 rounded-full bg-red-500" style={{ opacity: wave2 }} />
+    <Animated.View
+      style={[
+        styles.bar,
+        style,
+        {
+          height: MAX_HEIGHT,
+          marginHorizontal: 2,
+        },
+      ]}
+    />
+  );
+};
+
+export const Waveform = ({ isRecording, barCount = 20 }: WaveformProps) => {
+  return (
+    <View style={styles.container}>
+      {Array.from({ length: barCount }).map((_, i) => (
+        <WaveBar key={i} delay={i * 80} isRecording={isRecording} />
+      ))}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 60,
+  },
+  bar: {
+    width: BAR_WIDTH,
+    backgroundColor: '#D32F2F',
+    borderRadius: 4,
+  },
+});
