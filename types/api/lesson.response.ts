@@ -118,13 +118,30 @@ export interface MCQItem {
   question: string;
   correctAnswer: string;
 }
+export interface SpeakingTask {
+  task_id: string;
+  phonetic: string;
+  vocab_id: string;
+  question_type: string;
+  reference_text: string;
+}
+
+export interface SpeakingContent {
+  mode: 'word' | 'sentence';
+  skill: string;
+  tasks: SpeakingTask[];
+  schema_version: number;
+  speaking_level: number;
+}
 export interface MultipleChoiceContent {
   questions: MCQItem[];
 }
 
 // Gộp các loại Content lại (Để TypeScript không báo lỗi khi check type)
-export type ExerciseContent = MatchingContent & FillBlankContent & MultipleChoiceContent;
-
+export type ExerciseContent = Partial<MatchingContent> &
+  Partial<FillBlankContent> &
+  Partial<MultipleChoiceContent> &
+  Partial<SpeakingContent>;
 // ==========================================
 // 3. ENTITY CHÍNH (EXERCISE)
 // ==========================================

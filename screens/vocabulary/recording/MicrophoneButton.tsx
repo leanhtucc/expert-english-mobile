@@ -3,7 +3,7 @@ import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
-import { Waveform } from './WaveAnimation';
+import { WaveformAnimation } from './WaveAnimation';
 import { COLORS } from './constants';
 import { SpeakingState } from './types';
 
@@ -32,7 +32,7 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({ state, onSta
       >
         {isRecording ? (
           <View style={{ position: 'absolute', top: 0, width: '100%' }}>
-            <Waveform isRecording={isRecording} />
+            <WaveformAnimation isRecording={isRecording} />
           </View>
         ) : (
           // 2. KHI CHƯA THU / ĐANG XỬ LÝ: Hiện cục Mic

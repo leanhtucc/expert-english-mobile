@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,9 +12,10 @@ import { MultipleChoiceQuestion, useMultipleChoice } from './useMultipleChoice';
 
 interface MultipleChoiceScreenProps {
   questions: MultipleChoiceQuestion[];
-  onComplete?: (score: number, userPick: string) => void;
+  onComplete?: (score: number, userPick?: string) => void;
   onBack?: () => void;
   onClose?: () => void;
+  onOpenHint?: () => void; // 🌟 Thêm Props này để Parent bật Bottom Sheet Flashcard
   progress?: { current: number; total: number };
 }
 
@@ -23,6 +24,7 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
   onComplete,
   onBack,
   onClose,
+  onOpenHint,
   progress: externalProgress,
 }) => {
   const insets = useSafeAreaInsets();
@@ -34,31 +36,41 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
     isCorrect,
     handleSelectAnswer,
     handleNext,
-    resetAnswer, // Nhận hàm reset từ hook
+    resetAnswer,
   } = useMultipleChoice({
     questions,
     onComplete: onComplete ? (score: number) => onComplete(score, '') : undefined,
   });
 
-  // LOGIC: KHI TRẢ LỜI SAI -> CHỜ 1.5 GIÂY RỒI RESET ĐỂ CHỌN LẠI
+  // 🌟 STATE QUẢN LÝ LỖI SAI CỤC BỘ (Để hiện nút Gợi ý)
+  const [localWrongAttempts, setLocalWrongAttempts] = useState(0);
+  const wrongReportedRef = useRef(false);
+
+  // LOGIC: KHI TRẢ LỜI SAI -> TĂNG LỖI -> CHỜ 1.5s -> RESET ĐỂ CHỌN LẠI
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
 
     if (isAnswered && !isCorrect) {
+      if (!wrongReportedRef.current) {
+        // Tăng biến đếm số lần chọn sai
+        setLocalWrongAttempts(prev => prev + 1);
+
+        onComplete?.(0, selectedAnswer || ''); // Báo cho Parent biết là sai
+        wrongReportedRef.current = true;
+      }
+
       timer = setTimeout(() => {
         resetAnswer();
+        wrongReportedRef.current = false;
       }, 1500);
     }
 
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isAnswered, isCorrect, resetAnswer]);
+  }, [isAnswered, isCorrect, resetAnswer, onComplete, selectedAnswer]);
 
-  if (!currentQuestion) {
-    return null;
-  }
-
+  if (!currentQuestion) return null;
   const displayProgress = externalProgress || internalProgress;
 
   return (
@@ -85,11 +97,15 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
 
         <ScrollView
           className="w-full flex-1"
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 160 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 160, paddingTop: 10 }}
           showsVerticalScrollIndicator={false}
         >
-          <View className="mb-8">
-            <QuestionCard question={currentQuestion.question} />
+          <View className="mb-8 mt-2">
+            <QuestionCard
+              question={currentQuestion.question}
+              showHintButton={localWrongAttempts >= 2} // 🌟 Hiện nút khi sai >= 2 lần
+              onPressHint={onOpenHint} // 🌟 Gọi hàm của Parent để mở Bottom Sheet Flashcard
+            />
           </View>
 
           <View className="w-full" key={currentQuestion.id || currentQuestion.question}>
@@ -107,7 +123,6 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
         </ScrollView>
       </View>
 
-      {/* DẢI NÚT CHỈ HIỆN KHI CHƯA CHỐT HOẶC TRẢ LỜI SAI */}
       {(!isAnswered || (isAnswered && !isCorrect)) && (
         <View className="absolute bottom-0 left-0 right-0 z-40 w-full">
           <View
@@ -123,7 +138,6 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
         </View>
       )}
 
-      {/* MODAL TRẢ LỜI ĐÚNG ĐẶT RA NGOÀI ĐỂ OVERLAY CHE KÍN MÀN HÌNH */}
       {isAnswered && isCorrect && (
         <CheckResultButton status="correct" text={'Next Question'} onPress={handleNext} />
       )}

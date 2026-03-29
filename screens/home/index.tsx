@@ -13,9 +13,7 @@ import { IconRobot } from '@/components/icon';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { useAuth } from '@/hooks/useAuth';
 import { useLearningData } from '@/hooks/useLearningData';
-import { useRoadmapData } from '@/hooks/useRoadmapData';
 import { CARD_BG_DARK } from '@/screens/profile/constants/profile.constants';
-import { useAuthStore } from '@/stores/auth.store';
 import { useToastStore } from '@/stores/toast.store';
 
 // 👇 1. ĐỔI TÊN IMPORT TỪ MODAL THÀNH DRAWER
@@ -73,10 +71,8 @@ export const HomeScreen: React.FC = () => {
   }
 
   return (
-    // SafeAreaView bao ngoài z-index 10
-    <SafeAreaView className="z-10 flex-1 bg-gray-50">
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
-    <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
+    // Đã dọn dẹp: Chỉ giữ lại 1 SafeAreaView và 1 StatusBar
+    <SafeAreaView className="z-10 flex-1" style={{ backgroundColor: colors.background }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
 
       <ScrollView
@@ -114,9 +110,9 @@ export const HomeScreen: React.FC = () => {
           />
         </View>
 
-        <View className="z-10 mx-4 mt-1 items-center rounded-[24px] bg-[#FCF0F1] py-8">
+        {/* Đã dọn dẹp: Gộp 2 thẻ View thừa thành 1 thẻ chuẩn xác */}
         <View
-          className="mx-4 mt-1 items-center rounded-[24px] py-8"
+          className="z-10 mx-4 mt-1 items-center rounded-[24px] py-8"
           style={{
             backgroundColor: isDark ? CARD_BG_DARK : '#FCF0F1',
           }}

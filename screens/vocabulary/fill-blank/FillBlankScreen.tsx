@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -41,26 +41,28 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
     onComplete,
   });
 
-  // LOGIC: KHI TRẢ LỜI SAI -> CHỜ 1.5 GIÂY RỒI RESET ĐỂ CHỌN LẠI
+  const wrongReportedRef = useRef(false);
+
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
 
     if (isAnswered && !isCorrect) {
+      if (!wrongReportedRef.current) {
+        onComplete?.(0); // Gọi báo lỗi cho Parent
+        wrongReportedRef.current = true;
+      }
       timer = setTimeout(() => {
         resetAnswer();
+        wrongReportedRef.current = false;
       }, 1500);
     }
 
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isAnswered, isCorrect, resetAnswer]);
-
-  // Cần thêm dependency cho useEffect thứ 2 để xoá state khi chuyển component (tuỳ chọn)
-  // Nhưng key bọc dưới View đã lo việc này
+  }, [isAnswered, isCorrect, resetAnswer, onComplete]);
 
   if (!currentQuestion) return null;
-
   const displayProgress = externalProgress || internalProgress;
 
   return (
@@ -98,11 +100,8 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
               hint={currentQuestion.hint}
             />
           </View>
-
-          {/* 🌟 Truyền Key độc nhất của câu hỏi xuống AnswerInput để ép render lại 🌟 */}
           <View className="w-full">
             <AnswerInput
-              // Thêm key ở đây
               key={currentQuestion.id || sentenceParts.before}
               options={currentQuestion.options}
               selectedAnswer={selectedAnswer}

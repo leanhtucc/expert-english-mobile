@@ -44,7 +44,7 @@ const HorizontalModuleTracker: React.FC<{ modules: RoadmapModuleData[] }> = ({ m
   }
 
   return (
-    <View className="mb-10 mt-4 flex-row items-center justify-between px-2">
+    <View className="mb-10 flex-row items-center justify-between px-2">
       {displayModules.map((mod, index) => {
         const isLast = index === displayModules.length - 1;
         const isCompleted = mod.status === 'completed';
@@ -101,7 +101,7 @@ const HorizontalModuleTracker: React.FC<{ modules: RoadmapModuleData[] }> = ({ m
 const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
   const { colors, isDark } = useAppTheme();
 
-  if (status === 'completed')
+  if (status === 'completed') {
     return (
       <View
         className="h-10 w-10 items-center justify-center rounded-full"
@@ -112,8 +112,9 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
         </View>
       </View>
     );
+  }
 
-  if (status === 'active')
+  if (status === 'active') {
     return (
       <View
         className="h-10 w-10 items-center justify-center rounded-full"
@@ -124,11 +125,9 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
         </View>
       </View>
     );
+  }
 
   return (
-    <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-50">
-      <View className="h-7 w-7 items-center justify-center rounded-full bg-[#F3F4F6]">
-        <IconLockLession width={16} height={16} color="#B5A9A9" />
     <View
       className="h-10 w-10 items-center justify-center rounded-full"
       style={{ backgroundColor: isDark ? colors.surface : '#F3F4F6' }}
@@ -137,7 +136,7 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
         className="h-7 w-7 items-center justify-center rounded-full"
         style={{ backgroundColor: isDark ? colors.borderMuted : '#E5E7EB' }}
       >
-        <IconLockLession width={18} height={18} />
+        <IconLockLession width={16} height={16} color="#B5A9A9" />
       </View>
     </View>
   );
@@ -188,10 +187,6 @@ const RoadmapItem: React.FC<
       <View className="w-14 items-center">
         <RoadmapDot status={status} />
         {!isLast && (
-          <View
-            className={`w-[2px] flex-1 ${isLocked ? 'bg-gray-50' : 'bg-red-100'}`}
-            style={{ minHeight: 30 }}
-          />
           <View className="w-[2px] flex-1" style={{ minHeight: 30, backgroundColor: lineColor }} />
         )}
       </View>
@@ -220,7 +215,6 @@ export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({
   items,
   onLessonPress,
 }) => {
-export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items, onLessonPress }) => {
   const { colors } = useAppTheme();
 
   if (!items || items.length === 0) {
@@ -234,16 +228,13 @@ export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items, onLesso
   return (
     <View className="mx-5 mb-10">
       {/* Tiêu đề Khóa học */}
-      <View className="mb-2">
-        <Text className="text-[22px] font-black tracking-tight text-[#0F172A]">
-          Learning Roadmap
-        </Text>
-        {pathTitle && <Text className="mt-1 text-[14px] text-[#8C7A78]">{pathTitle}</Text>}
-    <View className="mx-5 mb-10 mt-10">
       <View className="mb-5 flex-row items-center justify-between">
-        <Text className="text-lg font-bold" style={{ color: colors.text }}>
-          Roadmap học tập
-        </Text>
+        <View className="mb-2">
+          <Text className="text-[22px] font-black tracking-tight text-[#0F172A]">
+            Learning Roadmap
+          </Text>
+          {pathTitle && <Text className="mt-1 text-[14px] text-[#8C7A78]">{pathTitle}</Text>}
+        </View>
       </View>
 
       {/* Dải phân cách Tuần (Nằm ngang) */}

@@ -1,6 +1,6 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,7 +16,7 @@ import { useRecording } from './useRecording';
 interface RecordingScreenProps {
   questions?: Question[];
   route?: any;
-  onComplete?: (results: any) => void;
+  onComplete?: (score: number) => void;
   onBack?: () => void;
   onClose?: () => void;
   progress?: { current: number; total: number };
@@ -31,7 +31,6 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
   progress: externalProgress,
 }) => {
   const insets = useSafeAreaInsets();
-
   const safeQuestions = questions || route?.params?.questions || MOCK_QUESTIONS;
 
   const {
@@ -44,24 +43,33 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
     startRecording,
     stopRecordingAndScore,
     handleRetry,
-    handleNext,
   } = useRecording({ questions: safeQuestions, onComplete });
+
+  const wrongReportedRef = useRef(false);
+
+  // LOGIC: Nếu thu âm trả về điểm thấp (Ví dụ < 70) -> Báo lỗi để kích hoạt Hint
+  useEffect(() => {
+    if (state === 'RESULT' && score !== null && score < 70) {
+      if (!wrongReportedRef.current) {
+        onComplete?.(0); // Gửi cờ sai
+        wrongReportedRef.current = true;
+      }
+    } else if (state === 'IDLE' || state === 'RECORDING') {
+      // Reset khi bấm thu âm lại
+      wrongReportedRef.current = false;
+    }
+  }, [state, score, onComplete]);
 
   const displayProgress = externalProgress || {
     current: currentIndex + 1,
     total: totalQuestions || 1,
   };
 
-  if (!currentQuestion) {
-    return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <Text>Loading questions...</Text>
-      </SafeAreaView>
-    );
-  }
+  if (!currentQuestion) return null;
 
   return (
     <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
+      {/* ... Giữ nguyên toàn bộ UI ... */}
       <View className="z-10 w-full bg-white">
         <ScreenHeader
           title="Speaking Practice"
@@ -97,9 +105,7 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
             )}
 
             <Text
-              className={`font-extrabold text-[#1E293B] ${
-                currentQuestion.type === 'word' ? 'text-[32px]' : 'text-[24px] leading-8'
-              }`}
+              className={`font-extrabold text-[#1E293B] ${currentQuestion.type === 'word' ? 'text-[32px]' : 'text-[24px] leading-8'}`}
             >
               {currentQuestion.text}
             </Text>
@@ -112,24 +118,16 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
             </View>
 
             <View className="mt-6 flex-row items-center justify-between">
-              {/* NÚT LISTEN (Sẽ tự động nhỏ lại khi nút biểu đồ bên phải to ra) */}
               <TouchableOpacity
                 onPress={playSampleAudio}
-                className={`flex-1 flex-row items-center justify-center rounded-2xl bg-[#D32F2F] py-[14px] ${
-                  state === 'PLAYING_AUDIO' ? 'opacity-70' : ''
-                }`}
+                className={`flex-1 flex-row items-center justify-center rounded-2xl bg-[#D32F2F] py-[14px] ${state === 'PLAYING_AUDIO' ? 'opacity-70' : ''}`}
               >
                 <Ionicons name="volume-medium" size={22} color="#FFF" />
                 <Text className="ml-2 text-[17px] font-bold text-white">Listen</Text>
               </TouchableOpacity>
 
-              {/* NÚT BIỂU ĐỒ ĐIỂM SỐ (Đã được làm dài ra) */}
-              <View
-                // Đổi từ px-5 thành px-8 (hoặc set hẳn min-w-[110px]) để nút dài ra hai bên
-                className="ml-4 min-w-[100px] flex-row items-center justify-center rounded-2xl bg-[#FCE4E4] px-8 py-[14px]"
-              >
+              <View className="ml-4 min-w-[100px] flex-row items-center justify-center rounded-2xl bg-[#FCE4E4] px-8 py-[14px]">
                 <Iconscoring width={20} height={20} color="#D32F2F" />
-
                 {score !== null && (
                   <Text className="ml-2 text-[16px] font-extrabold text-[#D32F2F]">{score}%</Text>
                 )}
@@ -152,20 +150,18 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
             />
           ) : (
             <View className="flex-row items-center justify-between pt-4 pb-4">
-              {/* NÚT TRY AGAIN - Ngắn hơn, bo góc tròn */}
               <TouchableOpacity
                 onPress={handleRetry}
-                // Thay flex-1 bằng px-6 để nút ôm vừa nội dung, đổi rounded-[16px] thành rounded-full
                 className="mr-3 flex-row items-center justify-center rounded-full bg-[#FCE4E4] px-6 py-[18px]"
               >
                 <Feather name="rotate-ccw" size={18} color="#9E001F" />
                 <Text className="ml-2 text-[16px] font-bold text-[#9E001F]">Try Again</Text>
               </TouchableOpacity>
 
-              {/* NÚT NEXT - Dài hơn (dùng flex-1 để chiếm hết chỗ trống), bo góc tròn */}
               <TouchableOpacity
-                onPress={handleNext}
-                // Đổi rounded-[16px] thành rounded-full, dùng màu nền đậm hơn
+                onPress={() => {
+                  onComplete?.(score || 100); // 🌟 Bấm NEXT thì pass luôn điểm số hiện tại về
+                }}
                 className="flex-1 flex-row items-center justify-center rounded-full bg-[#C8102E] py-[18px]"
                 style={{
                   shadowColor: '#C8102E',

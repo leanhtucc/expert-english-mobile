@@ -29,40 +29,24 @@ interface UseFlashcardProps {
 
 // ================= HOOK =================
 export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
-  const [queue, setQueue] = useState<FlashcardItem[]>([]);
-  const [currentCard, setCurrentCard] = useState<FlashcardItem | null>(null);
+  // Thay thế mảng Queue phức tạp bằng một Index đơn giản
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-
-  // STATE lưu tổng số thẻ phải học trong session này
-  const [sessionTotal, setSessionTotal] = useState(0);
 
   const soundRef = useRef<Audio.Sound | null>(null);
   const audioModeReadyRef = useRef<Promise<void> | null>(null);
   const preloadedSoundsRef = useRef<Map<string, Audio.Sound>>(new Map());
   const isCompletingRef = useRef(false);
 
+  const currentCard = flashcards[currentIndex] || null;
+  const sessionTotal = flashcards.length;
+
   const completeSession = useCallback(() => {
     if (isCompletingRef.current) return;
     isCompletingRef.current = true;
-    setCurrentCard(null);
-    setIsFlipped(false);
     onComplete?.();
   }, [onComplete]);
-
-  // ================= INIT QUEUE =================
-  useEffect(() => {
-    if (!flashcards.length) return;
-
-    isCompletingRef.current = false;
-
-    // Học toàn bộ từ của lesson, không cắt ngẫu nhiên số lượng.
-    const fullQueue = [...flashcards];
-
-    setQueue(fullQueue);
-    setCurrentCard(fullQueue[0]);
-    setSessionTotal(fullQueue.length);
-  }, [flashcards]);
 
   // ================= AUDIO SESSION + CLEANUP =================
   useEffect(() => {
@@ -71,9 +55,7 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
       staysActiveInBackground: false,
       shouldDuckAndroid: true,
       playThroughEarpieceAndroid: false,
-    }).catch(e => {
-      console.log('[useFlashcard] setAudioModeAsync:', e);
-    });
+    }).catch(e => console.log('[useFlashcard] setAudioModeAsync:', e));
 
     const preloadedMap = preloadedSoundsRef.current;
 
@@ -82,33 +64,23 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
         soundRef.current.unloadAsync();
         soundRef.current = null;
       }
-      preloadedMap.forEach(s => {
-        s.unloadAsync().catch(() => null);
-      });
+      preloadedMap.forEach(s => s.unloadAsync().catch(() => null));
       preloadedMap.clear();
     };
   }, []);
 
-  // Preload audio cho thẻ đang học + vài thẻ kế tiếp trong queue (giảm trễ do tải mạng).
+  // Preload audio cho thẻ đang học + vài thẻ kế tiếp
   useEffect(() => {
-    if (!queue.length) return;
+    if (!flashcards.length || currentIndex >= flashcards.length) return;
 
     const urls = [
       ...new Set(
-        queue
-          .slice(0, PRELOAD_AUDIO_COUNT)
+        flashcards
+          .slice(currentIndex, currentIndex + PRELOAD_AUDIO_COUNT)
           .map(c => c.audioUrl)
           .filter(Boolean)
       ),
     ] as string[];
-
-    const keep = new Set(urls);
-    preloadedSoundsRef.current.forEach((sound, uri) => {
-      if (keep.has(uri)) return;
-      if (soundRef.current === sound) return;
-      sound.unloadAsync().catch(() => null);
-      preloadedSoundsRef.current.delete(uri);
-    });
 
     let cancelled = false;
 
@@ -129,7 +101,7 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
           }
           preloadedSoundsRef.current.set(uri, sound);
         } catch {
-          // Lỗi URL — lúc bấm sẽ thử createAsync lại
+          // Ignore
         }
       }
     })();
@@ -137,99 +109,36 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
     return () => {
       cancelled = true;
     };
-  }, [queue]);
+  }, [flashcards, currentIndex]);
 
   // ================= ACTIONS =================
   const handleFlip = useCallback(() => {
     setIsFlipped(prev => !prev);
   }, []);
 
-  const handleKnowIt = useCallback(() => {
-    if (!currentCard || isCompletingRef.current) return;
+  // Hàm xử lý chung cho cả 2 nút (Gọn gàng, không nhét lại card)
+  const handleSwipe = useCallback(
+    (outcome: 'remembered' | 'not_remembered') => {
+      if (!currentCard || isCompletingRef.current) return;
 
-    const swipePayload = {
-      vocab_id: currentCard.id,
-      outcome: 'remembered' as const,
-    };
-    console.log('📤 [FLASHCARD SWIPE] Request:', swipePayload);
-    learningApi
-      .swipeFlashcard(swipePayload)
-      .then(res => {
-        console.log('📥 [FLASHCARD SWIPE] Response:', res?.data);
-        return res;
-      })
-      .catch(err => {
+      // 1. Gọi API lưu trạng thái ngầm
+      learningApi.swipeFlashcard({ vocab_id: currentCard.id, outcome }).catch(err => {
         console.log('⚠️ [FLASHCARD SWIPE] Error:', err?.response?.data || err?.message);
-        return null;
       });
 
-    setQueue(prevQueue => {
-      const count = Number(currentCard.rememberedCount || 0);
-
-      let delay = 5;
-      if (count >= 2) delay = 8;
-      if (count >= 3) delay = 12;
-
-      const newQueue = prevQueue.slice(1);
-
-      if (count < 4) {
-        const insertIndex = Math.min(delay, newQueue.length);
-        newQueue.splice(insertIndex, 0, {
-          ...currentCard,
-          rememberedCount: count + 1,
-        });
-      }
-
-      if (!newQueue.length) {
-        completeSession();
-        return [];
-      }
-
-      setCurrentCard(newQueue[0]);
+      // 2. Chuyển sang thẻ tiếp theo
       setIsFlipped(false);
-      return newQueue;
-    });
-  }, [completeSession, currentCard]);
-
-  const handleDontKnow = useCallback(() => {
-    if (!currentCard || isCompletingRef.current) return;
-
-    const swipePayload = {
-      vocab_id: currentCard.id,
-      outcome: 'not_remembered' as const,
-    };
-    console.log('📤 [FLASHCARD SWIPE] Request:', swipePayload);
-    learningApi
-      .swipeFlashcard(swipePayload)
-      .then(res => {
-        console.log('📥 [FLASHCARD SWIPE] Response:', res?.data);
-        return res;
-      })
-      .catch(err => {
-        console.log('⚠️ [FLASHCARD SWIPE] Error:', err?.response?.data || err?.message);
-        return null;
-      });
-
-    setQueue(prevQueue => {
-      const newQueue = prevQueue.slice(1);
-
-      // Nhét lại vào vị trí gần để học lại ngay lập tức
-      const insertIndex = Math.min(2, newQueue.length);
-      newQueue.splice(insertIndex, 0, {
-        ...currentCard,
-        rememberedCount: 0,
-      });
-
-      if (!newQueue.length) {
+      if (currentIndex + 1 < sessionTotal) {
+        setCurrentIndex(prev => prev + 1);
+      } else {
         completeSession();
-        return [];
       }
+    },
+    [currentCard, currentIndex, sessionTotal, completeSession]
+  );
 
-      setCurrentCard(newQueue[0]);
-      setIsFlipped(false);
-      return newQueue;
-    });
-  }, [completeSession, currentCard]);
+  const handleKnowIt = useCallback(() => handleSwipe('remembered'), [handleSwipe]);
+  const handleDontKnow = useCallback(() => handleSwipe('not_remembered'), [handleSwipe]);
 
   // ================= AUDIO =================
   const handlePlayAudio = useCallback(async () => {
@@ -238,17 +147,6 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
 
     try {
       setIsPlaying(true);
-
-      if (!audioModeReadyRef.current) {
-        audioModeReadyRef.current = Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false,
-        }).catch(e => {
-          console.log('[useFlashcard] setAudioModeAsync:', e);
-        });
-      }
       await audioModeReadyRef.current;
 
       const preloaded = preloadedSoundsRef.current.get(audioUrl);
@@ -256,8 +154,7 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
       if (soundRef.current) {
         const prev = soundRef.current;
         await prev.stopAsync().catch(() => null);
-        const prevIsPreloaded = [...preloadedSoundsRef.current.values()].includes(prev);
-        if (!prevIsPreloaded) {
+        if (![...preloadedSoundsRef.current.values()].includes(prev)) {
           await prev.unloadAsync().catch(() => null);
         }
         soundRef.current = null;
@@ -268,9 +165,7 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
         await preloaded.setPositionAsync(0);
         await preloaded.playAsync();
         preloaded.setOnPlaybackStatusUpdate(status => {
-          if (status.isLoaded && status.didJustFinish) {
-            setIsPlaying(false);
-          }
+          if (status.isLoaded && status.didJustFinish) setIsPlaying(false);
         });
         return;
       }
@@ -292,19 +187,17 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
 
   // ================= PROGRESS TRIGER =================
   const progress = useMemo(() => {
-    // SỐ THẺ ĐÃ HỌC XONG = TỔNG BAN ĐẦU - SỐ THẺ CÒN LẠI TRONG QUEUE
-    const completedCount = sessionTotal > 0 ? sessionTotal - queue.length : 0;
-
     return {
-      current: completedCount,
+      current: currentIndex, // Đã học được bao nhiêu thẻ
       total: sessionTotal,
-      percent: sessionTotal === 0 ? 0 : Math.round((completedCount / sessionTotal) * 100),
+      percent: sessionTotal === 0 ? 0 : Math.round((currentIndex / sessionTotal) * 100),
     };
-  }, [sessionTotal, queue.length]); // Khai báo rõ dependency để React biết khi nào cần tính lại
+  }, [sessionTotal, currentIndex]);
 
-  // ================= RESET =================
   const reset = useCallback(() => {
-    // Thường thì reset sẽ do component cha (VocabularyLearning) lo bằng cách đập đi xây lại
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    isCompletingRef.current = false;
   }, []);
 
   return {
@@ -312,7 +205,7 @@ export const useFlashcard = ({ flashcards, onComplete }: UseFlashcardProps) => {
     isFlipped,
     isPlaying,
     progress,
-    queueLength: queue.length,
+    queueLength: sessionTotal - currentIndex, // Số thẻ còn lại
 
     handleFlip,
     handleKnowIt,

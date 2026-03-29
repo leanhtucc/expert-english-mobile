@@ -8,15 +8,42 @@ import { CustomText as Text } from '@/components/ui/CustomText';
 import { useGenerateExercises } from '@/hooks/useGenerateExercises';
 import { useLessonFlow } from '@/hooks/useLessonFlow';
 
-// Import Screens
+import { HintBottomSheet } from './components';
 import { FillBlankScreen } from './fill-blank';
 import { FlashcardScreen } from './flashcard/FlashcardScreen';
 import { ImageQuizScreen } from './image-quiz';
 import { MatchTermsScreen } from './match-terms';
 import { MultipleChoiceScreen } from './multiple-choice';
+import { RecordingScreen } from './recording';
 import { LessonSummaryScreen } from './result';
 import { SessonSummaryScreen } from './result/SessonSummaryScreen';
 
+// 🌟 Import Bottom Sheet Gợi Ý
+
+// ==========================================
+// HELPER: SẮP XẾP VÀ ĐẢO ĐÁP ÁN
+// ==========================================
+const TYPE_PRIORITY: Record<string, number> = {
+  multiple_choice: 1, // Pronunciation / MCQ
+  pronunciation: 1,
+  matching: 2,
+  fill_in_blank: 3,
+  speaking: 4,
+  speaking_lv1: 4,
+};
+
+function shuffleArray<T>(array: T[]): T[] {
+  const newArr = [...(array || [])];
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
+}
+
+// ==========================================
+// TYPES
+// ==========================================
 interface UserAnswerItem {
   exercise_id: string;
   is_correct: boolean;
@@ -33,67 +60,110 @@ export default function VocabularyLearning() {
   const { lessonId, startMode = 'FLASHCARD' } = route.params || {};
 
   const [currentStep, setCurrentStep] = useState<Step>(startMode);
+
+  // State quản lý danh sách Quiz
+  const [processedQuizList, setProcessedQuizList] = useState<any[]>([]);
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   const [quizScore, setQuizScore] = useState(0);
 
-  // LUU TRỮ CÂU TRẢ LỜI
-  const [userAnswers, setUserAnswers] = useState<UserAnswerItem[]>([]);
-  const startTimeRef = useRef(Date.now()); // Tính thời gian làm bài
-  const [isSubmitting, setIsSubmitting] = useState(false); // Trạng thái chống bấm nhiều lần
+  // State quản lý lỗi sai cục bộ & Gợi ý
+  const [wrongAttempts, setWrongAttempts] = useState(0);
+  const [showHintSheet, setShowHintSheet] = useState(false);
 
-  const { flashcards, refetch: refetchFlashcard } = useLessonFlow(lessonId);
+  // Lưu trữ câu trả lời để nộp API
+  const [userAnswers, setUserAnswers] = useState<UserAnswerItem[]>([]);
+  const startTimeRef = useRef(Date.now());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Hooks gọi API
+  const { flashcards, refetch: refetchFlashcard, playAudio } = useLessonFlow(lessonId);
   const isPreparingQuiz = currentStep === 'PREPARING_QUIZ' || currentStep === 'DOING_QUIZ';
-  const { exercises: quizList, isLoading: isPreparingQuizLoading } = useGenerateExercises({
+
+  const { exercises: rawQuizList, isLoading: isPreparingQuizLoading } = useGenerateExercises({
     lessonId,
     enabled: isPreparingQuiz,
   });
 
-  // Tự động chuyển luồng khi chuẩn bị Quiz xong
+  // 1. XỬ LÝ DATA (SORT & SHUFFLE) KHI LẤY ĐƯỢC CÂU HỎI
   useEffect(() => {
-    if (currentStep === 'PREPARING_QUIZ' && quizList.length > 0 && !isPreparingQuizLoading) {
-      setCurrentStep('DOING_QUIZ');
-      setCurrentQuizIndex(0);
-      startTimeRef.current = Date.now(); // Bắt đầu tính giờ làm Quiz
+    if (rawQuizList && rawQuizList.length > 0) {
+      let sorted = [...rawQuizList].sort((a, b) => {
+        const typeA = a.type || a.type_info?.code || '';
+        const typeB = b.type || b.type_info?.code || '';
+        const pA = TYPE_PRIORITY[typeA] || 99;
+        const pB = TYPE_PRIORITY[typeB] || 99;
+        return pA - pB;
+      });
+
+      sorted = sorted.map(exercise => {
+        const newEx = JSON.parse(JSON.stringify(exercise));
+        if (newEx.type === 'multiple_choice' && newEx.questionData?.options) {
+          newEx.questionData.options = shuffleArray(newEx.questionData.options);
+        }
+        return newEx;
+      });
+
+      setProcessedQuizList(sorted);
     }
-  }, [quizList.length, currentStep, isPreparingQuizLoading]);
+  }, [rawQuizList]);
+
+  // 2. CHUYỂN TỪ LOADING SANG BẮT ĐẦU LÀM BÀI
+  useEffect(() => {
+    if (currentStep === 'PREPARING_QUIZ' && !isPreparingQuizLoading) {
+      if (processedQuizList.length > 0) {
+        setCurrentStep('DOING_QUIZ');
+        setCurrentQuizIndex(0);
+        startTimeRef.current = Date.now();
+      } else {
+        Alert.alert('Thông báo', 'Hiện tại chưa có bài tập Quiz cho bài học này.');
+        setCurrentStep('FLASHCARD_SUMMARY');
+      }
+    }
+  }, [processedQuizList.length, currentStep, isPreparingQuizLoading]);
 
   const handleClose = () => navigation.canGoBack() && navigation.goBack();
 
-  // XỬ LÝ KHI QUA CÂU MỚI
-  const handleNextQuiz = (
+  // 3. XỬ LÝ KHI NGƯỜI DÙNG CHỌN ĐÁP ÁN
+  const handleAnswerSubmit = (
     scoreAchieved: number,
-    answerData?: { selection: string; correct: string; isCorrect: boolean }
+    answerData: { selection: string; correct: string; isCorrect: boolean }
   ) => {
-    setQuizScore(prev => prev + scoreAchieved);
+    if (answerData.isCorrect) {
+      // TRẢ LỜI ĐÚNG: Tính điểm, lưu đáp án, chuyển câu
+      setQuizScore(prev => prev + scoreAchieved);
 
-    // Build object answer để nộp API
-    if (answerData) {
       const newAnswer: UserAnswerItem = {
-        exercise_id: quizList[currentQuizIndex]._id,
+        exercise_id: processedQuizList[currentQuizIndex]._id,
         is_correct: answerData.isCorrect,
         score: scoreAchieved,
         userSelection: answerData.selection,
         correctContent: answerData.correct,
       };
       setUserAnswers(prev => [...prev, newAnswer]);
-    }
 
-    if (currentQuizIndex < quizList.length - 1) {
-      setCurrentQuizIndex(prev => prev + 1);
+      // Reset lỗi & ẩn Hint
+      setWrongAttempts(0);
+      setShowHintSheet(false);
+
+      if (currentQuizIndex < processedQuizList.length - 1) {
+        setCurrentQuizIndex(prev => prev + 1);
+      } else {
+        setCurrentStep('FINAL_SUMMARY');
+      }
     } else {
-      setCurrentStep('FINAL_SUMMARY');
+      // TRẢ LỜI SAI: Tăng lỗi. Màn hình con sẽ tự biết khi nào hiện nút Gợi ý dựa trên local state.
+      const newAttempts = wrongAttempts + 1;
+      setWrongAttempts(newAttempts);
     }
   };
 
-  // HÀM NỘP BÀI (GỌI API)
+  // 4. HÀM NỘP BÀI CUỐI CÙNG
   const handleFinalSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-
     try {
       console.log('⏳ Đang bắn dữ liệu lên Server...');
       const totalTime = Math.max(1, Math.floor((Date.now() - startTimeRef.current) / 1000));
-      // Chia đều thời gian cho mỗi câu (vì API bắt gửi từng exercise 1)
       const timePerQuestion = Math.max(1, Math.floor(totalTime / (userAnswers.length || 1)));
 
       const submitPromises = userAnswers.map(ans => {
@@ -103,10 +173,7 @@ export default function VocabularyLearning() {
           is_correct: ans.is_correct,
           score: ans.score,
           time_spent_seconds: timePerQuestion,
-          answers: {
-            user_input: ans.userSelection,
-            system_answer: ans.correctContent,
-          },
+          answers: { user_input: ans.userSelection, system_answer: ans.correctContent },
         });
       });
 
@@ -121,7 +188,11 @@ export default function VocabularyLearning() {
     }
   };
 
-  // --- RENDER LOGIC ---
+  // ==========================================
+  // RENDER LOGIC
+  // ==========================================
+
+  // BƯỚC 1: HỌC FLASHCARD
   if (currentStep === 'FLASHCARD') {
     return (
       <FlashcardScreen
@@ -133,10 +204,12 @@ export default function VocabularyLearning() {
     );
   }
 
+  // BƯỚC 2: TỔNG KẾT FLASHCARD -> BẤM START QUIZ
   if (currentStep === 'FLASHCARD_SUMMARY') {
     return (
       <SessonSummaryScreen
         data={{ totalWords: flashcards.length, accuracy: 100, timeSpent: '02:30' }}
+        primaryActionText="Start Quiz"
         onPrimaryAction={() => setCurrentStep('PREPARING_QUIZ')}
         onRestart={async () => {
           await learningApi.resetLessonFlashcards({ lesson_id: lessonId });
@@ -148,24 +221,27 @@ export default function VocabularyLearning() {
     );
   }
 
-  if (currentStep === 'DOING_QUIZ' && quizList.length > 0) {
-    const currentQuiz = quizList[currentQuizIndex];
-    const progressData = { current: currentQuizIndex + 1, total: quizList.length };
+  // BƯỚC 3: ĐANG LÀM BÀI QUIZ
+  if (currentStep === 'DOING_QUIZ' && processedQuizList.length > 0) {
+    const currentQuiz = processedQuizList[currentQuizIndex];
+    const progressData = { current: currentQuizIndex + 1, total: processedQuizList.length };
 
-    // Logic lấy đáp án đúng gốc
     const getCorrectAnswer = () => {
       if (currentQuiz.type === 'multiple_choice') return currentQuiz.questionData.correctAnswer;
-      if (currentQuiz.type === 'fill_in_blank') return currentQuiz.questionData.correctAnswer; // Lấy theo định dạng lúc nãy đã parse
+      if (currentQuiz.type === 'fill_in_blank') return currentQuiz.questionData.correctAnswer;
+      if (currentQuiz.type === 'speaking') return currentQuiz.questionData.text;
       return 'matched_success';
     };
 
+    let QuizComponent = null;
+
     switch (currentQuiz.type) {
       case 'multiple_choice':
-        return (
+        QuizComponent = (
           <MultipleChoiceScreen
             questions={[currentQuiz.questionData]}
             onComplete={score =>
-              handleNextQuiz(score, {
+              handleAnswerSubmit(score, {
                 selection: 'user_answered',
                 correct: getCorrectAnswer(),
                 isCorrect: score > 0,
@@ -174,15 +250,16 @@ export default function VocabularyLearning() {
             progress={progressData}
             onClose={handleClose}
             onBack={handleClose}
+            onOpenHint={() => setShowHintSheet(true)} // 🌟 Truyền hàm mở Gợi ý
           />
         );
-
+        break;
       case 'fill_in_blank':
-        return (
+        QuizComponent = (
           <FillBlankScreen
             questions={[currentQuiz.questionData]}
             onComplete={score =>
-              handleNextQuiz(score, {
+              handleAnswerSubmit(score, {
                 selection: 'user_answered',
                 correct: getCorrectAnswer(),
                 isCorrect: score > 0,
@@ -191,15 +268,16 @@ export default function VocabularyLearning() {
             progress={progressData}
             onClose={handleClose}
             onBack={handleClose}
+            // onOpenHint có thể thêm vào FillBlankScreen nếu bạn muốn
           />
         );
-
+        break;
       case 'matching':
-        return (
+        QuizComponent = (
           <MatchTermsScreen
             pairs={currentQuiz.pairs}
             onComplete={score =>
-              handleNextQuiz(score, {
+              handleAnswerSubmit(score, {
                 selection: 'matched_all',
                 correct: 'matched_all',
                 isCorrect: score === 100,
@@ -208,15 +286,16 @@ export default function VocabularyLearning() {
             progress={progressData}
             onClose={handleClose}
             onBack={handleClose}
+            // onOpenHint có thể thêm vào MatchTermsScreen nếu bạn muốn
           />
         );
-
+        break;
       case 'image_quiz':
-        return (
+        QuizComponent = (
           <ImageQuizScreen
-            questions={[currentQuiz.questionData]} // Tuỳ bạn thiết lập ImageQuiz
+            questions={[currentQuiz.questionData]}
             onComplete={score =>
-              handleNextQuiz(score, {
+              handleAnswerSubmit(score, {
                 selection: 'user_answered',
                 correct: 'image_answer',
                 isCorrect: score > 0,
@@ -225,24 +304,57 @@ export default function VocabularyLearning() {
             progress={progressData}
             onClose={handleClose}
             onBack={handleClose}
+            // onOpenHint có thể thêm vào ImageQuizScreen nếu bạn muốn
           />
         );
-
+        break;
+      case 'speaking':
+        QuizComponent = (
+          <RecordingScreen
+            questions={[currentQuiz.questionData]}
+            onComplete={() =>
+              handleAnswerSubmit(100, {
+                selection: 'user_recorded_audio',
+                correct: getCorrectAnswer(),
+                isCorrect: true,
+              })
+            }
+            progress={progressData}
+            onClose={handleClose}
+            onBack={handleClose}
+          />
+        );
+        break;
       default:
-        return (
+        QuizComponent = (
           <View className="flex-1 items-center justify-center bg-white">
-            <Text>Dạng bài chưa hỗ trợ</Text>
+            <Text>Dạng bài chưa hỗ trợ: {currentQuiz.type}</Text>
           </View>
         );
     }
+
+    return (
+      <View className="relative flex-1">
+        {/* Render Form bài Quiz */}
+        {QuizComponent}
+
+        {/* 🌟 BOTTOM SHEET GỢI Ý TỪ VỰNG */}
+        <HintBottomSheet
+          isVisible={showHintSheet}
+          onClose={() => setShowHintSheet(false)}
+          vocabList={flashcards} // Truyền dữ liệu flashcards lấy từ useLessonFlow
+          onPlayAudio={playAudio} // Sử dụng hàm playAudio từ hook useLessonFlow
+        />
+      </View>
+    );
   }
 
+  // BƯỚC 4: TỔNG KẾT VÀ BẮN API
   if (currentStep === 'FINAL_SUMMARY') {
-    // Độ chính xác = Tổng điểm đạt được / Điểm tối đa có thể đạt (Giả sử mỗi câu 100 điểm)
     const accuracy =
-      quizList.length > 0 ? Math.round((quizScore / (quizList.length * 100)) * 100) : 0;
-
-    // Tính toán thời gian hiển thị (Dạng MM:SS)
+      processedQuizList.length > 0
+        ? Math.round((quizScore / (processedQuizList.length * 100)) * 100)
+        : 0;
     const totalSeconds = Math.max(1, Math.floor((Date.now() - startTimeRef.current) / 1000));
     const mins = Math.floor(totalSeconds / 60)
       .toString()
@@ -251,16 +363,13 @@ export default function VocabularyLearning() {
 
     return (
       <LessonSummaryScreen
-        data={{
-          totalWords: quizList.length,
-          accuracy: accuracy,
-          timeSpent: `${mins}:${secs}`,
-        }}
-        onPrimaryAction={handleFinalSubmit} // <--- GỌI API KHI BẤM NÚT NÀY
+        data={{ totalWords: processedQuizList.length, accuracy, timeSpent: `${mins}:${secs}` }}
+        onPrimaryAction={handleFinalSubmit}
         onClose={handleClose}
       />
     );
   }
 
+  // LOADING SCREEN (Chờ fetch Quiz)
   return <ActivityIndicator size="large" color="#E11D48" className="flex-1 bg-white" />;
 }

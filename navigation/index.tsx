@@ -108,7 +108,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined} theme={navTheme}>
       <Stack.Navigator
-        initialRouteName="RecordingScreen"
+        initialRouteName="InitialNavigator"
         screenOptions={{
           headerShown: false,
           gestureEnabled: false,

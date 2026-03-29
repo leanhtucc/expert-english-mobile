@@ -1,4 +1,5 @@
 export { default as CheckResultButton } from './CheckResultButton';
+export { HintBottomSheet } from './intBottomSheet';
 export { OptionButton } from './OptionButton';
 export { PrimaryButton } from './PrimaryButton';
 export { ProgressBar } from './ProgressBar';

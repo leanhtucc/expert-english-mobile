@@ -10,7 +10,7 @@ const parseExercisesToUI = (backendExercises: any[]) => {
 
   backendExercises.forEach(ex => {
     const content = ex.content;
-    const typeCode = ex.type_info?.code; // Sử dụng type_info.code để check dạng bài
+    const typeCode = ex.type_info?.code;
 
     if (!content || !typeCode) return;
 
@@ -27,28 +27,25 @@ const parseExercisesToUI = (backendExercises: any[]) => {
 
       formattedList.push({
         _id: ex._id,
-        type: 'matching', // Map cho UI hiểu
+        type: 'matching',
         pairs: pairs,
       });
     }
 
     // 2. DẠNG ĐIỀN TỪ (FILL IN THE BLANK)
     else if (typeCode === 'fill_in_blank' && content.sentences) {
-      // Gom tất cả các đáp án đúng lại để làm mảng options (đáp án nhiễu)
       const dynamicOptions = content.sentences.map((s: any) => s.answers[0]);
 
       content.sentences.forEach((item: any, index: number) => {
-        // Cắt câu hỏi qua từ khóa [BLANK]
         const [before, after] = item.sentence.split('[BLANK]');
         formattedList.push({
           _id: `${ex._id}_${index}`,
           original_exercise_id: ex._id,
-          type: 'fill_in_blank', // Map cho UI hiểu
+          type: 'fill_in_blank',
           questionData: {
             beforeBlank: before?.trim() || '',
             afterBlank: after?.trim() || '',
             correctAnswer: item.answers[0],
-            // Dùng mảng dynamicOptions vừa gom và xáo trộn vị trí
             options: [...dynamicOptions].sort(() => Math.random() - 0.5),
             hint: 'Choose the best word to complete the sentence.',
           },
@@ -62,7 +59,7 @@ const parseExercisesToUI = (backendExercises: any[]) => {
         formattedList.push({
           _id: `${ex._id}_${index}`,
           original_exercise_id: ex._id,
-          type: 'multiple_choice', // Ép về multiple_choice để dùng chung UI Trắc nghiệm
+          type: 'multiple_choice',
           questionData: {
             word: item.correctAnswer,
             question: item.question,
@@ -73,16 +70,32 @@ const parseExercisesToUI = (backendExercises: any[]) => {
         });
       });
     }
+
+    // 4. DẠNG LUYỆN NÓI (SPEAKING)
+    else if ((typeCode === 'speaking_lv1' || typeCode === 'speaking') && content.tasks) {
+      content.tasks.forEach((task: any, index: number) => {
+        formattedList.push({
+          _id: `${ex._id}_${index}`,
+          original_exercise_id: ex._id,
+          type: 'speaking',
+          questionData: {
+            type: content.mode || 'word',
+            text: task.reference_text,
+            phonetic: task.phonetic || '',
+            meaning: 'Tap the microphone and say the word above clearly.',
+            correctAnswer: task.reference_text,
+            imageUrl: null,
+          },
+        });
+      });
+    }
   });
 
   return formattedList;
 };
 
-// =========================================================
-// HOOK FETCH DATA (LẤY TRỰC TIẾP TỪ PAGE)
-// ==========================================
 interface UseGenerateExercisesProps {
-  lessonId: string; // Vẫn giữ lại để component cha không báo lỗi đỏ
+  lessonId: string;
   enabled?: boolean;
 }
 
@@ -91,7 +104,6 @@ export const useGenerateExercises = ({ enabled = false }: UseGenerateExercisesPr
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Dùng ref để tránh gọi API nhiều lần
   const isFetchingRef = useRef(false);
 
   const fetchExercises = useCallback(async () => {
@@ -102,30 +114,43 @@ export const useGenerateExercises = ({ enabled = false }: UseGenerateExercisesPr
     setError(null);
 
     try {
-      console.log('⏳ [USE_GENERATE_EXERCISES] Đang lấy danh sách bài tập...');
+      console.log('⏳ [USE_GENERATE_EXERCISES] Đang lấy toàn bộ danh sách bài tập...');
 
-      // Lấy thẳng data không quan tâm params lesson_id nữa, chỉ dùng page và limit
+      // 1. Lấy toàn bộ Data từ Backend (Giới hạn 1000 bài để đảm bảo không sót)
       const params = {
-        page: 1,
-        limit: 20,
+        limit: 1000,
       };
 
       const detailRes = await learningApi.getExercisesPage(params);
 
-      // Bóc tách an toàn
       const detailData = detailRes.data as any;
       const rawExercises = detailData?.data?.result || detailData?.result || [];
 
       console.log(
-        `✅ [USE_GENERATE_EXERCISES] Đã lấy thành công ${rawExercises.length} bài tập từ Server.`
+        `✅ [USE_GENERATE_EXERCISES] Đã lấy thành công ${rawExercises.length} bài tập (Exercise Objects) gốc từ Server.`
       );
 
-      // Đưa qua hàm Parse để bẻ mảng và chuẩn hóa cho UI
-      const formattedData = parseExercisesToUI(rawExercises);
-      setExercises(formattedData);
+      // 2. Bóc tách data thành mảng các câu hỏi nhỏ riêng lẻ
+      const allFormattedData = parseExercisesToUI(rawExercises);
+
+      // 🌟 3. LOGIC "BỐC THĂM CHIA RỔ"
+      // Phân loại các câu hỏi vào từng rổ tương ứng với dạng bài
+      const mcqs = allFormattedData.filter(ex => ex.type === 'multiple_choice');
+      const matchings = allFormattedData.filter(ex => ex.type === 'matching');
+      const fillBlanks = allFormattedData.filter(ex => ex.type === 'fill_in_blank');
+      const speakings = allFormattedData.filter(ex => ex.type === 'speaking');
+
+      const finalSession = [
+        ...mcqs.slice(0, 5),
+        ...matchings.slice(0, 2),
+        ...fillBlanks.slice(0, 5),
+        ...speakings.slice(0, 5),
+      ];
+
+      setExercises(finalSession);
 
       console.log(
-        `🎉 [USE_GENERATE_EXERCISES] Đã render ra ${formattedData.length} câu hỏi hiển thị lên màn hình.`
+        `🎉 [USE_GENERATE_EXERCISES] Đã lọc ra ${finalSession.length} câu hỏi CHUẨN CHỈ đưa lên UI.`
       );
     } catch (err: any) {
       console.error('🚨 [USE_GENERATE_EXERCISES] LỖI:', err?.response?.data || err.message);

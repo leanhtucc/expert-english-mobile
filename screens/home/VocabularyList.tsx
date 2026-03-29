@@ -125,7 +125,11 @@ const VocabularyItemCompact = ({
     style={{ borderColor: palette.border, backgroundColor: palette.card }}
   >
     <Image
-      source={{ uri: item.imageUrl || 'https://via.placeholder.com/60' }}
+      source={{
+        uri:
+          item.imageUrl ||
+          'https://images.unsplash.com/photo-1560806887-1e4cd0b6faa6?auto=format&fit=crop&w=200&q=80',
+      }}
       className="mr-3 h-[60px] w-[60px] rounded-[12px] bg-gray-100"
     />
     <View className="flex-1 justify-center">
@@ -167,7 +171,11 @@ const VocabularyItemExpanded = ({
   >
     <View className="flex-row">
       <Image
-        source={{ uri: item.imageUrl || 'https://via.placeholder.com/60' }}
+        source={{
+          uri:
+            item.imageUrl ||
+            'https://images.unsplash.com/photo-1560806887-1e4cd0b6faa6?auto=format&fit=crop&w=200&q=80',
+        }}
         className="mr-4 h-[60px] w-[60px] rounded-[14px] bg-gray-100"
       />
       <View className="flex-1 justify-center pt-1">
@@ -314,7 +322,7 @@ export default function VocabularyListScreen() {
       />
 
       <View
-        className="absolute bottom-0 left-0 right-0 border-t px-5 py-4 pb-8"
+        className="absolute bottom-10 left-0 right-0 border-t px-5 py-4 pb-8"
         style={{ borderTopColor: palette.border, backgroundColor: palette.bottomBarBg }}
       >
         <TouchableOpacity

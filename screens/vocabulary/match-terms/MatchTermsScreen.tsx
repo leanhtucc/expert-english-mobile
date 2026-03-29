@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -39,7 +39,19 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
     onComplete,
   });
 
-  // Đảo lộn danh sách định nghĩa bên phải một lần duy nhất
+  const wrongReportedRef = useRef<string | null>(null);
+
+  // LOGIC: Khi user nối sai 1 cặp, bật Hint Flashcard nếu cần
+  useEffect(() => {
+    if (wrongPair) {
+      const pairId = `${wrongPair.termId}-${wrongPair.defId}`;
+      if (wrongReportedRef.current !== pairId) {
+        onComplete?.(0); // Gọi báo lỗi cho Parent
+        wrongReportedRef.current = pairId;
+      }
+    }
+  }, [wrongPair, onComplete]);
+
   const shuffledDefinitions = useMemo(() => {
     return [...pairs].sort(() => Math.random() - 0.5);
   }, [pairs]);
@@ -48,6 +60,7 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
 
   return (
     <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
+      {/* ... Toàn bộ phần UI giữ nguyên ... */}
       <View className="z-10 w-full bg-white">
         <ScreenHeader
           title="Vocabulary Quiz"
@@ -58,7 +71,6 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
-        {/* Thanh Progress */}
         <View className="w-full px-5 pt-4 pb-2">
           <ProgressBar
             current={displayProgress.current}
@@ -72,7 +84,6 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Tiêu đề */}
           <View className="items-center px-5 py-6">
             <Text className="mb-2 text-[22px] font-black tracking-tight text-[#1E293B]">
               Connect the Terms
@@ -82,9 +93,7 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
             </Text>
           </View>
 
-          {/* 2 Cột Chứa Đáp Án (Không bị ẩn đi nữa) */}
           <View className="w-full flex-row px-4">
-            {/* Cột Trái (Terms) */}
             <View className="flex-1 pr-2">
               {pairs.map(item => (
                 <TermItem
@@ -104,7 +113,6 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
               ))}
             </View>
 
-            {/* Cột Phải (Definitions) */}
             <View className="flex-1 pl-2">
               {shuffledDefinitions.map(item => (
                 <TermItem
@@ -127,17 +135,12 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
         </ScrollView>
       </View>
 
-      {/* CỤM NÚT DƯỚI ĐÁY */}
       <View className="absolute bottom-0 left-0 right-0 z-40 w-full">
         <View
           style={{ paddingBottom: Math.max(insets.bottom, 16) }}
           className="w-full border-t border-slate-200 bg-white px-5 pt-4 shadow-[0_-4px_6px_rgba(0,0,0,0.05)]"
         >
-          <PrimaryButton
-            label="Submit Answer"
-            onPress={handleNext}
-            disabled={!isComplete} // Nút mờ đi, chỉ cho bấm khi ĐÃ MATCH XONG TẤT CẢ
-          />
+          <PrimaryButton label="Submit Answer" onPress={handleNext} disabled={!isComplete} />
         </View>
       </View>
     </SafeAreaView>
