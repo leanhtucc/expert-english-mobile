@@ -1,6 +1,6 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -18,30 +18,63 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 import { IconFlashCard, IconReview, IconVoiceVocab } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { useLessonFlow } from '@/hooks/useLessonFlow';
-
-// BỔ SUNG HOOK
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const COLORS = {
-  primary: '#D32F2F',
-  bg: '#FFF8F7',
-  card: '#FFFFFF',
-  border: '#F0EAEA',
-  textMain: '#222222',
-  textSub: '#777777',
+type VocabPalette = {
+  primary: string;
+  bg: string;
+  card: string;
+  border: string;
+  textMain: string;
+  textSub: string;
+  headerBg: string;
+  expandedBorder: string;
+  definitionAccent: string;
+  exampleText: string;
+  switchTrackOff: string;
+  switchRowBg: string;
+  bottomBarBg: string;
+  statusBarStyle: 'light-content' | 'dark-content';
 };
 
-// ... (Giữ nguyên các component: Header, TagBadge) ...
-const Header = ({ onBack }: { onBack: () => void }) => (
-  <View className="flex-row items-center border-b border-[#F0EAEA] bg-white px-4 py-3">
+function useVocabPalette(): VocabPalette {
+  const { colors, isDark } = useAppTheme();
+
+  return useMemo(
+    () => ({
+      primary: '#D32F2F',
+      bg: isDark ? colors.background : '#FFF8F7',
+      card: colors.card,
+      border: colors.border,
+      textMain: colors.text,
+      textSub: colors.muted,
+      headerBg: colors.surfaceElevated,
+      expandedBorder: isDark ? colors.border : '#FCE4E4',
+      definitionAccent: isDark ? '#F87171' : '#A91220',
+      exampleText: isDark ? colors.muted : '#4A4A4A',
+      switchTrackOff: isDark ? colors.surface : '#FCE4E4',
+      switchRowBg: isDark ? colors.surface : '#FFF0EF',
+      bottomBarBg: colors.surfaceElevated,
+      statusBarStyle: colors.statusBarStyle,
+    }),
+    [colors, isDark]
+  );
+}
+
+const Header = ({ onBack, palette }: { onBack: () => void; palette: VocabPalette }) => (
+  <View
+    className="flex-row items-center border-b px-4 py-3"
+    style={{ borderBottomColor: palette.border, backgroundColor: palette.headerBg }}
+  >
     <TouchableOpacity className="h-10 w-10 justify-center" activeOpacity={0.7} onPress={onBack}>
-      <Feather name="arrow-left" size={24} color={COLORS.textMain} />
+      <Feather name="arrow-left" size={24} color={palette.textMain} />
     </TouchableOpacity>
-    <Text className="flex-1 text-center text-[20px] font-bold" style={{ color: COLORS.textMain }}>
+    <Text className="flex-1 text-center text-[20px] font-bold" style={{ color: palette.textMain }}>
       Vocabulary List
     </Text>
     <View className="h-10 w-10" />
@@ -78,21 +111,31 @@ const TagBadge = ({ text }: { text: string; type?: 'pos' | 'status' }) => {
   );
 };
 
-// Map dữ liệu từ FlashcardData (API) sang UI
-const VocabularyItemCompact = ({ item }: { item: any }) => (
-  <View className="mb-3 flex-row items-center rounded-[16px] border border-[#F0EAEA] bg-white p-3 shadow-sm">
+const VocabularyItemCompact = ({
+  item,
+  onPlayAudio,
+  palette,
+}: {
+  item: any;
+  onPlayAudio: (url: string | null | undefined) => void;
+  palette: VocabPalette;
+}) => (
+  <View
+    className="mb-3 flex-row items-center rounded-[16px] border p-3 shadow-sm"
+    style={{ borderColor: palette.border, backgroundColor: palette.card }}
+  >
     <Image
-      source={{ uri: item.imageUrl || 'https://via.placeholder.com/60' }} // Ảnh mặc định nếu null
+      source={{ uri: item.imageUrl || 'https://via.placeholder.com/60' }}
       className="mr-3 h-[60px] w-[60px] rounded-[12px] bg-gray-100"
     />
     <View className="flex-1 justify-center">
-      <Text className="text-[16px] font-bold" style={{ color: COLORS.textMain }}>
+      <Text className="text-[16px] font-bold" style={{ color: palette.textMain }}>
         {item.word}
       </Text>
       <View className="mt-1 mb-1 self-start">
         <TagBadge text={item.partOfSpeech?.toUpperCase() || 'NEW'} />
       </View>
-      <Text className="text-[13px]" style={{ color: COLORS.textSub }}>
+      <Text className="text-[13px]" style={{ color: palette.textSub }}>
         {item.phonetic}
       </Text>
     </View>
@@ -100,30 +143,41 @@ const VocabularyItemCompact = ({ item }: { item: any }) => (
       <TouchableOpacity
         activeOpacity={0.7}
         className="p-2"
-        onPress={() => console.log('play audio:', item.audioUrl)}
+        onPress={() => onPlayAudio(item.audioUrl)}
       >
-        <IconVoiceVocab width={20} height={20} color={COLORS.primary} />
+        <IconVoiceVocab width={20} height={20} color={palette.primary} />
       </TouchableOpacity>
       <TagBadge text={item.isRemembered ? 'LEARNED' : 'NEW'} />
     </View>
   </View>
 );
 
-const VocabularyItemExpanded = ({ item }: { item: any }) => (
-  <View className="mb-4 rounded-[20px] border border-[#FCE4E4] bg-white p-4 shadow-sm">
+const VocabularyItemExpanded = ({
+  item,
+  onPlayAudio,
+  palette,
+}: {
+  item: any;
+  onPlayAudio: (url: string | null | undefined) => void;
+  palette: VocabPalette;
+}) => (
+  <View
+    className="mb-4 rounded-[20px] border p-4 shadow-sm"
+    style={{ borderColor: palette.expandedBorder, backgroundColor: palette.card }}
+  >
     <View className="flex-row">
       <Image
         source={{ uri: item.imageUrl || 'https://via.placeholder.com/60' }}
         className="mr-4 h-[60px] w-[60px] rounded-[14px] bg-gray-100"
       />
       <View className="flex-1 justify-center pt-1">
-        <Text className="text-[18px] font-bold" style={{ color: COLORS.textMain }}>
+        <Text className="text-[18px] font-bold" style={{ color: palette.textMain }}>
           {item.word}
         </Text>
         <View className="mt-1 mb-1 self-start">
           <TagBadge text={item.partOfSpeech?.toUpperCase() || 'NEW'} />
         </View>
-        <Text className="text-[14px]" style={{ color: COLORS.textSub }}>
+        <Text className="text-[14px]" style={{ color: palette.textSub }}>
           {item.phonetic}
         </Text>
       </View>
@@ -132,6 +186,7 @@ const VocabularyItemExpanded = ({ item }: { item: any }) => (
           activeOpacity={0.7}
           className="h-8 w-8 items-center justify-center rounded-full"
           style={{ backgroundColor: '#A91220' }}
+          onPress={() => onPlayAudio(item.audioUrl)}
         >
           <Ionicons name="play" size={16} color="#FFFFFF" style={{ marginLeft: 2 }} />
         </TouchableOpacity>
@@ -140,13 +195,15 @@ const VocabularyItemExpanded = ({ item }: { item: any }) => (
         </View>
       </View>
     </View>
-    <View className="my-4 h-[1px] w-full bg-[#F0EAEA]" />
-    <Text className="mb-2 text-[15px] font-semibold" style={{ color: '#A91220' }}>
+    <View className="my-4 h-[1px] w-full" style={{ backgroundColor: palette.border }} />
+    <Text className="mb-2 text-[15px] font-semibold" style={{ color: palette.definitionAccent }}>
       {item.definitionVi}
     </Text>
     <View>
-      <Text className="mb-1 text-[14px] text-[#4A4A4A]">&quot;{item.exampleEn}&quot;</Text>
-      <Text className="text-[13px]" style={{ color: COLORS.textSub }}>
+      <Text className="mb-1 text-[14px]" style={{ color: palette.exampleText }}>
+        &quot;{item.exampleEn}&quot;
+      </Text>
+      <Text className="text-[13px]" style={{ color: palette.textSub }}>
         {item.exampleVi}
       </Text>
     </View>
@@ -158,9 +215,9 @@ export default function VocabularyListScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { lessonId } = route.params || {};
+  const palette = useVocabPalette();
 
-  // GỌI API ĐỂ LẤY DANH SÁCH TỪ VỰNG TỪ LESSON_ID
-  const { loading, flashcards, error } = useLessonFlow(lessonId);
+  const { loading, flashcards, error, playAudio } = useLessonFlow(lessonId);
 
   const toggleSwitch = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -173,87 +230,98 @@ export default function VocabularyListScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text className="mt-4 text-gray-500">Đang tải danh sách từ vựng...</Text>
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: palette.headerBg }}
+      >
+        <ActivityIndicator size="large" color={palette.primary} />
+        <Text className="mt-4" style={{ color: palette.textSub }}>
+          Đang tải danh sách từ vựng...
+        </Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.bg }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <Header onBack={handleBack} />
+    <SafeAreaView className="flex-1" style={{ backgroundColor: palette.bg }}>
+      <StatusBar barStyle={palette.statusBarStyle} backgroundColor={palette.headerBg} />
+      <Header onBack={handleBack} palette={palette} />
 
-      {/* ... (Phần switch Ẩn/Hiện nghĩa giữ nguyên) ... */}
       <View className="px-5 py-4">
-        <View className="flex-row items-center justify-between rounded-2xl bg-[#FFF0EF] p-4">
-          <View className="flex-1 pr-4">
-            <Text
-              className="text-[17px] font-bold"
-              style={{ color: isMeaningShown ? '#3B2828' : '#A89B9A' }}
-            >
-              Ẩn nghĩa từ vựng
-            </Text>
-            <Text
-              className="mt-1 text-[13px]"
-              style={{ color: isMeaningShown ? '#5C4A48' : '#C2B8B7' }}
-            >
-              {isMeaningShown ? 'Đang hiển thị toàn bộ nội dung' : 'Đang ẩn nghĩa và ví dụ'}
-            </Text>
-          </View>
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={toggleSwitch}
-            style={{
-              width: 56,
-              height: 32,
-              borderRadius: 16,
-              backgroundColor: isMeaningShown ? COLORS.primary : '#FCE4E4',
-              justifyContent: 'center',
-              alignItems: isMeaningShown ? 'flex-end' : 'flex-start',
-              paddingHorizontal: 2,
-            }}
-          >
-            <View
+        <View className="rounded-2xl p-4" style={{ backgroundColor: palette.switchRowBg }}>
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1 pr-4">
+              <Text
+                className="text-[17px] font-bold"
+                style={{ color: isMeaningShown ? palette.textMain : palette.textSub }}
+              >
+                Ẩn nghĩa từ vựng
+              </Text>
+              <Text
+                className="mt-1 text-[13px]"
+                style={{
+                  color: isMeaningShown ? palette.textSub : palette.textSub,
+                  opacity: isMeaningShown ? 1 : 0.75,
+                }}
+              >
+                {isMeaningShown ? 'Đang hiển thị toàn bộ nội dung' : 'Đang ẩn nghĩa và ví dụ'}
+              </Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={toggleSwitch}
               style={{
-                width: 28,
-                height: 28,
-                borderRadius: 14,
-                backgroundColor: '#fff',
-                elevation: 2,
+                width: 56,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: isMeaningShown ? palette.primary : palette.switchTrackOff,
+                justifyContent: 'center',
+                alignItems: isMeaningShown ? 'flex-end' : 'flex-start',
+                paddingHorizontal: 2,
               }}
-            />
-          </TouchableOpacity>
+            >
+              <View
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 14,
+                  backgroundColor: palette.bottomBarBg,
+                  elevation: 2,
+                }}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
       <FlatList
-        data={flashcards} // SỬ DỤNG DATA THẬT
+        data={flashcards}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 160 }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text className="mt-10 text-center text-gray-500">{error || 'Chưa có từ vựng nào.'}</Text>
+          <Text className="mt-10 text-center" style={{ color: palette.textSub }}>
+            {error || 'Chưa có từ vựng nào.'}
+          </Text>
         }
         renderItem={({ item }) =>
           isMeaningShown ? (
-            <VocabularyItemExpanded item={item} />
+            <VocabularyItemExpanded item={item} onPlayAudio={playAudio} palette={palette} />
           ) : (
-            <VocabularyItemCompact item={item} />
+            <VocabularyItemCompact item={item} onPlayAudio={playAudio} palette={palette} />
           )
         }
       />
 
-      {/* FIXED BOTTOM BUTTONS */}
-      <View className="absolute bottom-6 left-0 right-0 border-t border-[#F0EAEA] bg-white px-5 py-4 pb-8">
-        {/* Nút 1: Vào thẳng Flashcard */}
+      <View
+        className="absolute bottom-0 left-0 right-0 border-t px-5 py-4 pb-8"
+        style={{ borderTopColor: palette.border, backgroundColor: palette.bottomBarBg }}
+      >
         <TouchableOpacity
           activeOpacity={0.85}
           className="w-full flex-row items-center justify-center rounded-[16px] py-4 shadow-md"
-          style={{ backgroundColor: COLORS.primary, shadowColor: COLORS.primary }}
+          style={{ backgroundColor: palette.primary, shadowColor: palette.primary }}
           onPress={() => {
-            console.log('📖 [VocabList] Chuyển sang Học Flashcard');
             navigation.navigate('VocabularyLearning', { lessonId, startMode: 'FLASHCARD' });
           }}
         >
@@ -261,18 +329,16 @@ export default function VocabularyListScreen() {
           <Text className="ml-2 text-[16px] font-bold text-white">Review with Flashcard</Text>
         </TouchableOpacity>
 
-        {/* Nút 2: Vào thẳng Quiz */}
         <TouchableOpacity
           activeOpacity={0.7}
-          className="mt-3 w-full flex-row items-center justify-center rounded-[16px] border-[1.5px] bg-white py-4"
-          style={{ borderColor: COLORS.primary }}
+          className="mt-3 w-full flex-row items-center justify-center rounded-[16px] border-[1.5px] py-4"
+          style={{ borderColor: palette.primary, backgroundColor: palette.card }}
           onPress={() => {
-            console.log('🎮 [VocabList] Chuyển sang Làm Bài Tập (Quiz)');
             navigation.navigate('VocabularyLearning', { lessonId, startMode: 'PREPARING_QUIZ' });
           }}
         >
-          <IconReview width={20} height={20} color={COLORS.primary} />
-          <Text className="ml-2 text-[16px] font-bold" style={{ color: COLORS.primary }}>
+          <IconReview width={20} height={20} color={palette.primary} />
+          <Text className="ml-2 text-[16px] font-bold" style={{ color: palette.primary }}>
             Start Quiz
           </Text>
         </TouchableOpacity>

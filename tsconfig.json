@@ -11,6 +11,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "app.config.js"],
+  "include": ["**/*.ts", "**/*.tsx", "app.config.js", ".expo/types/**/*.ts", "expo-env.d.ts"],
   "exclude": ["node_modules", "app-example"]
 }

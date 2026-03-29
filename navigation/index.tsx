@@ -1,3 +1,5 @@
+import React, { useMemo } from 'react';
+
 import {
   NavigationContainer,
   NavigatorScreenParams,
@@ -5,8 +7,8 @@ import {
 } from '@react-navigation/native';
 import { TransitionPresets, createStackNavigator } from '@react-navigation/stack';
 
-// NHỚ IMPORT TransitionPresets Ở ĐÂY
-
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { CreatePasswordScreen } from '@/screens/auth/CreatePassword';
 import { EnterEmailScreen } from '@/screens/auth/enterEmail';
 import LoginEmailScreen from '@/screens/auth/loginEmail';
@@ -23,6 +25,7 @@ import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/scre
 import VocabularyLearning from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
+import { buildNavigationTheme } from './navigationTheme';
 import TabNavigator from './tab-navigator';
 
 // ... (Giữ nguyên phần export type param list và các hàm navigate, goBack, resetRoot) ...
@@ -50,7 +53,7 @@ export type RootStackParamList = {
   PremiumInterstitial: undefined;
   TabNavigator: NavigatorScreenParams<TabNavigatorParamList> | { screen?: string };
   Modal: undefined;
-  PracticeSetup: undefined;
+  PracticeSetup: { lessonId?: string } | undefined;
   PersonalInformationScreen: undefined;
   ChangePasswordScreen: undefined;
   VocabularyListScreen: undefined;
@@ -89,13 +92,18 @@ export function resetRoot(routeName: keyof RootStackParamList) {
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function RootStack() {
+  const colorScheme = useColorScheme() ?? 'light';
+  const navTheme = useMemo(() => buildNavigationTheme(colorScheme), [colorScheme]);
+  const bg = Colors[colorScheme].background;
+
   return (
-    <NavigationContainer ref={navigationRef} initialState={undefined}>
+    <NavigationContainer ref={navigationRef} initialState={undefined} theme={navTheme}>
       <Stack.Navigator
         initialRouteName="InitialNavigator"
         screenOptions={{
           headerShown: false,
           gestureEnabled: false,
+          cardStyle: { backgroundColor: bg },
         }}
       >
         <Stack.Screen

@@ -2,10 +2,12 @@ import * as React from 'react';
 import Svg, { Path } from 'react-native-svg';
 import type { SvgProps } from 'react-native-svg';
 
-const SvgIconNotification = (props: SvgProps) => (
+type Props = SvgProps & { iconColor?: string };
+
+const SvgIconNotification = ({ iconColor = '#334155', ...props }: Props) => (
   <Svg width={24} height={24} fill="none" viewBox="0 0 16 20" {...props}>
     <Path
-      fill="#334155"
+      fill={iconColor}
       d="M0 17v-2h2V8q0-2.075 1.25-3.687Q4.5 2.7 6.5 2.2v-.7q0-.625.438-1.062A1.45 1.45 0 0 1 8 0q.624 0 1.063.438Q9.5.874 9.5 1.5v.7q2 .5 3.25 2.113T14 8v7h2v2zm8 3q-.824 0-1.412-.587A1.93 1.93 0 0 1 6 18h4q0 .824-.588 1.413A1.93 1.93 0 0 1 8 20m-4-5h8V8q0-1.65-1.175-2.825T8 4 5.175 5.175 4 8z"
     />
   </Svg>

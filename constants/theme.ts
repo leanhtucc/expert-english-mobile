@@ -7,22 +7,37 @@ import { Platform } from 'react-native';
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
+/** Màu dùng cho SafeArea / màn hình / thẻ — đồng bộ sáng tối */
 export const Colors = {
   light: {
     text: '#11181C',
-    background: '#fff',
+    background: '#F8FAFC',
     tint: tintColorLight,
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    surface: '#F1F5F9',
+    surfaceElevated: '#FFFFFF',
+    border: '#E2E8F0',
+    borderMuted: '#F1F5F9',
+    muted: '#64748B',
+    card: '#FFFFFF',
+    statusBarStyle: 'dark-content' as const,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: '#F4F4F5',
+    background: '#0C0A09',
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    icon: '#A8A29E',
+    tabIconDefault: '#A8A29E',
     tabIconSelected: tintColorDark,
+    surface: '#1C1917',
+    surfaceElevated: '#292524',
+    border: '#44403C',
+    borderMuted: '#3F3F46',
+    muted: '#A8A29E',
+    card: '#292524',
+    statusBarStyle: 'light-content' as const,
   },
 };
 

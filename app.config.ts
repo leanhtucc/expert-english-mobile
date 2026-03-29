@@ -35,6 +35,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
     favicon: './assets/images/icon-app.png',
   },
   plugins: [
+    'expo-router',
     [
       'expo-splash-screen',
       {
@@ -47,8 +48,17 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
+    [
+      '@sentry/react-native/expo',
+      {
+        url: 'https://sentry.io/',
+        project: 'react-native',
+        organization: 'anh-tu-studio',
+      },
+    ],
   ],
   experiments: {
+    typedRoutes: true,
     reactCompiler: true,
   },
   extra: {

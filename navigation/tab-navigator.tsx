@@ -76,6 +76,7 @@ function CustomTabBar({
           {
             height: 56 + insets.bottom,
             backgroundColor: colors.background,
+            borderTopColor: colors.borderMuted,
             paddingBottom: 0,
             elevation: 0,
             shadowOpacity: 0,
@@ -199,7 +200,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
     elevation: 8,
     shadowOpacity: 0.05,
     shadowRadius: 4,

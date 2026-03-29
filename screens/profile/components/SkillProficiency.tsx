@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Dimensions, Text, View } from 'react-native';
 import { CurveType, LineChart } from 'react-native-gifted-charts';
 import Svg, { Circle, Line, Polygon, Text as SvgText } from 'react-native-svg';
 
 import { IconFeedBackRealTime } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
+
+import { CARD_BG_DARK } from '../constants/profile.constants';
 
 const accentColor = '#D32F2F';
 const screenWidth = Dimensions.get('window').width;
 
 export const SkillProficiency = () => {
+  const { colors, isDark } = useAppTheme();
+
+  const chartTheme = useMemo(
+    () => ({
+      cardBg: isDark ? CARD_BG_DARK : '#FFFFFF',
+      gridStroke: isDark ? '#44403C' : '#F3F4F6',
+      radarLabelFill: isDark ? '#A8A29E' : '#4B5563',
+      areaEndFill: isDark ? CARD_BG_DARK : '#FFFFFF',
+      dataPointInner: isDark ? colors.surfaceElevated : '#FFFFFF',
+    }),
+    [colors.surfaceElevated, isDark]
+  );
   // --- 1. RADAR CHART LOGIC (GIỮ NGUYÊN) ---
   const radarCenter = 130;
   const radarRadius = 80;
@@ -61,7 +76,7 @@ export const SkillProficiency = () => {
             borderRadius: 6,
             borderWidth: 2,
             borderColor: accentColor,
-            backgroundColor: 'white',
+            backgroundColor: chartTheme.dataPointInner,
           }}
         />
       ),
@@ -82,13 +97,21 @@ export const SkillProficiency = () => {
   const stepSpacing = (chartWidth - startAndEndSpacing * 2) / 6;
 
   return (
-    <View className="overflow-hidden rounded-3xl bg-white shadow-sm" style={{ elevation: 2 }}>
+    <View
+      className="overflow-hidden rounded-3xl shadow-sm"
+      style={{ elevation: 2, backgroundColor: chartTheme.cardBg }}
+    >
       {/* --- PHẦN 1: SKILL PROFICIENCY (RADAR) --- */}
-      <View className="border-b border-dashed border-gray-200 p-6">
+      <View
+        className="border-b border-dashed p-6"
+        style={{ borderBottomColor: isDark ? colors.border : '#E5E7EB' }}
+      >
         <View className="mb-6 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <IconFeedBackRealTime width={20} height={20} color={accentColor} />
-            <Text className="ml-2 text-lg font-bold text-gray-800">Năng lực</Text>
+            <Text className="ml-2 text-lg font-bold" style={{ color: colors.text }}>
+              Năng lực
+            </Text>
           </View>
           <Text className="font-bold" style={{ color: accentColor }}>
             TỔNG QUAN: 85%
@@ -98,7 +121,13 @@ export const SkillProficiency = () => {
         <View className="items-center justify-center">
           <Svg width={260} height={260}>
             {webs.map((points, index) => (
-              <Polygon key={index} points={points} stroke="#F3F4F6" strokeWidth="1.5" fill="none" />
+              <Polygon
+                key={index}
+                points={points}
+                stroke={chartTheme.gridStroke}
+                strokeWidth="1.5"
+                fill="none"
+              />
             ))}
             {angles.map((angle, index) => (
               <Line
@@ -107,7 +136,7 @@ export const SkillProficiency = () => {
                 y1={radarCenter}
                 x2={radarCenter + radarRadius * Math.cos(angle)}
                 y2={radarCenter + radarRadius * Math.sin(angle)}
-                stroke="#F3F4F6"
+                stroke={chartTheme.gridStroke}
                 strokeWidth="1.5"
               />
             ))}
@@ -131,7 +160,7 @@ export const SkillProficiency = () => {
                   y={radarCenter + textR * Math.sin(angles[index])}
                   fontSize="12"
                   fontWeight="600"
-                  fill="#4B5563"
+                  fill={chartTheme.radarLabelFill}
                   textAnchor="middle"
                 >
                   {point.label}
@@ -154,7 +183,9 @@ export const SkillProficiency = () => {
 
       {/* --- PHẦN 2: THỐNG KÊ HÀNG NGÀY --- */}
       <View className="p-5 pt-6 pb-8">
-        <Text className="mb-6 text-lg font-bold text-gray-800">Thống kê hàng ngày</Text>
+        <Text className="mb-6 text-lg font-bold" style={{ color: colors.text }}>
+          Thống kê hàng ngày
+        </Text>
 
         {/* Đẩy lùi sang trái một chút để biểu đồ cân giữa hơn */}
         <View style={{ marginLeft: -15 }}>
@@ -167,7 +198,7 @@ export const SkillProficiency = () => {
             color={accentColor}
             thickness={3}
             startFillColor={accentColor}
-            endFillColor="white"
+            endFillColor={chartTheme.areaEndFill}
             startOpacity={0.2}
             endOpacity={0}
             areaChart
@@ -192,7 +223,7 @@ export const SkillProficiency = () => {
             initialSpacing={startAndEndSpacing} // Thêm khoảng trống ở đầu cho MON
             endSpacing={startAndEndSpacing} // Thêm khoảng trống ở cuối cho SUN
             spacing={stepSpacing} // Khoảng cách đều giữa các ngày
-            xAxisLabelTextStyle={{ color: '#6B7280', fontSize: 11, fontWeight: 'bold' }}
+            xAxisLabelTextStyle={{ color: colors.muted, fontSize: 11, fontWeight: 'bold' }}
           />
         </View>
       </View>
