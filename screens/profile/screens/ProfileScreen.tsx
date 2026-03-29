@@ -108,8 +108,10 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             }
             label="Chứng chỉ"
             subtitle="0 danh mục đã hoàn thành"
-            onPress={() => {}}
-            isDark={isDark}
+            onPress={() => {
+              navigation.navigate('Certificates');
+            }}
+            isDark={false}
           />
         </View>
 

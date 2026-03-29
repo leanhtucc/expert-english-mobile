@@ -12,29 +12,38 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { IconRobot } from '@/components/icon';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { useAuth } from '@/hooks/useAuth';
+import { useLearningData } from '@/hooks/useLearningData';
 import { useRoadmapData } from '@/hooks/useRoadmapData';
 import { CARD_BG_DARK } from '@/screens/profile/constants/profile.constants';
 import { useAuthStore } from '@/stores/auth.store';
 import { useToastStore } from '@/stores/toast.store';
-import { RoadmapLesson, RoadmapModule, RoadmapPath } from '@/types/api/learningPath.response';
 
-import { FocusSessionCard, HeaderGreeting, HeroGoalCard, LearningRoadmap } from './components';
+// 👇 1. ĐỔI TÊN IMPORT TỪ MODAL THÀNH DRAWER
+import {
+  FocusSessionCard,
+  HeaderGreeting,
+  HeroGoalCard,
+  LearningRoadmap,
+  QuestMasterDrawer,
+} from './components';
 
 export const HomeScreen: React.FC = () => {
   const { colors, isDark } = useAppTheme();
   const navigation = useNavigation<StackNavigationProp<any>>();
   const showToast = useToastStore(state => state.showToast);
+
   const { fetchUserInfo } = useAuth();
   const [userName, setUserName] = useState<string>('Người học');
 
-  const accessToken = useAuthStore(state => state.accessToken);
-  const { loading, data } = useRoadmapData(accessToken || '');
+  // State quản lý đóng mở Menu
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+
+  const { loading, currentPath, modules, roadmap, todayLesson } = useLearningData();
 
   useEffect(() => {
     fetchUserInfo().then(user => user && setUserName(user.username));
   }, [fetchUserInfo]);
 
-  // Xử lý khi bấm vào bài học trên cây Roadmap
   const handleLessonPress = (lessonId: string, status: string) => {
     if (status === 'locked') {
       showToast('Vui lòng hoàn thành các bài học trước đó!');
@@ -42,41 +51,6 @@ export const HomeScreen: React.FC = () => {
     }
     navigation.navigate('VocabularyListScreen', { lessonId });
   };
-
-  // ==========================================
-  // BÓC TÁCH DỮ LIỆU TỪ API ROADMAP CHUẨN XÁC
-  // ==========================================
-  let roadmapItems: any[] = [];
-  let todayLesson: RoadmapLesson | null = null;
-  let currentPath: RoadmapPath | null = null;
-  let currentModule: RoadmapModule | null = null;
-
-  if (data && data.learning_path) {
-    currentPath = data.learning_path;
-
-    // Tìm module đang học (is_current) hoặc fallback về module đầu tiên
-    currentModule = data.learning_modules?.find(m => m.is_current) || data.learning_modules?.[0];
-
-    if (currentModule && currentModule.lessons) {
-      // 1. Tạo danh sách nốt vẽ Roadmap
-      roadmapItems = currentModule.lessons.map((lesson, idx) => {
-        // Tạm thời mở khoá bài đang học và bài đầu tiên
-        let status: 'completed' | 'active' | 'locked' = 'locked';
-        if (lesson.is_current || idx === 0) status = 'active';
-
-        return {
-          _id: lesson._id,
-          displayDate: `Bài ${idx + 1}`, // Hiện chữ "Bài 1", "Bài 2" cho đẹp
-          name_en: lesson.name_en,
-          name_vi: lesson.name_vi,
-          status,
-        };
-      });
-
-      // 2. Tìm bài học Focus cho thẻ to nhất (Hôm nay)
-      todayLesson = currentModule.lessons.find(l => l.is_current) || currentModule.lessons[0];
-    }
-  }
 
   // ==========================================
   // RENDER UI
@@ -99,20 +73,23 @@ export const HomeScreen: React.FC = () => {
   }
 
   return (
+    // SafeAreaView bao ngoài z-index 10
+    <SafeAreaView className="z-10 flex-1 bg-gray-50">
+      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
+        className="z-10"
       >
-        <HeaderGreeting name={userName} />
+        {/* NÚT MENU CỦA HEADER ĐỂ MỞ DRAWER */}
+        <HeaderGreeting name={userName} onMenuPress={() => setIsMenuVisible(true)} />
 
-        {/* Level động từ Path */}
         <HeroGoalCard level={currentPath?.target_level?.toUpperCase() || 'BEGINNER'} />
 
-        {/* Thẻ Bài học Today */}
-        <View className="mt-6">
+        <View className="z-10 mt-6">
           <FocusSessionCard
             title={todayLesson?.name_vi || todayLesson?.name_en || 'Chưa có bài học'}
             category={todayLesson?.lesson_type?.toUpperCase() || 'VOCABULARY'}
@@ -128,11 +105,16 @@ export const HomeScreen: React.FC = () => {
           />
         </View>
 
-        {/* Bản đồ Roadmap */}
-        <View>
-          <LearningRoadmap items={roadmapItems} onLessonPress={handleLessonPress} />
+        <View className="z-10 mt-8 flex-1">
+          <LearningRoadmap
+            pathTitle={currentPath?.name_vi || currentPath?.name_en || 'Khóa học chưa có tên'}
+            modules={modules}
+            items={roadmap}
+            onLessonPress={handleLessonPress}
+          />
         </View>
 
+        <View className="z-10 mx-4 mt-1 items-center rounded-[24px] bg-[#FCF0F1] py-8">
         <View
           className="mx-4 mt-1 items-center rounded-[24px] py-8"
           style={{
@@ -163,6 +145,12 @@ export const HomeScreen: React.FC = () => {
           </Text>
         </View>
       </ScrollView>
+
+      {/* 👇 2. NHÚNG CUSTOM DRAWER MỚI VÀO ĐÂY (NỔI TRÊN SCROLLVIEW NHỜ ABSOLUTE + Z-50) */}
+      <QuestMasterDrawer
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)} // Action đóng
+      />
     </SafeAreaView>
   );
 };

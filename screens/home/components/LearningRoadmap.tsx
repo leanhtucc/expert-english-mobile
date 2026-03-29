@@ -5,19 +5,98 @@ import { IconCheckCourse, IconLockLession } from '@/components/icon';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { CARD_BG_DARK } from '@/screens/profile/constants/profile.constants';
 
-type RoadmapStatus = 'completed' | 'active' | 'locked';
+// Định nghĩa kiểu dữ liệu
+export type RoadmapStatus = 'completed' | 'active' | 'locked';
 
-interface RoadmapItemData {
+export interface RoadmapItemData {
   _id: string;
   displayDate: string;
   name_en: string;
   status: RoadmapStatus;
 }
 
+export interface RoadmapModuleData {
+  id: string;
+  number: number;
+  label: string;
+  status: 'completed' | 'current' | 'locked';
+}
+
 interface LearningRoadmapProps {
+  pathTitle?: string;
+  modules?: RoadmapModuleData[];
   items: RoadmapItemData[];
   onLessonPress?: (lessonId: string, status: RoadmapStatus) => void;
 }
+
+const HorizontalModuleTracker: React.FC<{ modules: RoadmapModuleData[] }> = ({ modules }) => {
+  if (!modules || modules.length === 0) return null;
+
+  const displayModules = [...modules];
+  while (displayModules.length < 4) {
+    const nextIndex = displayModules.length;
+    displayModules.push({
+      id: `fake-locked-mod-${nextIndex}`,
+      number: nextIndex + 1,
+      label: `Tuần ${nextIndex + 1}`,
+      status: 'locked',
+    });
+  }
+
+  return (
+    <View className="mb-10 mt-4 flex-row items-center justify-between px-2">
+      {displayModules.map((mod, index) => {
+        const isLast = index === displayModules.length - 1;
+        const isCompleted = mod.status === 'completed';
+        const isCurrent = mod.status === 'current';
+        const isLocked = mod.status === 'locked';
+
+        const lineClass = isCompleted ? 'bg-[#C8102E]' : 'bg-[#FCF0F1]';
+
+        return [
+          <View key={`node-${mod.id}`} className="relative z-10 items-center">
+            <View
+              className={`items-center justify-center rounded-full ${
+                isCurrent
+                  ? 'h-[44px] w-[44px] border-[4px] border-white bg-[#C8102E]'
+                  : 'h-[36px] w-[36px]'
+              } ${isCompleted ? 'bg-[#C8102E]' : ''} ${isLocked ? 'bg-[#FCF0F1]' : ''} `}
+              style={
+                isCurrent
+                  ? {
+                      elevation: 6,
+                      shadowColor: '#C8102E',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.35,
+                      shadowRadius: 8,
+                    }
+                  : {}
+              }
+            >
+              {isCompleted && <IconCheckCourse width={16} height={16} color="white" />}
+              {isCurrent && <Text className="text-[16px] font-bold text-white">{mod.number}</Text>}
+              {isLocked && <IconLockLession width={18} height={18} color="#B5A9A9" />}
+            </View>
+
+            {/* Chữ hiển thị bên dưới */}
+            <Text
+              className={`absolute top-[52px] w-[70px] whitespace-nowrap text-center text-[12px] font-bold ${
+                isCurrent ? 'text-[#C8102E]' : 'text-[#8C7A78]'
+              } `}
+            >
+              {mod.label}
+            </Text>
+          </View>,
+
+          /* Đường gạch ngang (Nằm xen giữa các node) */
+          !isLast ? (
+            <View key={`line-${mod.id}`} className={`z-0 mx-[-2px] h-[4px] flex-1 ${lineClass}`} />
+          ) : null,
+        ];
+      })}
+    </View>
+  );
+};
 
 const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
   const { colors, isDark } = useAppTheme();
@@ -29,7 +108,7 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
         style={{ backgroundColor: isDark ? '#3F1D1D' : '#FEE2E2' }}
       >
         <View className="h-7 w-7 items-center justify-center rounded-full bg-[#C8102E]">
-          <IconCheckCourse width={16} height={16} />
+          <IconCheckCourse width={16} height={16} color="white" />
         </View>
       </View>
     );
@@ -47,6 +126,9 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
     );
 
   return (
+    <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-50">
+      <View className="h-7 w-7 items-center justify-center rounded-full bg-[#F3F4F6]">
+        <IconLockLession width={16} height={16} color="#B5A9A9" />
     <View
       className="h-10 w-10 items-center justify-center rounded-full"
       style={{ backgroundColor: isDark ? colors.surface : '#F3F4F6' }}
@@ -106,6 +188,10 @@ const RoadmapItem: React.FC<
       <View className="w-14 items-center">
         <RoadmapDot status={status} />
         {!isLast && (
+          <View
+            className={`w-[2px] flex-1 ${isLocked ? 'bg-gray-50' : 'bg-red-100'}`}
+            style={{ minHeight: 30 }}
+          />
           <View className="w-[2px] flex-1" style={{ minHeight: 30, backgroundColor: lineColor }} />
         )}
       </View>
@@ -125,6 +211,15 @@ const RoadmapItem: React.FC<
   );
 };
 
+// ========================================================
+// COMPONENT CHÍNH (WRAPPER)
+// ========================================================
+export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({
+  pathTitle,
+  modules,
+  items,
+  onLessonPress,
+}) => {
 export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items, onLessonPress }) => {
   const { colors } = useAppTheme();
 
@@ -137,6 +232,13 @@ export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items, onLesso
   }
 
   return (
+    <View className="mx-5 mb-10">
+      {/* Tiêu đề Khóa học */}
+      <View className="mb-2">
+        <Text className="text-[22px] font-black tracking-tight text-[#0F172A]">
+          Learning Roadmap
+        </Text>
+        {pathTitle && <Text className="mt-1 text-[14px] text-[#8C7A78]">{pathTitle}</Text>}
     <View className="mx-5 mb-10 mt-10">
       <View className="mb-5 flex-row items-center justify-between">
         <Text className="text-lg font-bold" style={{ color: colors.text }}>
@@ -144,6 +246,10 @@ export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({ items, onLesso
         </Text>
       </View>
 
+      {/* Dải phân cách Tuần (Nằm ngang) */}
+      <HorizontalModuleTracker modules={modules || []} />
+
+      {/* Danh sách bài học (Dọc) */}
       {items.map((item, index) => (
         <RoadmapItem
           key={item._id}

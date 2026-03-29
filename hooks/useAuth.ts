@@ -20,22 +20,17 @@ export const useAuth = () => {
   const sendEmailOTP = async (email: string) => {
     setLoading(true);
     try {
+      // Gọi API send OTP (Bạn có thể bỏ trường type nếu BE không cần, hoặc để mặc định)
       const response = await authApi.sendOtp({ email, type: 'login' });
+
       const payload = (response.data as SendOtpResponse).data;
+
+      // Quan trọng: Trả về trạng thái exists (Đã tồn tại hay chưa)
       return payload?.exists;
     } catch (error: any) {
-      console.log('🚨 LỖI 500 CHI TIẾT:', {
-        message: error.message,
-        config: error.config,
-        code: error.code,
-        request: error.request,
-        response: error.response,
-        responseData: error.response?.data,
-        responseStatus: error.response?.status,
-        responseHeaders: error.response?.headers,
-      });
-      console.log('🚨 FULL ERROR OBJECT:', error);
-      showToast(error.response?.data?.message || 'Lỗi hệ thống (500)', 'error');
+      console.log('🚨 LỖI GỌI API SEND OTP:', error.response?.data || error.message);
+      showToast(error.response?.data?.message || 'Không thể kiểm tra email lúc này.', 'error');
+      // Trả về null để UI biết là có lỗi, không thực hiện navigate
       return null;
     } finally {
       setLoading(false);
@@ -118,49 +113,25 @@ export const useAuth = () => {
   const registerNewAccount = async (username: string, email: string, password: string) => {
     setLoading(true);
     try {
-      // Gọi API với username và email riêng biệt
       const response = await authApi.register({
         platform: 'Mobile',
-        username: username, // Nhận từ tham số truyền vào
+        username: username,
         email: email,
         password: password,
       });
 
       const payload = (response.data as RegisterResponse).data;
 
-      if (payload?.accessToken) {
-        // 1. Lưu token vào AuthStore
-        setAuthData({
-          accessToken: payload.accessToken,
-          refreshToken: payload.refreshToken,
-          email: email, // Lưu email để định danh
-          accessExpireAt: payload.accessExpireAt,
-          refreshExpireAt: payload.refreshExpireAt,
-        });
-
-        // 2. Lấy thông tin Profile để check isSurvey
-        const user = await fetchUserInfo();
-
-        showToast('Tạo tài khoản thành công!', 'success');
-
-        // Trả về user object để màn hình UI xử lý navigate
-        return user;
+      // Đăng ký thành công! (Dù BE có trả về token hay không, ta cũng sẽ force user qua màn Login)
+      if (response.data?.success || payload?.accessToken) {
+        showToast('Tạo tài khoản thành công! Vui lòng đăng nhập.', 'success');
+        return true; // Báo hiệu UI chuyển trang
       }
-      return null;
+      return false;
     } catch (error: any) {
-      console.log('🚨 LỖI GỌI API REGISTER:', {
-        message: error.message,
-        config: error.config,
-        code: error.code,
-        request: error.request,
-        response: error.response,
-        responseData: error.response?.data,
-        responseStatus: error.response?.status,
-        responseHeaders: error.response?.headers,
-      });
-      console.log('🚨 FULL ERROR OBJECT:', error);
+      console.log('🚨 LỖI GỌI API REGISTER:', error.response?.data || error.message);
       showToast(error?.response?.data?.message || 'Có lỗi xảy ra khi tạo tài khoản.', 'error');
-      return null;
+      return false;
     } finally {
       setLoading(false);
     }

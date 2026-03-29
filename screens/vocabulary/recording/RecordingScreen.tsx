@@ -1,132 +1,184 @@
-import React from 'react';
-import { ActivityIndicator, SafeAreaView, Text, View } from 'react-native';
+import { Feather, Ionicons } from '@expo/vector-icons';
 
+import React from 'react';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { Iconscoring } from '@/components/icon';
+
+import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
-import { SecondaryButton } from '../components/SecondaryButton';
 import { MicrophoneButton } from './MicrophoneButton';
-import { WaveAnimation } from './WaveAnimation';
+import { MOCK_QUESTIONS } from './constants';
+import { Question } from './types';
 import { useRecording } from './useRecording';
 
 interface RecordingScreenProps {
-  word: string;
-  phonetic?: string;
-  onComplete?: (audioUrl: string) => void;
-  onSkip?: () => void;
+  questions?: Question[];
+  route?: any;
+  onComplete?: (results: any) => void;
   onBack?: () => void;
+  onClose?: () => void;
+  progress?: { current: number; total: number };
 }
 
 export const RecordingScreen: React.FC<RecordingScreenProps> = ({
-  word,
-  phonetic,
+  questions,
+  route,
   onComplete,
-  onSkip,
   onBack,
+  onClose,
+  progress: externalProgress,
 }) => {
-  const {
-    isRecording,
-    isPaused,
-    formattedDuration,
-    isAnalyzing,
-    startRecording,
-    stopRecording,
-    pauseRecording,
-    resumeRecording,
-  } = useRecording({
-    onRecordingComplete: onComplete,
-  });
+  const insets = useSafeAreaInsets();
 
-  const handleMicPress = () => {
-    if (!isRecording) {
-      startRecording();
-    } else if (isPaused) {
-      resumeRecording();
-    } else {
-      stopRecording();
-    }
+  const safeQuestions = questions || route?.params?.questions || MOCK_QUESTIONS;
+
+  const {
+    state,
+    currentQuestion,
+    currentIndex,
+    totalQuestions,
+    score,
+    playSampleAudio,
+    startRecording,
+    stopRecordingAndScore,
+    handleRetry,
+    handleNext,
+  } = useRecording({ questions: safeQuestions, onComplete });
+
+  const displayProgress = externalProgress || {
+    current: currentIndex + 1,
+    total: totalQuestions || 1,
   };
 
-  return (
-    <SafeAreaView className="flex-1 bg-gradient-to-b from-red-50 to-white">
-      {/* Header */}
-      <ScreenHeader
-        title="Recording & Feedback"
-        subtitle="Practice pronunciation"
-        onBack={onBack}
-      />
+  if (!currentQuestion) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <Text>Loading questions...</Text>
+      </SafeAreaView>
+    );
+  }
 
-      <View className="flex-1 items-center justify-center px-6">
-        {/* Word Display */}
-        <View className="mb-8">
-          <Text className="mb-2 text-center text-5xl font-bold text-gray-800">{word}</Text>
-          {phonetic && <Text className="text-center text-xl text-gray-500">{phonetic}</Text>}
+  return (
+    <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
+      <View className="z-10 w-full bg-white">
+        <ScreenHeader
+          title="Speaking Practice"
+          subtitle="PRONUNCIATION"
+          onBack={onBack}
+          onClose={onClose}
+        />
+      </View>
+
+      <View className="flex-1 bg-[#F8FAFC]">
+        <View className="w-full px-5 pt-4 pb-2">
+          <ProgressBar
+            current={displayProgress.current}
+            total={displayProgress.total}
+            variant="quiz"
+          />
         </View>
 
-        {/* Recording Status */}
-        {isAnalyzing ? (
-          <View className="mb-8 items-center">
-            <ActivityIndicator size="large" color="#DC2626" />
-            <Text className="mt-4 text-lg text-gray-600">Analyzing your pronunciation...</Text>
-          </View>
-        ) : (
-          <>
-            {/* Wave Animation */}
-            <View className="mb-8 h-32 items-center justify-center">
-              <WaveAnimation isActive={isRecording && !isPaused} />
-            </View>
-
-            {/* Microphone Button */}
-            <View className="mb-6 items-center">
-              <MicrophoneButton
-                isRecording={isRecording}
-                isPaused={isPaused}
-                onPress={handleMicPress}
-              />
-            </View>
-
-            {/* Duration */}
-            {isRecording && (
-              <Text className="mb-4 font-mono text-2xl font-bold text-red-600">
-                {formattedDuration}
-              </Text>
-            )}
-
-            {/* Instructions */}
-            <View className="mb-6 max-w-md rounded-2xl bg-white p-5 shadow-sm">
-              <Text className="text-center text-base leading-6 text-gray-700">
-                {!isRecording
-                  ? '🎤 Tap the microphone to start recording'
-                  : isPaused
-                    ? '▶ Tap to resume recording'
-                    : '■ Tap to stop and analyze'}
-              </Text>
-            </View>
-
-            {/* Action Buttons */}
-            {!isRecording && (
-              <View className="w-full max-w-md space-y-3">
-                {isRecording && (
-                  <SecondaryButton
-                    label={isPaused ? 'Resume' : 'Pause'}
-                    onPress={isPaused ? resumeRecording : pauseRecording}
-                    className="mb-3"
-                  />
-                )}
-
-                {onSkip && !isRecording && (
-                  <SecondaryButton label="Skip for now" onPress={onSkip} />
-                )}
+        <ScrollView
+          className="w-full flex-1"
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 140 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="rounded-[24px] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+            {currentQuestion.type === 'word' && currentQuestion.imageUrl && (
+              <View className="mb-6 h-[180px] w-full items-center justify-center">
+                <Image
+                  source={{ uri: currentQuestion.imageUrl }}
+                  className="h-[320px] w-[320px]"
+                  resizeMode="contain"
+                />
               </View>
             )}
-          </>
-        )}
 
-        {/* Tips */}
-        <View className="absolute bottom-8 left-6 right-6">
-          <View className="rounded-2xl bg-blue-50 p-4">
-            <Text className="text-center text-sm leading-5 text-blue-800">
-              💡 Speak clearly and at a normal pace for best results
+            <Text
+              className={`font-extrabold text-[#1E293B] ${
+                currentQuestion.type === 'word' ? 'text-[32px]' : 'text-[24px] leading-8'
+              }`}
+            >
+              {currentQuestion.text}
             </Text>
+            <Text className="mt-2 text-[15px] text-[#64748B]">{currentQuestion.phonetic}</Text>
+
+            <View className="mt-5 rounded-xl border-l-[3px] border-[#D32F2F] bg-[#FFF8F8] p-4">
+              <Text className="text-[15px] leading-6 text-[#4A4A4A]">
+                &quot;{currentQuestion.meaning}&quot;
+              </Text>
+            </View>
+
+            <View className="mt-6 flex-row items-center justify-between">
+              {/* NÚT LISTEN (Sẽ tự động nhỏ lại khi nút biểu đồ bên phải to ra) */}
+              <TouchableOpacity
+                onPress={playSampleAudio}
+                className={`flex-1 flex-row items-center justify-center rounded-2xl bg-[#D32F2F] py-[14px] ${
+                  state === 'PLAYING_AUDIO' ? 'opacity-70' : ''
+                }`}
+              >
+                <Ionicons name="volume-medium" size={22} color="#FFF" />
+                <Text className="ml-2 text-[17px] font-bold text-white">Listen</Text>
+              </TouchableOpacity>
+
+              {/* NÚT BIỂU ĐỒ ĐIỂM SỐ (Đã được làm dài ra) */}
+              <View
+                // Đổi từ px-5 thành px-8 (hoặc set hẳn min-w-[110px]) để nút dài ra hai bên
+                className="ml-4 min-w-[100px] flex-row items-center justify-center rounded-2xl bg-[#FCE4E4] px-8 py-[14px]"
+              >
+                <Iconscoring width={20} height={20} color="#D32F2F" />
+
+                {score !== null && (
+                  <Text className="ml-2 text-[16px] font-extrabold text-[#D32F2F]">{score}%</Text>
+                )}
+              </View>
+            </View>
           </View>
+        </ScrollView>
+      </View>
+
+      <View className="absolute bottom-0 left-0 right-0 z-40 w-full">
+        <View
+          style={{ paddingBottom: Math.max(insets.bottom, 4) }}
+          className="w-full bg-[#F8FAFC] px-5 pt-2"
+        >
+          {state !== 'RESULT' ? (
+            <MicrophoneButton
+              state={state}
+              onStart={startRecording}
+              onStop={stopRecordingAndScore}
+            />
+          ) : (
+            <View className="flex-row items-center justify-between pt-4 pb-4">
+              {/* NÚT TRY AGAIN - Ngắn hơn, bo góc tròn */}
+              <TouchableOpacity
+                onPress={handleRetry}
+                // Thay flex-1 bằng px-6 để nút ôm vừa nội dung, đổi rounded-[16px] thành rounded-full
+                className="mr-3 flex-row items-center justify-center rounded-full bg-[#FCE4E4] px-6 py-[18px]"
+              >
+                <Feather name="rotate-ccw" size={18} color="#9E001F" />
+                <Text className="ml-2 text-[16px] font-bold text-[#9E001F]">Try Again</Text>
+              </TouchableOpacity>
+
+              {/* NÚT NEXT - Dài hơn (dùng flex-1 để chiếm hết chỗ trống), bo góc tròn */}
+              <TouchableOpacity
+                onPress={handleNext}
+                // Đổi rounded-[16px] thành rounded-full, dùng màu nền đậm hơn
+                className="flex-1 flex-row items-center justify-center rounded-full bg-[#C8102E] py-[18px]"
+                style={{
+                  shadowColor: '#C8102E',
+                  shadowOpacity: 0.2,
+                  shadowRadius: 5,
+                  elevation: 4,
+                }}
+              >
+                <Text className="mr-2 text-[16px] font-bold text-white">Next</Text>
+                <Feather name="arrow-right" size={20} color="#FFF" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>

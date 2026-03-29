@@ -1,107 +1,119 @@
-import { useCallback, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Alert } from 'react-native';
 
-export interface RecordingState {
-  isRecording: boolean;
-  isPaused: boolean;
-  duration: number;
-  audioUrl?: string;
-}
+import { Audio } from 'expo-av';
+
+import { Question, SpeakingState } from './types';
 
 interface UseRecordingProps {
-  onRecordingComplete?: (audioUrl: string) => void;
+  questions: Question[];
+  onComplete?: (results: any) => void;
 }
 
-export const useRecording = ({ onRecordingComplete }: UseRecordingProps = {}) => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [audioUrl, setAudioUrl] = useState<string | undefined>();
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+// BẢO VỆ LỖI: Gán questions mặc định là mảng rỗng [] nếu bị undefined
+export const useRecording = ({ questions = [], onComplete }: UseRecordingProps) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [state, setState] = useState<SpeakingState>('IDLE');
+  const [score, setScore] = useState<number | null>(null);
 
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
 
-  const startRecording = useCallback(() => {
-    setIsRecording(true);
-    setIsPaused(false);
-    setDuration(0);
-    setAudioUrl(undefined);
+  // An toàn lấy câu hỏi hiện tại
+  const currentQuestion = questions.length > 0 ? questions[currentIndex] : null;
 
-    // Start timer
-    timerRef.current = setInterval(() => {
-      setDuration(prev => prev + 1);
-    }, 1000);
-
-    // TODO: Implement actual recording logic
-    console.log('Recording started');
+  useEffect(() => {
+    (async () => {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Quyền truy cập', 'Ứng dụng cần quyền sử dụng Micro để thu âm.');
+      }
+    })();
   }, []);
 
-  const pauseRecording = useCallback(() => {
-    setIsPaused(true);
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
+  useEffect(() => {
+    return () => {
+      if (recording) recording.stopAndUnloadAsync();
+      if (sound) sound.unloadAsync();
+    };
+  }, [recording, sound]);
+
+  const playSampleAudio = async () => {
+    if (state === 'RECORDING' || state === 'PROCESSING' || !currentQuestion) return;
+    try {
+      setState('PLAYING_AUDIO');
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: currentQuestion.audioUrl },
+        { shouldPlay: true }
+      );
+      setSound(newSound);
+      newSound.setOnPlaybackStatusUpdate(status => {
+        if (status.isLoaded && status.didJustFinish) {
+          setState('IDLE');
+        }
+      });
+    } catch (error) {
+      console.log('Lỗi phát âm thanh', error);
+      setState('IDLE');
     }
-    console.log('Recording paused');
-  }, []);
+  };
 
-  const resumeRecording = useCallback(() => {
-    setIsPaused(false);
-    timerRef.current = setInterval(() => {
-      setDuration(prev => prev + 1);
-    }, 1000);
-    console.log('Recording resumed');
-  }, []);
-
-  const stopRecording = useCallback(() => {
-    setIsRecording(false);
-    setIsPaused(false);
-
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
+  const startRecording = async () => {
+    try {
+      if (sound) await sound.unloadAsync();
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      const { recording: newRecording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(newRecording);
+      setState('RECORDING');
+    } catch (err) {
+      console.error('Không thể bắt đầu thu âm', err);
+      setState('IDLE');
     }
+  };
 
-    // TODO: Implement actual recording stop and file generation
-    const mockAudioUrl = 'mock-audio-url.mp3';
-    setAudioUrl(mockAudioUrl);
-
-    console.log('Recording stopped');
-
-    // Analyze recording
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      onRecordingComplete?.(mockAudioUrl);
-    }, 2000);
-  }, [onRecordingComplete]);
-
-  const reset = useCallback(() => {
-    setIsRecording(false);
-    setIsPaused(false);
-    setDuration(0);
-    setAudioUrl(undefined);
-    setIsAnalyzing(false);
-
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
+  const stopRecordingAndScore = async () => {
+    if (!recording) return;
+    setState('PROCESSING');
+    try {
+      await recording.stopAndUnloadAsync();
+      setRecording(null);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setScore(Math.floor(Math.random() * 31) + 70);
+      setState('RESULT');
+    } catch (error) {
+      console.error('Lỗi khi dừng thu âm', error);
+      setState('IDLE');
     }
-  }, []);
+  };
 
-  const formatDuration = useCallback((seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }, []);
+  const handleRetry = () => {
+    setScore(null);
+    setState('IDLE');
+  };
+
+  const handleNext = () => {
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setScore(null);
+      setState('IDLE');
+    } else {
+      Alert.alert('Hoàn thành', 'Bạn đã hoàn thành bài luyện tập!');
+      onComplete?.({});
+    }
+  };
 
   return {
-    isRecording,
-    isPaused,
-    duration,
-    audioUrl,
-    isAnalyzing,
-    formattedDuration: formatDuration(duration),
+    state,
+    currentQuestion,
+    currentIndex,
+    totalQuestions: questions.length,
+    score,
+    playSampleAudio,
     startRecording,
-    pauseRecording,
-    resumeRecording,
-    stopRecording,
-    reset,
+    stopRecordingAndScore,
+    handleRetry,
+    handleNext,
   };
 };

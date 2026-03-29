@@ -16,12 +16,18 @@ import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
 import DetailedDayScreen from '@/screens/home/DetailLessionScreen';
 import VocabularyListScreen from '@/screens/home/VocabularyList';
 import { OnboardingScreen } from '@/screens/onboarding';
-import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
+import RenewalScreen from '@/screens/onboarding/RenewalScreen';
+import {
+  CertificatesScreen,
+  ChangePasswordScreen,
+  PersonalInformationScreen,
+} from '@/screens/profile';
 import { ProgressAnalysisScreen } from '@/screens/progressForUser/screens/ProgressAnalysisScreen';
 import { StreakCompleteScreen } from '@/screens/progressForUser/screens/StreakCompleteScreen';
 import { WeekUnlockScreen } from '@/screens/progressForUser/screens/WeekUnlockScreen';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
+import { RecordingScreen } from '@/screens/vocabulary/recording/RecordingScreen';
 import VocabularyLearning from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
@@ -61,6 +67,9 @@ export type RootStackParamList = {
   StreakComplete: undefined;
   ProgressAnalysis: undefined;
   WeekUnlock: undefined;
+  Certificates: undefined;
+  RenewalScreen: undefined;
+  RecordingScreen: undefined;
   AIFeedback: { userAnswer: string; mode: string };
   VocabularyLearning: undefined;
 };
@@ -99,7 +108,7 @@ export default function RootStack() {
   return (
     <NavigationContainer ref={navigationRef} initialState={undefined} theme={navTheme}>
       <Stack.Navigator
-        initialRouteName="InitialNavigator"
+        initialRouteName="RecordingScreen"
         screenOptions={{
           headerShown: false,
           gestureEnabled: false,
@@ -203,6 +212,11 @@ export default function RootStack() {
           }}
         />
         <Stack.Screen
+          name="RecordingScreen"
+          component={RecordingScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
           name="WeekUnlock"
           component={WeekUnlockScreen}
           options={{
@@ -211,7 +225,20 @@ export default function RootStack() {
             gestureDirection: 'horizontal',
           }}
         />
-
+        <Stack.Screen
+          name="Certificates"
+          component={CertificatesScreen}
+          options={{
+            ...TransitionPresets.SlideFromRightIOS,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+          }}
+        />
+        <Stack.Screen
+          name="RenewalScreen"
+          component={RenewalScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
         <Stack.Screen name="TabNavigator" component={TabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
