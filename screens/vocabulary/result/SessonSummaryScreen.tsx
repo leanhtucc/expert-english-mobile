@@ -7,7 +7,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { useNavigation } from '@react-navigation/native';
 
-import ImageSessionSummary from '@/assets/svgs/output/ImageSessionSummary';
+import { IMageSessionSummary } from '@/components/icon';
 
 import { ResultStatCard } from '../components';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -73,7 +73,7 @@ export const SessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
         {/* Mascot */}
         <View className="mb-6 items-center">
           <View className="h-[180px] w-[180px] items-center justify-center">
-            <ImageSessionSummary width={360} height={360} />
+            <IMageSessionSummary width={360} height={360} />
           </View>
         </View>
 
