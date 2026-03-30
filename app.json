@@ -4,35 +4,46 @@
     "slug": "ExpertEnglish",
     "version": "1.0.0",
     "orientation": "portrait",
+
     "icon": "./assets/images/icon-app.png",
+
     "scheme": "expertenglish",
     "userInterfaceStyle": "automatic",
-    "ios": {
-      "supportsTablet": true
+
+    "splash": {
+      "image": "./assets/images/icon-app.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
     },
+
+    "ios": {
+      "supportsTablet": true,
+      "icon": "./assets/images/icon-app.png"
+    },
+
     "android": {
+      "icon": "./assets/images/icon-app.png",
       "adaptiveIcon": {
-        "backgroundColor": "#0A4A6B",
-        "foregroundImage": "./assets/images/icon-app.png"
+        "foregroundImage": "./assets/images/icon-app.png",
+        "backgroundColor": "#0A4A6B"
       },
       "predictiveBackGestureEnabled": false
     },
+
     "web": {
       "output": "static",
       "favicon": "./assets/images/icon-app.png"
     },
+
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
+          "backgroundColor": "#ffffff",
           "image": "./assets/images/icon-app.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "resizeMode": "contain"
         }
       ],
       [
@@ -44,6 +55,7 @@
         }
       ]
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
