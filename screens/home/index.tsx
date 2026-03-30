@@ -142,7 +142,6 @@ export const HomeScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      {/* 👇 2. NHÚNG CUSTOM DRAWER MỚI VÀO ĐÂY (NỔI TRÊN SCROLLVIEW NHỜ ABSOLUTE + Z-50) */}
       <QuestMasterDrawer
         visible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)} // Action đóng

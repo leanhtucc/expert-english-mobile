@@ -9,10 +9,11 @@ import { ChatBubbleUser } from './ChatBubbleUser';
 interface ScenarioCardProps {
   scenario: ScenarioPreview;
   mode: PracticeMode;
-  /** Chỉ màn Nâng cao: tô màu phát âm theo từ */
   showWordFeedback?: boolean;
-  /** false khi người học chưa nói (ẩn bubble trả lời). */
   showUserBubble?: boolean;
+  // 🌟 THÊM PROPS NÀY
+  onToggleFeedback?: () => void;
+  isFeedbackVisible?: boolean;
 }
 
 export const ScenarioCard: React.FC<ScenarioCardProps> = ({
@@ -20,6 +21,8 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
   mode,
   showWordFeedback = false,
   showUserBubble = true,
+  onToggleFeedback,
+  isFeedbackVisible = false,
 }) => {
   return (
     <View>
@@ -44,13 +47,16 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
             text: scenario.exampleAnswer,
             translation: scenario.exampleAnswerTranslation,
             timestamp: Date.now(),
-            score: scenario.progress,
+            score: scenario.score,
             pronunciationSegments: scenario.pronunciationSegments,
           }}
           role="BẠN"
           showAvatar={true}
           mode={mode}
           showWordFeedback={showWordFeedback}
+          // 🌟 TRUYỀN XUỐNG DƯỚI
+          onToggleFeedback={onToggleFeedback}
+          isFeedbackVisible={isFeedbackVisible}
         />
       ) : null}
     </View>

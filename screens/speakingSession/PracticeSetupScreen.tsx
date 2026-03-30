@@ -7,7 +7,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-import { IconBackButton, IconMicrophone, IconRepeat, IconStreakRed } from '@/components/icon';
+import { IconBackButton, IconMicrophone, IconRepeat } from '@/components/icon';
 import { useAppTheme } from '@/hooks/useAppTheme';
 import { useGenerateSpeakingForLesson } from '@/hooks/useGenerateSpeakingForLesson';
 import { useRoadmapData } from '@/hooks/useRoadmapData';
@@ -20,9 +20,11 @@ import {
   speakingExerciseToScenarioPreview,
 } from '@/types/api/speakingExercise.response';
 import type { PronunciationFeedback } from '@/types/api/submitPronunciation.response';
-import { PracticeMode, ScenarioPreview } from '@/types/speaking.types';
+import { ScenarioPreview } from '@/types/speaking.types';
 import { getTodayLessonIdFromRoadmap } from '@/utils/roadmapTodayLesson';
 
+import { ProgressBar } from '../vocabulary/components';
+import { LessonSummaryScreen } from '../vocabulary/result';
 import { ChatBubbleAI } from './components/ChatBubbleAI';
 import { PronunciationFeedbackCard } from './components/PronunciationFeedbackCard';
 import { ScenarioCard } from './components/ScenarioCard';
@@ -33,43 +35,66 @@ type PracticeSetupScreenNavigationProp = StackNavigationProp<RootStackParamList,
 export const PracticeSetupScreen: React.FC = () => {
   const accessToken = useAuthStore(state => state.accessToken);
   const { data: roadmapData, loading: roadmapLoading } = useRoadmapData(accessToken || '');
-
-  /** Tạm thời: chỉ lấy `_id` bài học "hôm nay" trên roadmap (không dùng route params). */
   const lessonId = useMemo(() => getTodayLessonIdFromRoadmap(roadmapData), [roadmapData]);
 
-  const {
-    exercisesByLesson,
-    isLoading: speakingApiLoading,
-    error: speakingApiError,
-  } = useGenerateSpeakingForLesson({ lessonId, enabled: !!lessonId });
-
+  const { exercisesByLesson, isLoading: speakingApiLoading } = useGenerateSpeakingForLesson({
+    lessonId,
+    enabled: !!lessonId,
+  });
   const exercises = useMemo(
     () => parseExercisesByLessonResponse(exercisesByLesson),
     [exercisesByLesson]
   );
 
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
+  const [hasRecorded, setHasRecorded] = useState(false);
+  const [pronunciationFeedback, setPronunciationFeedback] = useState<PronunciationFeedback | null>(
+    null
+  );
+  const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
+
+  // 🌟 STATE QUẢN LÝ VIỆC HIỆN TỔNG KẾT NỘI BỘ
+  const [isFinished, setIsFinished] = useState(false);
 
   useEffect(() => {
     setCurrentExerciseIndex(0);
     setPronunciationFeedback(null);
+    setShowFeedbackDetails(false);
+    setIsFinished(false);
   }, [lessonId, exercises.length]);
+
+  // Trong file PracticeSetupScreen.tsx
 
   const scenario: ScenarioPreview | null = useMemo(() => {
     const ex = exercises[currentExerciseIndex];
     if (!ex) return null;
-    return speakingExerciseToScenarioPreview(ex);
-  }, [exercises, currentExerciseIndex]);
 
-  /** Chờ roadmap hoặc chờ hook speaking (chưa có mảng exercises). */
+    const baseScenario = speakingExerciseToScenarioPreview(ex);
+
+    if (pronunciationFeedback) {
+      return {
+        ...baseScenario,
+        score: pronunciationFeedback.score,
+        pronunciationSegments: [
+          {
+            // 🌟 CHỈNH Ở ĐÂY: Ưu tiên baseScenario.exampleAnswer (từ vựng gốc)
+            // thay vì pronunciationFeedback.transcript (kết quả AI nghe được)
+            text: baseScenario.exampleAnswer || pronunciationFeedback.referenceText || '...',
+            isCorrect: pronunciationFeedback.passed,
+          },
+        ],
+      };
+    }
+
+    return baseScenario;
+  }, [exercises, currentExerciseIndex, pronunciationFeedback]);
+
   const isWaitingForSpeaking =
     roadmapLoading || (!!lessonId && speakingApiLoading && exercises.length === 0);
-
   const totalQuestions = exercises.length;
   const currentQuestion =
     exercises.length > 0 ? Math.min(currentExerciseIndex + 1, exercises.length) : 0;
-  const sessionProgressPct =
-    exercises.length > 0 ? Math.round(((currentExerciseIndex + 1) / exercises.length) * 100) : 0;
 
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useAppTheme();
@@ -89,23 +114,13 @@ export const PracticeSetupScreen: React.FC = () => {
     }),
     [colors, isDark]
   );
-  const navigation = useNavigation<PracticeSetupScreenNavigationProp>();
-  const selectedMode: PracticeMode = 'dual-explorer';
-  const [practiceLevel, setPracticeLevel] = useState<'basic' | 'advanced'>('basic');
-  const [isRecording, setIsRecording] = useState(false);
-  /** Đã dừng ghi xong — hiển thị Thử lại + feedback, không chuyển màn */
-  const [hasRecorded, setHasRecorded] = useState(false);
-  const [pronunciationFeedback, setPronunciationFeedback] = useState<PronunciationFeedback | null>(
-    null
-  );
 
-  /** Ghi âm m4a + metering; dừng thì submit-pronunciation */
+  const navigation = useNavigation<PracticeSetupScreenNavigationProp>();
   const {
-    micLevel,
     start: startPronunciationRecording,
     stop: stopPronunciationRecording,
+    micLevel,
   } = useSpeakingPronunciationRecorder();
-
   const { submitAfterRecording } = useSubmitSpeakingPronunciation({
     exercises,
     currentExerciseIndex,
@@ -113,12 +128,11 @@ export const PracticeSetupScreen: React.FC = () => {
     lessonId,
   });
 
-  const streak = 5;
-
   const goPrevExercise = () => {
     setCurrentExerciseIndex(i => Math.max(0, i - 1));
     setHasRecorded(false);
     setPronunciationFeedback(null);
+    setShowFeedbackDetails(false);
   };
 
   const goNextExercise = () => {
@@ -126,11 +140,13 @@ export const PracticeSetupScreen: React.FC = () => {
     setCurrentExerciseIndex(i => Math.min(exercises.length - 1, i + 1));
     setHasRecorded(false);
     setPronunciationFeedback(null);
+    setShowFeedbackDetails(false);
   };
 
   const startRecording = async () => {
     setHasRecorded(false);
     setPronunciationFeedback(null);
+    setShowFeedbackDetails(false);
     const ok = await startPronunciationRecording();
     if (ok) setIsRecording(true);
   };
@@ -146,24 +162,39 @@ export const PracticeSetupScreen: React.FC = () => {
   const handleRetry = () => {
     setHasRecorded(false);
     setPronunciationFeedback(null);
+    setShowFeedbackDetails(false);
   };
 
-  /** Tên giữ cho tương thích / tránh lỗi tham chiếu cũ — tương đương bắt đầu ghi */
-  const handleStartSpeaking = startRecording;
+  // 🌟 NẾU ĐÃ BẤM HOÀN THÀNH: Render màn hình tổng kết đè lên luôn
+  if (isFinished) {
+    return (
+      <LessonSummaryScreen
+        data={{
+          totalWords: exercises.length,
+          accuracy: 85, // Bạn có thể tính toán điểm trung bình thực tế nếu muốn
+          timeSpent: '05:20',
+        }}
+        showRadarChart={true}
+        primaryActionText="Next lesson"
+        onPrimaryAction={() => navigation.goBack()}
+        onClose={() => {
+          navigation.replace('TabNavigator', { screen: 'Home' });
+        }}
+      />
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.bg }} edges={['top']}>
-      {/* Header */}
       <View
-        className="border-b px-4 pb-3 pt-2"
+        className="border-b px-4 pb-4 pt-2"
         style={{ borderBottomColor: COLORS.border, backgroundColor: COLORS.headerBg }}
       >
-        <View className="flex-row items-center justify-between">
+        <View className="mb-4 flex-row items-center justify-between">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             className="h-10 w-10 items-center justify-center rounded-full"
             style={{ backgroundColor: isDark ? colors.surface : '#F3F4F6' }}
-            hitSlop={8}
           >
             <IconBackButton width={16} height={16} iconColor={isDark ? '#FFFFFF' : '#0F172A'} />
           </TouchableOpacity>
@@ -175,69 +206,39 @@ export const PracticeSetupScreen: React.FC = () => {
           </Text>
           <View className="h-10 w-10" />
         </View>
-
-        <View className="mt-3 flex-row items-center justify-between">
-          <View className="flex-row items-center gap-1.5">
-            <IconStreakRed width={22} height={22} />
-            <Text className="text-[15px] font-bold" style={{ color: COLORS.primary }}>
-              Streak {streak}
-            </Text>
-          </View>
-          <Text className="text-xs font-bold tracking-wider" style={{ color: COLORS.textMuted }}>
-            {isWaitingForSpeaking
-              ? 'QUESTION …'
-              : totalQuestions > 0
-                ? `QUESTION ${currentQuestion}/${totalQuestions}`
-                : 'QUESTION —'}
-          </Text>
-        </View>
-
-        <View
-          className="mt-3 mb-3 h-2 w-full overflow-hidden rounded-full"
-          style={{ backgroundColor: isDark ? colors.border : '#E5E7EB' }}
-        >
-          <View
-            className="h-full rounded-full"
-            style={{
-              width: `${sessionProgressPct}%`,
-              backgroundColor: COLORS.primary,
-            }}
-          />
-        </View>
-
-        {/* CƠ BẢN / NÂNG CAO */}
-        <View className="mt-4 flex-row gap-3">
+        <ProgressBar
+          current={currentQuestion}
+          total={totalQuestions}
+          variant="quiz"
+          className="mb-5"
+        />
+        <View className="mt-6 flex-row gap-3">
           <TouchableOpacity
-            onPress={() => setPracticeLevel('basic')}
-            activeOpacity={0.85}
             className="flex-1 rounded-2xl py-3"
             style={{
               borderWidth: 2,
-              borderColor: practiceLevel === 'basic' ? COLORS.primary : COLORS.inactiveBorder,
-              backgroundColor: practiceLevel === 'basic' ? COLORS.pinkSoft : COLORS.inactiveTabBg,
+              borderColor: COLORS.primary,
+              backgroundColor: COLORS.pinkSoft,
             }}
           >
             <Text
               className="text-center text-sm font-bold uppercase tracking-wide"
-              style={{ color: practiceLevel === 'basic' ? COLORS.primary : '#9CA3AF' }}
+              style={{ color: COLORS.primary }}
             >
               CƠ BẢN
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setPracticeLevel('advanced')}
-            activeOpacity={0.85}
             className="flex-1 rounded-2xl py-3"
             style={{
               borderWidth: 2,
-              borderColor: practiceLevel === 'advanced' ? COLORS.primary : COLORS.inactiveBorder,
-              backgroundColor:
-                practiceLevel === 'advanced' ? COLORS.pinkSoft : COLORS.inactiveTabBg,
+              borderColor: COLORS.inactiveBorder,
+              backgroundColor: COLORS.inactiveTabBg,
             }}
           >
             <Text
               className="text-center text-sm font-bold uppercase tracking-wide"
-              style={{ color: practiceLevel === 'advanced' ? COLORS.primary : '#9CA3AF' }}
+              style={{ color: '#9CA3AF' }}
             >
               NÂNG CAO
             </Text>
@@ -253,49 +254,26 @@ export const PracticeSetupScreen: React.FC = () => {
           paddingBottom: 20,
           flexGrow: 1,
         }}
-        showsVerticalScrollIndicator={false}
       >
         {isWaitingForSpeaking ? (
           <View className="min-h-[320px] flex-1 justify-start pt-2">
             <ChatBubbleAI
-              message={{
-                id: 'loading',
-                role: 'ai',
-                text: '',
-                timestamp: Date.now(),
-              }}
-              role={roadmapLoading ? 'LỘ TRÌNH' : 'SPEAKING'}
-              mode={selectedMode}
+              message={{ id: 'loading', role: 'ai', text: '', timestamp: Date.now() }}
+              role="SPEAKING"
               showTypingIndicator
             />
-          </View>
-        ) : !lessonId ? (
-          <View className="min-h-[200px] items-center justify-center py-12">
-            <Text className="text-center text-sm" style={{ color: COLORS.textMuted }}>
-              Chưa có bài học trên lộ trình để luyện speaking.
-            </Text>
-          </View>
-        ) : speakingApiError && exercises.length === 0 ? (
-          <View className="min-h-[200px] items-center justify-center py-12">
-            <Text className="text-center text-sm" style={{ color: COLORS.primary }}>
-              Không tải được bài tập. Thử lại sau.
-            </Text>
-          </View>
-        ) : exercises.length === 0 ? (
-          <View className="min-h-[200px] items-center justify-center py-12">
-            <Text className="text-center text-sm" style={{ color: COLORS.textMuted }}>
-              Chưa có bài speaking cho bài học này.
-            </Text>
           </View>
         ) : scenario ? (
           <View>
             <ScenarioCard
               scenario={scenario}
-              mode={selectedMode}
+              mode="dual-explorer"
               showUserBubble={hasRecorded}
-              showWordFeedback={practiceLevel === 'advanced' && hasRecorded}
+              showWordFeedback={hasRecorded}
+              onToggleFeedback={() => setShowFeedbackDetails(prev => !prev)}
+              isFeedbackVisible={showFeedbackDetails}
             />
-            {hasRecorded && pronunciationFeedback ? (
+            {hasRecorded && pronunciationFeedback && showFeedbackDetails && (
               <PronunciationFeedbackCard
                 feedback={pronunciationFeedback}
                 textMain={COLORS.textMain}
@@ -306,12 +284,11 @@ export const PracticeSetupScreen: React.FC = () => {
                 mistakeRowBg={isDark ? 'rgba(255,255,255,0.08)' : '#F3F4F6'}
                 isDark={isDark}
               />
-            ) : null}
+            )}
           </View>
         ) : null}
       </ScrollView>
 
-      {/* Bottom: idle = Câu trước | Mic | Tiếp theo — ghi âm = chỉ sóng full width + dừng */}
       <View
         className={`border-t pt-4 ${isRecording ? 'px-0' : 'px-4'}`}
         style={{
@@ -329,13 +306,12 @@ export const PracticeSetupScreen: React.FC = () => {
               <View className="w-[76px] items-center">
                 <TouchableOpacity
                   onPress={goPrevExercise}
-                  disabled={exercises.length === 0 || currentExerciseIndex === 0}
+                  disabled={currentExerciseIndex === 0}
                   className="h-14 w-14 items-center justify-center rounded-full"
                   style={{
                     backgroundColor: COLORS.pinkSoft,
-                    opacity: exercises.length === 0 || currentExerciseIndex === 0 ? 0.4 : 1,
+                    opacity: currentExerciseIndex === 0 ? 0.4 : 1,
                   }}
-                  activeOpacity={0.85}
                 >
                   <Feather name="chevron-left" size={26} color="#9CA3AF" />
                 </TouchableOpacity>
@@ -344,17 +320,9 @@ export const PracticeSetupScreen: React.FC = () => {
 
               <View className="items-center">
                 <TouchableOpacity
-                  onPress={() => void (hasRecorded ? handleRetry() : handleStartSpeaking())}
+                  onPress={() => void (hasRecorded ? handleRetry() : startRecording())}
                   className="h-[72px] w-[72px] items-center justify-center rounded-full shadow-lg"
-                  style={{
-                    backgroundColor: COLORS.primary,
-                    shadowColor: COLORS.primary,
-                    shadowOffset: { width: 0, height: 6 },
-                    shadowOpacity: 0.35,
-                    shadowRadius: 12,
-                    elevation: 8,
-                  }}
-                  activeOpacity={0.85}
+                  style={{ backgroundColor: COLORS.primary, elevation: 8 }}
                 >
                   {hasRecorded ? (
                     <IconRepeat width={34} height={34} color="#FFFFFF" />
@@ -369,28 +337,33 @@ export const PracticeSetupScreen: React.FC = () => {
 
               <View className="w-[76px] items-center">
                 <TouchableOpacity
-                  onPress={goNextExercise}
-                  disabled={exercises.length === 0 || currentExerciseIndex >= exercises.length - 1}
-                  className="h-14 w-14 items-center justify-center rounded-full"
-                  style={{
-                    backgroundColor: COLORS.nextBlue,
-                    opacity:
-                      exercises.length === 0 || currentExerciseIndex >= exercises.length - 1
-                        ? 0.4
-                        : 1,
+                  onPress={() => {
+                    if (currentExerciseIndex >= exercises.length - 1) {
+                      // 🌟 THAY ĐỔI: SET FINISHED THAY VÌ NAVIGATE
+                      setIsFinished(true);
+                    } else {
+                      goNextExercise();
+                    }
                   }}
-                  activeOpacity={0.85}
+                  disabled={exercises.length === 0}
+                  className="h-14 w-14 items-center justify-center rounded-full"
+                  style={{ backgroundColor: COLORS.nextBlue }}
                 >
-                  <Feather name="chevron-right" size={26} color="#FFFFFF" />
+                  {currentExerciseIndex >= exercises.length - 1 ? (
+                    <Feather name="check" size={26} color="#FFFFFF" />
+                  ) : (
+                    <Feather name="chevron-right" size={26} color="#FFFFFF" />
+                  )}
                 </TouchableOpacity>
-                <Text className="mt-1 text-[10px] font-medium text-gray-500">Tiếp theo</Text>
+                <Text className="mt-1 text-[10px] font-medium text-gray-500">
+                  {currentExerciseIndex >= exercises.length - 1 ? 'Hoàn thành' : 'Tiếp theo'}
+                </Text>
               </View>
             </View>
           </View>
         ) : (
           <TouchableOpacity
             onPress={() => void stopRecording()}
-            activeOpacity={0.92}
             className="w-full items-center pb-2"
             style={{ minHeight: 120 }}
           >

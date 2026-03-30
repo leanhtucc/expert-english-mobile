@@ -1,45 +1,86 @@
-import { Feather } from '@expo/vector-icons';
-
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
+
+import { HintButton } from '../components/HintButton';
 
 interface QuestionCardProps {
   word?: string;
   question: string;
   phonetic?: string;
   className?: string;
-  showHintButton?: boolean; // Cờ bật tắt nút Gợi ý
-  onPressHint?: () => void; // Hàm khi bấm nút Gợi ý
+  showHintButton?: boolean;
+  isHintUsed?: boolean;
+  onPressHint?: () => void;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
   className = '',
   showHintButton = false,
-  onPressHint,
+  isHintUsed = false,
+  onPressHint, // Prop này dùng để xử lý sự kiện bấm nút
 }) => {
+  const renderSmartQuestion = () => {
+    // Danh sách các từ khóa để tách chuỗi
+    const splitKeywords = ['pronunciation', 'definition', 'meaning'];
+    const matchedKeyword = splitKeywords.find(kw => question.toLowerCase().includes(kw));
+
+    if (matchedKeyword) {
+      // REGEX BỌC THÉP: Tách tại từ khóa, chấp nhận mọi khoảng trắng và dấu :
+      const regex = new RegExp(`(${matchedKeyword})\\s*:?\\s*`, 'i');
+      const parts = question.split(regex);
+
+      if (parts.length >= 3) {
+        // Hợp nhất phần hướng dẫn tiếng Anh
+        const instructionText = parts[0].trim() + ' ' + parts[1].toLowerCase() + ':';
+
+        // Hợp nhất phần nội dung tiếng Việt còn lại
+        let contentText = parts.slice(2).join('').trim();
+
+        // Xóa dấu hỏi ở cuối câu tiếng Việt nếu có để tránh lặp dấu
+        if (contentText.endsWith('?')) {
+          contentText = contentText.slice(0, -1);
+        }
+
+        return (
+          <View className="w-full items-center justify-center">
+            {/* Câu lệnh Tiếng Anh: TO, ĐẬM */}
+            <Text className="mb-2.5 text-center text-[20px] font-extrabold leading-[30px] text-[#1E293B]">
+              {instructionText}
+            </Text>
+            {/* Nghĩa Tiếng Việt: Nhỏ hơn, In nghiêng, Xám nhạt */}
+            <Text className="text-center text-[16px] font-medium italic leading-6 text-[#64748B]">
+              &quot;{contentText}&quot;
+            </Text>
+          </View>
+        );
+      }
+    }
+
+    // Trường hợp không bắt được từ khóa thì hiện nguyên bản nhưng vẫn style đẹp
+    return (
+      <Text className="text-center text-[20px] font-extrabold leading-8 text-[#1E293B]">
+        {question}
+      </Text>
+    );
+  };
+
   return (
     <View
-      className={`relative min-h-[140px] w-full rounded-[20px] border border-slate-100 bg-white shadow-sm ${className}`}
+      className={`w-full overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm ${className}`}
     >
-      {/* KHU VỰC CÂU HỎI CHÍNH */}
-      <View className="flex-1 items-center justify-center p-6">
-        <Text className="text-center text-[18px] font-bold leading-7 text-[#1E293B]">
-          {question}
-        </Text>
-      </View>
+      <View className="flex-1 items-center justify-center py-8 px-6">
+        {/* Render phần nội dung câu hỏi */}
+        {renderSmartQuestion()}
 
-      {/* NÚT GỢI Ý NỔI Ở GÓC TRÊN CÙNG BÊN PHẢI (Chỉ hiện khi showHintButton = true) */}
-      {showHintButton && (
-        <TouchableOpacity
-          onPress={onPressHint}
-          activeOpacity={0.8}
-          className="absolute top-[-15px] right-2 flex-row items-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 shadow-sm"
-        >
-          <Feather name="map-pin" size={14} color="#C8102E" />
-          <Text className="ml-1 text-[13px] font-bold text-[#C8102E]">Gợi ý</Text>
-        </TouchableOpacity>
-      )}
+        {/* Nút Gợi ý (HintButton bản to) */}
+        {showHintButton && (
+          <HintButton
+            onPress={onPressHint || (() => {})} // Sửa lỗi gọi sai handleOpenHint
+            isUsed={isHintUsed}
+          />
+        )}
+      </View>
     </View>
   );
 };

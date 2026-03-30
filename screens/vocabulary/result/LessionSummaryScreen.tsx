@@ -1,7 +1,9 @@
+import { Feather } from '@expo/vector-icons';
+
 import React from 'react';
 import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Line, Polygon, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Line, Polygon } from 'react-native-svg';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,18 +30,19 @@ interface LessonSummaryScreenProps {
   data: LessonSummaryData;
   onRestart?: () => void;
   onReviewWeak?: () => void;
-  onClose?: () => void;
-  // 🌟 BỔ SUNG 2 PROPS NÀY ĐỂ FIX LỖI TYPESCRIPT 🌟
+  onClose?: () => void; // Thường dùng để quay về Home
   primaryActionText?: string;
   onPrimaryAction?: () => void;
+  showRadarChart?: boolean;
 }
 
 export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
   data,
   onRestart,
   onClose,
-  primaryActionText = 'Start Speaking', // Gán giá trị mặc định nếu ko truyền
-  onPrimaryAction, // Nhận hàm từ component cha
+  primaryActionText = 'Start Speaking',
+  onPrimaryAction,
+  showRadarChart = false,
 }) => {
   const insets = useSafeAreaInsets();
   const accentColor = '#D32F2F';
@@ -100,7 +103,7 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
             alignItems: 'center',
             paddingHorizontal: 16,
             paddingTop: 8,
-            paddingBottom: insets.bottom + 40,
+            paddingBottom: insets.bottom + 20,
           }}
         >
           {/* Header */}
@@ -119,18 +122,19 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
             </View>
           </View>
 
-          {/* Mascot/Character */}
-          <View className="mb-16">
-            <View className="h-[220px] w-[220px] items-center justify-center rounded-full bg-[#FFE4E6]/50">
-              <ImageResultLession width={260} height={260} />
+          {/* Mascot */}
+          <View className={showRadarChart ? 'mb-6' : 'mb-12'}>
+            <View className="h-[200px] w-[200px] items-center justify-center rounded-full bg-[#FFE4E6]/50">
+              <ImageResultLession width={220} height={220} />
             </View>
           </View>
 
-          <Text className="mb-2 text-center text-3xl font-bold text-[#0F172A]">Spectacular!</Text>
+          <Text className="mb-2 text-center text-4xl font-extrabold text-[#0F172A]">
+            Spectacular!
+          </Text>
 
-          <Text className="mb-10 text-center text-[15px] text-[#64748B]">
-            You&apos;ve mastered{' '}
-            <Text className="font-bold text-[#C6102E]">{data.totalWords} new</Text> industry terms.
+          <Text className="mb-8 text-center text-[16px] text-[#64748B]">
+            You spoke better than yesterday.
           </Text>
 
           {/* Stats Row */}
@@ -146,7 +150,7 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
             <ResultStatCard
               className="mx-1.5 flex-1"
               icon={<IconLearningGoal width={24} height={24} />}
-              label="ACCURACY"
+              label="OVERALL"
               value={`${data.accuracy}%`}
               valueOnTop={true}
             />
@@ -159,80 +163,85 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
               valueOnTop={true}
             />
           </View>
-          <View className="items-center justify-center">
-            <Svg width={260} height={260}>
-              {webs.map((points, index) => (
-                <Polygon
-                  key={index}
-                  points={points}
-                  stroke="#F3F4F6"
-                  strokeWidth="1.5"
-                  fill="none"
-                />
-              ))}
-              {angles.map((angle, index) => (
-                <Line
-                  key={index}
-                  x1={radarCenter}
-                  y1={radarCenter}
-                  x2={radarCenter + radarRadius * Math.cos(angle)}
-                  y2={radarCenter + radarRadius * Math.sin(angle)}
-                  stroke="#F3F4F6"
-                  strokeWidth="1.5"
-                />
-              ))}
-              <Polygon
-                points={dataPoints.map(p => `${p.x},${p.y}`).join(' ')}
-                fill={accentColor}
-                fillOpacity="0.1"
-                stroke={accentColor}
-                strokeWidth="2.5"
-                strokeLinejoin="round"
-              />
-              {dataPoints.map((point, index) => (
-                <Circle key={index} cx={point.x} cy={point.y} r="4" fill={point.dotColor} />
-              ))}
-              {dataPoints.map((point, index) => {
-                const textR = radarRadius + 28;
-                return (
-                  <SvgText
+
+          {/* Radar Chart */}
+          {showRadarChart && (
+            <View className="mb-8 items-center justify-center">
+              <Svg width={260} height={260}>
+                {webs.map((points, index) => (
+                  <Polygon
                     key={index}
-                    x={radarCenter + textR * Math.cos(angles[index])}
-                    y={radarCenter + textR * Math.sin(angles[index])}
-                    fontSize="12"
-                    fontWeight="600"
-                    fill="#4B5563"
-                    textAnchor="middle"
-                  >
-                    {point.label}
-                    <SvgText
-                      x={radarCenter + textR * Math.cos(angles[index])}
-                      y={radarCenter + textR * Math.sin(angles[index]) + 16}
-                      fontSize="13"
-                      fontWeight="bold"
-                      fill={accentColor}
-                      textAnchor="middle"
-                    >
-                      {point.value}%
-                    </SvgText>
-                  </SvgText>
-                );
-              })}
-            </Svg>
+                    points={points}
+                    stroke="#F3F4F6"
+                    strokeWidth="1.5"
+                    fill="none"
+                  />
+                ))}
+                {angles.map((angle, index) => (
+                  <Line
+                    key={index}
+                    x1={radarCenter}
+                    y1={radarCenter}
+                    x2={radarCenter + radarRadius * Math.cos(angle)}
+                    y2={radarCenter + radarRadius * Math.sin(angle)}
+                    stroke="#F3F4F6"
+                    strokeWidth="1.5"
+                  />
+                ))}
+                <Polygon
+                  points={dataPoints.map(p => `${p.x},${p.y}`).join(' ')}
+                  fill={accentColor}
+                  fillOpacity="0.1"
+                  stroke={accentColor}
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                />
+                {dataPoints.map((point, index) => (
+                  <Circle key={index} cx={point.x} cy={point.y} r="4" fill={point.dotColor} />
+                ))}
+              </Svg>
+            </View>
+          )}
+
+          {/* Status Card */}
+          <View className="mb-8 w-full overflow-hidden rounded-[16px] bg-[#FFF0F2]">
+            <View className="absolute bottom-0 left-0 top-0 w-[6px] bg-[#9E001F]" />
+            <View className="flex-row items-center px-4 py-3 pl-5">
+              <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-[#FCE4E4]">
+                <Feather name="mic" size={18} color="#9E001F" />
+              </View>
+              <View className="flex-1 justify-center">
+                <Text className="text-[14px] font-extrabold uppercase text-[#1E293B]">
+                  CHECKING STATUS
+                </Text>
+                <Text className="mt-0.5 text-[13px] text-[#64748B]">
+                  Communicating with vendors about orders.
+                </Text>
+              </View>
+            </View>
           </View>
 
-          <View className="mt-auto w-full px-2">
-            {/* 🌟 SỬA LẠI NÚT NÀY ĐỂ NHẬN HÀM VÀ CHỮ TỪ COMPONENT CHA 🌟 */}
+          {/* Actions Container */}
+          <View className="mt-auto w-full items-center px-2">
             <TouchableOpacity
-              onPress={onPrimaryAction || onRestart} // Gọi onPrimaryAction (Submit API), nếu ko có thì gọi onRestart
+              onPress={onPrimaryAction || onRestart}
               activeOpacity={0.8}
-              className="flex-row items-center justify-center rounded-2xl bg-[#C6102E] px-5 py-[16px] shadow-md"
+              className="w-full flex-row items-center justify-center rounded-[20px] bg-[#C6102E] px-5 py-[18px] shadow-md"
             >
-              {/* Nếu chữ ko phải "Lưu kết quả & Thoát" thì mới hiện icon micro (tránh lạc quẻ) */}
               {primaryActionText === 'Start Speaking' && (
                 <IconVoiceBlack width={20} height={20} className="mr-2" />
               )}
-              <Text className="text-[17px] font-bold text-white">{primaryActionText}</Text>
+              <Text className="text-[18px] font-bold text-white">{primaryActionText}</Text>
+              {primaryActionText !== 'Start Speaking' && (
+                <Feather name="arrow-right" size={20} color="#FFFFFF" style={{ marginLeft: 8 }} />
+              )}
+            </TouchableOpacity>
+
+            {/* 🌟 THÊM TEXT QUAY VỀ TRANG CHỦ TẠI ĐÂY 🌟 */}
+            <TouchableOpacity onPress={onClose} className="mt-6 py-2" activeOpacity={0.6}>
+              <Text className="text-[16px] font-bold uppercase tracking-widest text-[#64748B]">
+                Back to Home
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

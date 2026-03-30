@@ -25,6 +25,7 @@ export interface ScenarioPreview {
   exampleAnswerTranslation?: string;
   /** Gợi ý phát âm từng từ (màn Nâng cao) */
   pronunciationSegments?: HighlightedText[];
+  score?: number;
 }
 
 export interface AIFeedback {
