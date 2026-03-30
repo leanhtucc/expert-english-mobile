@@ -22,16 +22,18 @@ type EnterEmailScreenNavigationProp = StackNavigationProp<any>;
 
 export const EnterEmailScreen: React.FC = () => {
   const navigation = useNavigation<EnterEmailScreenNavigationProp>();
-  const { loading, sendEmailOTP } = useAuth(); // Sử dụng Hook
+  const { loading } = useAuth(); // Đã ẩn sendEmailOTP vì không dùng tới
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
-  // Tùy chọn: Validate email format
-  const isValidEmail = (emailStr: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(emailStr);
-  };
+  // ==========================================
+  // 🚧 TẠM THỜI BỎ QUA CHECK FORMAT EMAIL 🚧
+  // ==========================================
+  // const isValidEmail = (emailStr: string): boolean => {
+  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //   return emailRegex.test(emailStr);
+  // };
 
   // Handle submit
   const handleSubmit = async () => {
@@ -39,32 +41,21 @@ export const EnterEmailScreen: React.FC = () => {
 
     const formattedEmail = email.trim();
 
+    // Vẫn giữ lại check rỗng để tránh user bấm nút khi chưa nhập gì
     if (!formattedEmail) {
-      setError('Vui lòng nhập email của bạn.');
+      setError('Vui lòng nhập thông tin.');
       return;
     }
 
-    if (!isValidEmail(formattedEmail)) {
-      setError('Email không đúng định dạng.');
-      return;
-    }
+    // 🚧 TẠM THỜI BỎ QUA LỖI SAI ĐỊNH DẠNG 🚧
+    // if (!isValidEmail(formattedEmail)) {
+    //   setError('Email không đúng định dạng.');
+    //   return;
+    // }
 
-    // 1. Gọi API Send OTP để kiểm tra sự tồn tại
-    const isExist = await sendEmailOTP(formattedEmail);
-
-    // Nếu lỗi API (trả về null) thì dừng
-    if (isExist === null) return;
-
-    // 2. CHIA NHÁNH LOGIC:
-    if (isExist === true) {
-      // TÀI KHOẢN ĐÃ TỒN TẠI -> Nhảy sang màn Đăng Nhập
-      console.log('🔄 Email đã tồn tại. Chuyển sang màn Đăng nhập.');
-      navigation.navigate('LoginEmail', { email: formattedEmail });
-    } else {
-      // CHƯA CÓ TÀI KHOẢN (API ĐÃ GỬI OTP) -> Nhảy sang màn Nhập OTP
-      console.log('✉️ Email mới. Chuyển sang màn Xác thực OTP.');
-      navigation.navigate('VerifyOTP', { email: formattedEmail });
-    }
+    // Bắn thẳng sang màn Login
+    console.log('🚧 Bỏ qua check định dạng và OTP, đi thẳng tới màn LoginEmail');
+    navigation.navigate('LoginEmail', { email: formattedEmail });
   };
 
   return (

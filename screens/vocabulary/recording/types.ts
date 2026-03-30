@@ -8,4 +8,5 @@ export type Question = {
   meaning?: string;
   imageUrl?: string;
   audioUrl: string;
+  vocab_id: string;
 };

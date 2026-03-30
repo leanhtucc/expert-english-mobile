@@ -1,3 +1,5 @@
+import { Feather } from '@expo/vector-icons';
+
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -8,7 +10,9 @@ import Animated, {
 import React, { useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { IconAvatar2, IconPLay, IconPlayVoice, IconSpeedSpeaking } from '@/components/icon';
+// 🌟 THÊM IMPORT NÀY
+
+import { IconAvatar2, IconSpeedSpeaking, IconVoiceVocab } from '@/components/icon';
 import { ChatMessage, HighlightedText, PracticeMode } from '@/types/speaking.types';
 
 import { ProgressBar } from './ProgressBar';
@@ -18,8 +22,10 @@ interface ChatBubbleUserProps {
   showAvatar?: boolean;
   role?: string;
   mode?: PracticeMode;
-  /** Hiển thị tô màu từng từ (Nâng cao) */
   showWordFeedback?: boolean;
+  // 🌟 THÊM 2 PROPS NÀY ĐỂ ĐIỀU KHIỂN NÚT NHẬN XÉT
+  onToggleFeedback?: () => void;
+  isFeedbackVisible?: boolean;
 }
 
 const PINK_BG = '#FFF0EF';
@@ -31,6 +37,8 @@ export const ChatBubbleUser: React.FC<ChatBubbleUserProps> = ({
   role = 'FRONTEND DEVELOPER',
   mode = 'dual-explorer',
   showWordFeedback = false,
+  onToggleFeedback,
+  isFeedbackVisible = false,
 }) => {
   const showEnglish = mode !== 'translation-hero';
   const showVietnamese = mode !== 'english-master';
@@ -57,7 +65,6 @@ export const ChatBubbleUser: React.FC<ChatBubbleUserProps> = ({
 
   const renderEnglish = () => {
     if (segments && segments.length > 0) {
-      // Một Text cha + Text con lồng nhau → chảy inline, xuống dòng đúng cả câu (tránh flex-row tách từng cụm).
       return (
         <Text className="mb-2 text-[15px] font-semibold leading-6">
           {segments.map((seg, index) => (
@@ -105,21 +112,49 @@ export const ChatBubbleUser: React.FC<ChatBubbleUserProps> = ({
             </Text>
           )}
 
-          <View className="mt-3 flex-row flex-wrap items-center gap-2">
-            <TouchableOpacity className="h-9 w-9 items-center justify-center" hitSlop={8}>
-              <IconPlayVoice width={20} height={20} color="#D32F2F" />
-            </TouchableOpacity>
-            <View className="flex-row items-center gap-0.5">
-              <IconSpeedSpeaking width={18} height={18} color="#6B7280" />
-              <Text className="text-xs font-semibold text-gray-600">0.75x</Text>
+          {/* 🌟 CHỈNH SỬA LẠI ROW NÀY: Thêm nút Xem/Ẩn nhận xét */}
+          <View className="mt-3 flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <TouchableOpacity className="h-9 w-9 items-center justify-center" hitSlop={8}>
+                <IconVoiceVocab width={20} height={20} color="#D32F2F" />
+              </TouchableOpacity>
+              <View className="flex-row items-center gap-0.5">
+                <IconSpeedSpeaking width={18} height={18} color="#6B7280" />
+                <Text className="text-xs font-semibold text-gray-600">0.75x</Text>
+              </View>
             </View>
-            <TouchableOpacity
-              className="h-8 w-8 items-center justify-center rounded-full bg-white/90"
-              hitSlop={8}
-            >
-              <IconPLay width={12} height={12} color="#D32F2F" />
-            </TouchableOpacity>
+
+            {onToggleFeedback && message.score !== undefined && (
+              <TouchableOpacity
+                onPress={onToggleFeedback}
+                activeOpacity={0.7}
+                // Thêm items-center để icon và text thẳng hàng tuyệt đối
+                className="flex-row items-center justify-center rounded-full px-3 py-1.5"
+                style={{
+                  backgroundColor: isFeedbackVisible ? '#D32F2F' : '#FCE4E4',
+                  minHeight: 32, // Đảm bảo chiều cao cố định để không bị lệch
+                }}
+              >
+                <Feather
+                  name={isFeedbackVisible ? 'chevron-up' : 'message-circle'}
+                  size={14}
+                  color={isFeedbackVisible ? '#FFFFFF' : '#D32F2F'}
+                  style={{ marginRight: 4 }} // Thay gap bằng marginRight để kiểm soát chính xác hơn
+                />
+                <Text
+                  className="text-[12px] font-bold tracking-tight"
+                  style={{
+                    color: isFeedbackVisible ? '#FFFFFF' : '#D32F2F',
+                    textAlignVertical: 'center', // Căn giữa chữ theo chiều dọc trên Android
+                    lineHeight: 16, // Khớp với size của icon
+                  }}
+                >
+                  {isFeedbackVisible ? 'Đóng' : 'Nhận xét'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
+
           {message.score !== undefined && (
             <View className="mt-3 w-full min-w-0 self-stretch" style={{ maxWidth: '100%' }}>
               <ProgressBar

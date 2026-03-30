@@ -3,15 +3,17 @@ import { Alert } from 'react-native';
 
 import { Audio } from 'expo-av';
 
+import { submitSpeakingPronunciation } from '@/api/submitSpeakingPronunciation';
+
 import { Question, SpeakingState } from './types';
 
 interface UseRecordingProps {
   questions: Question[];
   onComplete?: (results: any) => void;
+  lessonId?: string;
 }
 
-// BẢO VỆ LỖI: Gán questions mặc định là mảng rỗng [] nếu bị undefined
-export const useRecording = ({ questions = [], onComplete }: UseRecordingProps) => {
+export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecordingProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [state, setState] = useState<SpeakingState>('IDLE');
   const [score, setScore] = useState<number | null>(null);
@@ -19,7 +21,6 @@ export const useRecording = ({ questions = [], onComplete }: UseRecordingProps) 
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
-  // An toàn lấy câu hỏi hiện tại
   const currentQuestion = questions.length > 0 ? questions[currentIndex] : null;
 
   useEffect(() => {
@@ -33,34 +34,60 @@ export const useRecording = ({ questions = [], onComplete }: UseRecordingProps) 
 
   useEffect(() => {
     return () => {
-      if (recording) recording.stopAndUnloadAsync();
-      if (sound) sound.unloadAsync();
+      if (recording) recording.stopAndUnloadAsync().catch(() => {});
+      if (sound) sound.unloadAsync().catch(() => {});
     };
   }, [recording, sound]);
 
   const playSampleAudio = async () => {
-    if (state === 'RECORDING' || state === 'PROCESSING' || !currentQuestion) return;
+    // Ngăn chặn việc bấm chồng chéo nếu đang ghi âm, đang xử lý điểm, hoặc đang phát âm thanh
+    if (
+      state === 'RECORDING' ||
+      state === 'PROCESSING' ||
+      state === 'PLAYING_AUDIO' ||
+      !currentQuestion
+    )
+      return;
+
+    // LƯU LẠI TRẠNG THÁI HIỆN TẠI ĐỂ BIẾT MÀ QUAY VỀ
+    // (Nếu đang ở IDLE -> quay về IDLE. Nếu đang ở RESULT -> quay về RESULT)
+    const previousState = state;
+
+    if (!currentQuestion.audioUrl) {
+      Alert.alert('Thông báo', 'Từ vựng này chưa có âm thanh mẫu.');
+      return;
+    }
+
     try {
       setState('PLAYING_AUDIO');
+
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: currentQuestion.audioUrl },
         { shouldPlay: true }
       );
       setSound(newSound);
+
       newSound.setOnPlaybackStatusUpdate(status => {
         if (status.isLoaded && status.didJustFinish) {
-          setState('IDLE');
+          // PHỤC HỒI TRẠNG THÁI CŨ KHI PHÁT XONG
+          setState(previousState);
         }
       });
     } catch (error) {
-      console.log('Lỗi phát âm thanh', error);
-      setState('IDLE');
+      console.log('🚨 Lỗi phát âm thanh:', error);
+      setState(previousState); // Phục hồi trạng thái cũ nếu lỗi
     }
   };
 
   const startRecording = async () => {
     try {
-      if (sound) await sound.unloadAsync();
+      if (sound) await sound.unloadAsync().catch(() => {});
       await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
       const { recording: newRecording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
@@ -76,14 +103,33 @@ export const useRecording = ({ questions = [], onComplete }: UseRecordingProps) 
   const stopRecordingAndScore = async () => {
     if (!recording) return;
     setState('PROCESSING');
+
     try {
       await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
       setRecording(null);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setScore(Math.floor(Math.random() * 31) + 70);
+
+      if (uri && currentQuestion) {
+        const actualVocabId = currentQuestion.vocab_id || currentQuestion.id;
+        const actualReferenceText = currentQuestion.text;
+
+        const result = await submitSpeakingPronunciation({
+          audioUri: uri,
+          vocabId: actualVocabId,
+          referenceText: actualReferenceText,
+          lessonId: lessonId,
+        });
+
+        if (result) {
+          setScore(Math.round(result.score));
+        } else {
+          setScore(0);
+        }
+      }
       setState('RESULT');
     } catch (error) {
-      console.error('Lỗi khi dừng thu âm', error);
+      console.error('🚨 Lỗi chấm điểm:', error);
+      Alert.alert('Lỗi', 'Không thể kết nối với máy chủ chấm điểm.');
       setState('IDLE');
     }
   };
@@ -99,8 +145,7 @@ export const useRecording = ({ questions = [], onComplete }: UseRecordingProps) 
       setScore(null);
       setState('IDLE');
     } else {
-      Alert.alert('Hoàn thành', 'Bạn đã hoàn thành bài luyện tập!');
-      onComplete?.({});
+      onComplete?.(score ?? 0);
     }
   };
 

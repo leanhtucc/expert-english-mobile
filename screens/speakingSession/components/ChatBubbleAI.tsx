@@ -8,7 +8,7 @@ import Animated, {
 import React, { useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { IconAvatar1, IconPlayVoice, IconSpeedSpeaking } from '@/components/icon';
+import { IconAvatar1, IconSpeedSpeaking, IconVoiceVocab } from '@/components/icon';
 import { ChatMessage, PracticeMode } from '@/types/speaking.types';
 
 import { TypingIndicator } from './TypingIndicator';
@@ -93,7 +93,7 @@ export const ChatBubbleAI: React.FC<ChatBubbleAIProps> = ({
                 className="h-9 w-9 items-center justify-center"
                 hitSlop={8}
               >
-                <IconPlayVoice width={22} height={22} color="#D32F2F" />
+                <IconVoiceVocab width={22} height={22} color="#D32F2F" />
               </TouchableOpacity>
               <View className="flex-row items-center gap-1">
                 <IconSpeedSpeaking width={20} height={20} color="#6B7280" />

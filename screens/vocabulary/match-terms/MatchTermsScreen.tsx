@@ -1,7 +1,9 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import CheckResultButton from '../components/CheckResultButton';
+import { HintButton } from '../components/HintButton';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -13,7 +15,18 @@ interface MatchTermsScreenProps {
   onComplete?: (score: number) => void;
   onBack?: () => void;
   onClose?: () => void;
+  onOpenHint?: () => void;
   progress?: { current: number; total: number };
+}
+
+// Hàm Shuffle độc lập để đảm bảo tính ngẫu nhiên
+function shuffleArray<T>(array: T[]): T[] {
+  const newArr = [...array];
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
 }
 
 export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
@@ -22,8 +35,11 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
   onBack,
   progress: externalProgress,
   onClose,
+  onOpenHint,
 }) => {
   const insets = useSafeAreaInsets();
+
+  // Logic xử lý nối từ từ Hook
   const {
     selectedTerm,
     selectedDefinition,
@@ -36,31 +52,44 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
     handleNext,
   } = useMatchTerms({
     pairs,
-    onComplete,
   });
 
+  // Quản lý trạng thái Gợi ý & Chuyển cảnh
+  const [localWrongAttempts, setLocalWrongAttempts] = useState(0);
+  const [isHintUsed, setIsHintUsed] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const wrongReportedRef = useRef<string | null>(null);
 
-  // LOGIC: Khi user nối sai 1 cặp, bật Hint Flashcard nếu cần
+  // Theo dõi khi người dùng nối sai
   useEffect(() => {
     if (wrongPair) {
       const pairId = `${wrongPair.termId}-${wrongPair.defId}`;
       if (wrongReportedRef.current !== pairId) {
-        onComplete?.(0); // Gọi báo lỗi cho Parent
+        setLocalWrongAttempts(prev => prev + 1);
         wrongReportedRef.current = pairId;
       }
     }
-  }, [wrongPair, onComplete]);
+  }, [wrongPair]);
 
-  const shuffledDefinitions = useMemo(() => {
-    return [...pairs].sort(() => Math.random() - 0.5);
-  }, [pairs]);
+  const handlePressHint = () => {
+    setIsHintUsed(true);
+    if (onOpenHint) onOpenHint();
+  };
+
+  const handleConfirmCompletion = () => {
+    setIsTransitioning(true);
+    handleNext();
+    onComplete?.(100);
+  };
+
+  // 🌟 Tạo danh sách đã xào bài (Chỉ chạy lại khi pairs thay đổi)
+  const shuffledTerms = useMemo(() => shuffleArray(pairs), [pairs]);
+  const shuffledDefinitions = useMemo(() => shuffleArray(pairs), [pairs]);
 
   const displayProgress = externalProgress || internalProgress;
 
   return (
     <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
-      {/* ... Toàn bộ phần UI giữ nguyên ... */}
       <View className="z-10 w-full bg-white">
         <ScreenHeader
           title="Vocabulary Quiz"
@@ -84,18 +113,29 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
-          <View className="items-center px-5 py-6">
-            <Text className="mb-2 text-[22px] font-black tracking-tight text-[#1E293B]">
-              Connect the Terms
-            </Text>
-            <Text className="text-center text-[15px] text-slate-500">
-              Tap a word on the left, then tap its meaning on the right.
-            </Text>
+          {/* HEADER SECTION CÓ NÚT GỢI Ý INLINE */}
+          <View className="flex-row items-start justify-between px-5 py-6">
+            <View className="flex-1 pr-4">
+              <Text className="mb-1.5 text-[22px] font-black tracking-tight text-[#1E293B]">
+                Connect the Terms
+              </Text>
+              <Text className="text-[14.5px] leading-5 text-[#64748B]">
+                Tap a word on the left, then tap its meaning on the right.
+              </Text>
+            </View>
+
+            {localWrongAttempts >= 2 && (
+              <View className="pt-1">
+                <HintButton.Inline isUsed={isHintUsed} onPress={handlePressHint} />
+              </View>
+            )}
           </View>
 
+          {/* GRID NỐI TỪ */}
           <View className="w-full flex-row px-4">
+            {/* CỘT TRÁI - TERMS */}
             <View className="flex-1 pr-2">
-              {pairs.map(item => (
+              {shuffledTerms.map(item => (
                 <TermItem
                   key={`term-${item.id}`}
                   text={item.term}
@@ -113,6 +153,7 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
               ))}
             </View>
 
+            {/* CỘT PHẢI - DEFINITIONS */}
             <View className="flex-1 pl-2">
               {shuffledDefinitions.map(item => (
                 <TermItem
@@ -135,14 +176,28 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
         </ScrollView>
       </View>
 
-      <View className="absolute bottom-0 left-0 right-0 z-40 w-full">
-        <View
-          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-          className="w-full border-t border-slate-200 bg-white px-5 pt-4 shadow-[0_-4px_6px_rgba(0,0,0,0.05)]"
-        >
-          <PrimaryButton label="Submit Answer" onPress={handleNext} disabled={!isComplete} />
+      {/* FOOTER - NÚT SUBMIT XÁM KHI CHƯA HOÀN THÀNH */}
+      {!isComplete && (
+        <View className="absolute bottom-5 left-0 right-0 z-40 w-full">
+          <View
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            className="w-full border-t border-slate-200 bg-white px-5 pt-4"
+          >
+            <PrimaryButton label="Submit Answer" onPress={() => {}} disabled={true} />
+          </View>
         </View>
-      </View>
+      )}
+
+      {/* MODAL KẾT QUẢ KHI THÀNH CÔNG */}
+      {isComplete && !isTransitioning && (
+        <CheckResultButton
+          status="correct"
+          text="Next Question"
+          description="Great job! You matched all the terms correctly."
+          proTip="Matching terms helps strengthen the connection between word forms and their meanings in long-term memory."
+          onPress={handleConfirmCompletion}
+        />
+      )}
     </SafeAreaView>
   );
 };

@@ -15,7 +15,7 @@ interface MultipleChoiceScreenProps {
   onComplete?: (score: number, userPick?: string) => void;
   onBack?: () => void;
   onClose?: () => void;
-  onOpenHint?: () => void; // 🌟 Thêm Props này để Parent bật Bottom Sheet Flashcard
+  onOpenHint?: () => void;
   progress?: { current: number; total: number };
 }
 
@@ -23,8 +23,8 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
   questions,
   onComplete,
   onBack,
-  onClose,
   onOpenHint,
+  onClose,
   progress: externalProgress,
 }) => {
   const insets = useSafeAreaInsets();
@@ -42,20 +42,29 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
     onComplete: onComplete ? (score: number) => onComplete(score, '') : undefined,
   });
 
-  // 🌟 STATE QUẢN LÝ LỖI SAI CỤC BỘ (Để hiện nút Gợi ý)
   const [localWrongAttempts, setLocalWrongAttempts] = useState(0);
+  const [isHintUsed, setIsHintUsed] = useState(false);
+
+  // 🌟 STATE CHỐNG NHÁY (ANTI-GLITCH)
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const wrongReportedRef = useRef(false);
 
-  // LOGIC: KHI TRẢ LỜI SAI -> TĂNG LỖI -> CHỜ 1.5s -> RESET ĐỂ CHỌN LẠI
+  // 🌟 RESET TẤT CẢ KHI CÓ CÂU HỎI MỚI VÀO
+  useEffect(() => {
+    setLocalWrongAttempts(0);
+    setIsHintUsed(false);
+    setIsTransitioning(false);
+    wrongReportedRef.current = false;
+  }, [currentQuestion?.question]);
+
+  // LOGIC TRẢ LỜI SAI
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
 
-    if (isAnswered && !isCorrect) {
+    if (isAnswered && !isCorrect && !isTransitioning) {
       if (!wrongReportedRef.current) {
-        // Tăng biến đếm số lần chọn sai
         setLocalWrongAttempts(prev => prev + 1);
-
-        onComplete?.(0, selectedAnswer || ''); // Báo cho Parent biết là sai
+        onComplete?.(0, selectedAnswer || '');
         wrongReportedRef.current = true;
       }
 
@@ -68,10 +77,24 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isAnswered, isCorrect, resetAnswer, onComplete, selectedAnswer]);
+  }, [isAnswered, isCorrect, resetAnswer, onComplete, selectedAnswer, isTransitioning]);
+
+  const handlePressHint = () => {
+    setIsHintUsed(true);
+    if (onOpenHint) onOpenHint();
+  };
+
+  // 🌟 HÀM KHI BẤM NEXT QUESTION (Giấu đi UI hiện tại ngay lập tức)
+  const handlePressNextQuestion = () => {
+    setIsTransitioning(true);
+    handleNext();
+  };
 
   if (!currentQuestion) return null;
   const displayProgress = externalProgress || internalProgress;
+
+  // Nếu đang chuyển cảnh (vừa ấn Next xong), giả vờ như chưa trả lời để UI câu mới không bị nháy xanh
+  const displayAsAnswered = isAnswered && !isTransitioning;
 
   return (
     <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
@@ -103,8 +126,9 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
           <View className="mb-8 mt-2">
             <QuestionCard
               question={currentQuestion.question}
-              showHintButton={localWrongAttempts >= 2} // 🌟 Hiện nút khi sai >= 2 lần
-              onPressHint={onOpenHint} // 🌟 Gọi hàm của Parent để mở Bottom Sheet Flashcard
+              showHintButton={localWrongAttempts >= 2}
+              isHintUsed={isHintUsed}
+              onPressHint={handlePressHint}
             />
           </View>
 
@@ -115,7 +139,7 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
                 label={option}
                 isSelected={selectedAnswer === option}
                 isCorrect={option === currentQuestion.correctAnswer}
-                isAnswered={isAnswered}
+                isAnswered={displayAsAnswered} // 🌟 Sử dụng trạng thái chống nháy
                 onPress={() => handleSelectAnswer(option)}
               />
             ))}
@@ -123,8 +147,9 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
         </ScrollView>
       </View>
 
-      {(!isAnswered || (isAnswered && !isCorrect)) && (
-        <View className="absolute bottom-0 left-0 right-0 z-40 w-full">
+      {/* HIỂN THỊ NÚT SUBMIT NẾU CHƯA TRẢ LỜI HOẶC TRẢ LỜI SAI */}
+      {(!displayAsAnswered || (displayAsAnswered && !isCorrect)) && (
+        <View className="absolute bottom-5 left-0 right-0 z-40 w-full">
           <View
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}
             className="w-full border-t border-slate-200 bg-white px-5 pt-4"
@@ -132,14 +157,19 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
             <PrimaryButton
               label="Submit Answer"
               onPress={handleNext}
-              disabled={!selectedAnswer || (isAnswered && !isCorrect)}
+              disabled={!selectedAnswer || (displayAsAnswered && !isCorrect)}
             />
           </View>
         </View>
       )}
 
-      {isAnswered && isCorrect && (
-        <CheckResultButton status="correct" text={'Next Question'} onPress={handleNext} />
+      {/* HIỂN THỊ NÚT NEXT NẾU TRẢ LỜI ĐÚNG */}
+      {displayAsAnswered && isCorrect && (
+        <CheckResultButton
+          status="correct"
+          text={'Next Question'}
+          onPress={handlePressNextQuestion} // 🌟 Gọi hàm chuyển cảnh tức thời
+        />
       )}
     </SafeAreaView>
   );

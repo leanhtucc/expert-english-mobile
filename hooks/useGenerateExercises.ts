@@ -1,144 +1,148 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { apiConfig } from '@/api';
 import { learningApi } from '@/api/endpoints/learning.api';
 
-// =========================================================
-// HÀM CHUYỂN ĐỔI DATA TỪ BACKEND SANG FORMAT CỦA UI
-// =========================================================
-const parseExercisesToUI = (backendExercises: any[]) => {
-  const formattedList: any[] = [];
-
-  backendExercises.forEach(ex => {
-    const content = ex.content;
-    const typeCode = ex.type_info?.code;
-
-    if (!content || !typeCode) return;
-
-    // 1. DẠNG NỐI TỪ (MATCHING)
-    if (typeCode === 'matching' && content.left && content.right) {
-      const pairs = content.left.map((leftItem: any) => {
-        const rightItem = content.right.find((r: any) => r.id === leftItem.id);
-        return {
-          id: leftItem.id,
-          term: leftItem.text,
-          definition: rightItem ? rightItem.text : '',
-        };
-      });
-
-      formattedList.push({
-        _id: ex._id,
-        type: 'matching',
-        pairs: pairs,
-      });
-    }
-
-    // 2. DẠNG ĐIỀN TỪ (FILL IN THE BLANK)
-    else if (typeCode === 'fill_in_blank' && content.sentences) {
-      const dynamicOptions = content.sentences.map((s: any) => s.answers[0]);
-
-      content.sentences.forEach((item: any, index: number) => {
-        const [before, after] = item.sentence.split('[BLANK]');
-        formattedList.push({
-          _id: `${ex._id}_${index}`,
-          original_exercise_id: ex._id,
-          type: 'fill_in_blank',
-          questionData: {
-            beforeBlank: before?.trim() || '',
-            afterBlank: after?.trim() || '',
-            correctAnswer: item.answers[0],
-            options: [...dynamicOptions].sort(() => Math.random() - 0.5),
-            hint: 'Choose the best word to complete the sentence.',
-          },
-        });
-      });
-    }
-
-    // 3. DẠNG TRẮC NGHIỆM PHÁT ÂM (PRONUNCIATION / MULTIPLE CHOICE)
-    else if (typeCode === 'pronunciation' && content.questions) {
-      content.questions.forEach((item: any, index: number) => {
-        formattedList.push({
-          _id: `${ex._id}_${index}`,
-          original_exercise_id: ex._id,
-          type: 'multiple_choice',
-          questionData: {
-            word: item.correctAnswer,
-            question: item.question,
-            options: item.options,
-            correctAnswer: item.correctAnswer,
-            phonetic: item.phonetic,
-          },
-        });
-      });
-    }
-
-    // 4. DẠNG LUYỆN NÓI (SPEAKING)
-    else if ((typeCode === 'speaking_lv1' || typeCode === 'speaking') && content.tasks) {
-      content.tasks.forEach((task: any, index: number) => {
-        formattedList.push({
-          _id: `${ex._id}_${index}`,
-          original_exercise_id: ex._id,
-          type: 'speaking',
-          questionData: {
-            type: content.mode || 'word',
-            text: task.reference_text,
-            phonetic: task.phonetic || '',
-            meaning: 'Tap the microphone and say the word above clearly.',
-            correctAnswer: task.reference_text,
-            imageUrl: null,
-          },
-        });
-      });
-    }
-  });
-
-  return formattedList;
+// ================= HELPER =================
+const resolveAudioUrl = (url?: string | null) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${apiConfig.baseURL}${url}`;
 };
 
-interface UseGenerateExercisesProps {
+export const useGenerateExercises = ({
+  lessonId,
+  enabled = false,
+}: {
   lessonId: string;
   enabled?: boolean;
-}
-
-export const useGenerateExercises = ({ enabled = false }: UseGenerateExercisesProps) => {
+}) => {
   const [exercises, setExercises] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
   const isFetchingRef = useRef(false);
 
   const fetchExercises = useCallback(async () => {
-    if (!enabled || isFetchingRef.current) return;
+    if (!enabled || isFetchingRef.current || !lessonId) return;
 
     isFetchingRef.current = true;
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log('⏳ [USE_GENERATE_EXERCISES] Đang lấy toàn bộ danh sách bài tập...');
+      console.log(`\n🚀 [EXERCISE] Bắt đầu lấy bài tập cho Lesson: ${lessonId}`);
 
-      // 1. Lấy toàn bộ Data từ Backend (Giới hạn 1000 bài để đảm bảo không sót)
+      // 🌟 ĐÃ THÊM LẠI CONDITION LESSON_ID Ở ĐÂY 🌟
       const params = {
-        limit: 1000,
+        limit: 100,
+        condition: JSON.stringify({ lesson_id: lessonId }), // Lọc bài tập theo đúng bài đang học
       };
 
-      const detailRes = await learningApi.getExercisesPage(params);
+      // 1. Thử lấy danh sách bài tập lần đầu
+      let res = await learningApi.getExercisesPage(params);
+      let rawList = res.data?.data?.result || [];
+      console.log(`📥 [EXERCISE] Tìm thấy: ${rawList.length} câu hỏi cho bài này.`);
 
-      const detailData = detailRes.data as any;
-      const rawExercises = detailData?.data?.result || detailData?.result || [];
+      // 2. NẾU CHƯA CÓ, GỌI API TẠO MỚI VÀ CHỜ 2 GIÂY
+      if (rawList.length === 0) {
+        console.log('⚠️ [EXERCISE] Bài này chưa có bài tập. Đang yêu cầu Server tạo mới...');
+        try {
+          await learningApi.generateLesson(lessonId);
+          console.log('⏳ [EXERCISE] Đã gửi lệnh tạo. Đợi Server xử lý 2 giây...');
 
-      console.log(
-        `✅ [USE_GENERATE_EXERCISES] Đã lấy thành công ${rawExercises.length} bài tập (Exercise Objects) gốc từ Server.`
+          await new Promise(resolve => setTimeout(resolve, 2000));
+
+          // Lấy lại sau khi tạo
+          res = await learningApi.getExercisesPage(params);
+          rawList = res.data?.data?.result || [];
+          console.log(`✅ [EXERCISE] Sau khi tạo - Tìm thấy: ${rawList.length} câu hỏi.`);
+        } catch (genErr) {
+          console.error('🚨 [EXERCISE] Lỗi khi bảo Server tạo bài tập:', genErr);
+        }
+      }
+
+      if (rawList.length === 0) {
+        console.log('❌ [EXERCISE] Vẫn trả về 0 câu hỏi. Hủy load.');
+        setExercises([]);
+        return;
+      }
+
+      // 3. Map dữ liệu chi tiết (Giữ nguyên logic của bạn)
+      const formattedNestedList = await Promise.all(
+        rawList.map(async (ex: any) => {
+          const typeCode = ex.type_info?.code;
+          const content = ex.content;
+          const results: any[] = [];
+
+          if (typeCode === 'multiple_choice' || typeCode === 'pronunciation') {
+            content.questions?.forEach((q: any, i: number) => {
+              results.push({
+                _id: `${ex._id}_${i}`,
+                type: 'multiple_choice',
+                questionData: { ...q, id: `${ex._id}_${i}` },
+              });
+            });
+          } else if (typeCode === 'matching') {
+            const pairs = content.left?.map((l: any) => ({
+              id: l.id,
+              term: l.text,
+              definition: content.right?.find((r: any) => r.id === l.id)?.text || '',
+            }));
+            results.push({ _id: ex._id, type: 'matching', pairs });
+          } else if (typeCode === 'fill_in_blank') {
+            content.sentences?.forEach((s: any, i: number) => {
+              const [before, after] = s.sentence.split('[BLANK]');
+              results.push({
+                _id: `${ex._id}_${i}`,
+                type: 'fill_in_blank',
+                questionData: {
+                  beforeBlank: before?.trim(),
+                  afterBlank: after?.trim(),
+                  correctAnswer: s.answers[0],
+                  options: content.sentences
+                    .map((opt: any) => opt.answers[0])
+                    .sort(() => Math.random() - 0.5),
+                },
+              });
+            });
+          } else if (typeCode === 'speaking_lv1' || typeCode === 'speaking') {
+            const vocabId = ex.vocab_id || content?.tasks?.[0]?.vocab_id;
+            if (vocabId) {
+              try {
+                const vRes = await learningApi.getVocabularyDetail(vocabId);
+                const rawPayload = vRes.data as any;
+                const vData = rawPayload?.data?.data || rawPayload?.data || rawPayload;
+                const rawAudioUrl = vData?.audio_url || vData?.audioUrl;
+                const finalAudioUrl = resolveAudioUrl(rawAudioUrl);
+
+                results.push({
+                  _id: ex._id,
+                  type: 'speaking',
+                  questionData: {
+                    vocab_id: vocabId,
+                    type: content.mode || 'word',
+                    text: vData?.word || content.tasks?.[0]?.reference_text,
+                    phonetic: vData?.phonetic || '',
+                    meaning: vData?.definition_vi || '',
+                    audioUrl: finalAudioUrl,
+                    imageUrl: vData?.image_url || vData?.imageUrl || null,
+                  },
+                });
+              } catch (err) {
+                console.error(`🚨 [SPEAKING] Lỗi gọi API Vocab ${vocabId}:`, err);
+              }
+            }
+          }
+          return results;
+        })
       );
 
-      // 2. Bóc tách data thành mảng các câu hỏi nhỏ riêng lẻ
-      const allFormattedData = parseExercisesToUI(rawExercises);
+      const formattedList = formattedNestedList.flat();
 
-      // 🌟 3. LOGIC "BỐC THĂM CHIA RỔ"
-      // Phân loại các câu hỏi vào từng rổ tương ứng với dạng bài
-      const mcqs = allFormattedData.filter(ex => ex.type === 'multiple_choice');
-      const matchings = allFormattedData.filter(ex => ex.type === 'matching');
-      const fillBlanks = allFormattedData.filter(ex => ex.type === 'fill_in_blank');
-      const speakings = allFormattedData.filter(ex => ex.type === 'speaking');
+      const mcqs = formattedList.filter(ex => ex.type === 'multiple_choice');
+      const matchings = formattedList.filter(ex => ex.type === 'matching');
+      const fillBlanks = formattedList.filter(ex => ex.type === 'fill_in_blank');
+      const speakings = formattedList.filter(ex => ex.type === 'speaking');
 
       const finalSession = [
         ...mcqs.slice(0, 5),
@@ -147,24 +151,19 @@ export const useGenerateExercises = ({ enabled = false }: UseGenerateExercisesPr
         ...speakings.slice(0, 5),
       ];
 
+      console.log(`✅ [EXERCISE] Sắp xếp xong cho bài học! Đưa ${finalSession.length} câu vào UI.`);
       setExercises(finalSession);
-
-      console.log(
-        `🎉 [USE_GENERATE_EXERCISES] Đã lọc ra ${finalSession.length} câu hỏi CHUẨN CHỈ đưa lên UI.`
-      );
     } catch (err: any) {
-      console.error('🚨 [USE_GENERATE_EXERCISES] LỖI:', err?.response?.data || err.message);
-      setError(err?.message || 'Có lỗi xảy ra khi tải bài tập.');
+      console.error('🚨 [EXERCISE] Lỗi tổng:', err.response?.data || err.message);
+      setError(err.message);
     } finally {
       setIsLoading(false);
       isFetchingRef.current = false;
     }
-  }, [enabled]);
+  }, [lessonId, enabled]);
 
   useEffect(() => {
-    if (enabled && exercises.length === 0) {
-      fetchExercises();
-    }
+    if (enabled && exercises.length === 0) fetchExercises();
   }, [enabled, exercises.length, fetchExercises]);
 
   return { exercises, isLoading, error, refetch: fetchExercises };

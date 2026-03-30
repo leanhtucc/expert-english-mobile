@@ -1,6 +1,6 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,7 +9,6 @@ import { Iconscoring } from '@/components/icon';
 import { ProgressBar } from '../components/ProgressBar';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { MicrophoneButton } from './MicrophoneButton';
-import { MOCK_QUESTIONS } from './constants';
 import { Question } from './types';
 import { useRecording } from './useRecording';
 
@@ -31,8 +30,8 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
   progress: externalProgress,
 }) => {
   const insets = useSafeAreaInsets();
-  const safeQuestions = questions || route?.params?.questions || MOCK_QUESTIONS;
-
+  const safeQuestions = questions || route?.params?.questions || [];
+  const lessonId = route?.params?.lessonId;
   const {
     state,
     currentQuestion,
@@ -43,22 +42,7 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
     startRecording,
     stopRecordingAndScore,
     handleRetry,
-  } = useRecording({ questions: safeQuestions, onComplete });
-
-  const wrongReportedRef = useRef(false);
-
-  // LOGIC: Nếu thu âm trả về điểm thấp (Ví dụ < 70) -> Báo lỗi để kích hoạt Hint
-  useEffect(() => {
-    if (state === 'RESULT' && score !== null && score < 70) {
-      if (!wrongReportedRef.current) {
-        onComplete?.(0); // Gửi cờ sai
-        wrongReportedRef.current = true;
-      }
-    } else if (state === 'IDLE' || state === 'RECORDING') {
-      // Reset khi bấm thu âm lại
-      wrongReportedRef.current = false;
-    }
-  }, [state, score, onComplete]);
+  } = useRecording({ questions: safeQuestions, onComplete, lessonId });
 
   const displayProgress = externalProgress || {
     current: currentIndex + 1,
@@ -69,7 +53,6 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
 
   return (
     <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['left', 'right', 'top']}>
-      {/* ... Giữ nguyên toàn bộ UI ... */}
       <View className="z-10 w-full bg-white">
         <ScreenHeader
           title="Speaking Practice"
@@ -142,7 +125,8 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
           style={{ paddingBottom: Math.max(insets.bottom, 4) }}
           className="w-full bg-[#F8FAFC] px-5 pt-2"
         >
-          {state !== 'RESULT' ? (
+          {/* LƯU Ý Ở ĐÂY: Quyết định dựa vào score, không dựa vào state */}
+          {score === null ? (
             <MicrophoneButton
               state={state}
               onStart={startRecording}
@@ -160,7 +144,7 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
 
               <TouchableOpacity
                 onPress={() => {
-                  onComplete?.(score || 100); // 🌟 Bấm NEXT thì pass luôn điểm số hiện tại về
+                  onComplete?.(score ?? 0);
                 }}
                 className="flex-1 flex-row items-center justify-center rounded-full bg-[#C8102E] py-[18px]"
                 style={{
