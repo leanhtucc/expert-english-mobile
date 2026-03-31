@@ -9,12 +9,23 @@ import { ChatBubbleUser } from './ChatBubbleUser';
 interface ScenarioCardProps {
   scenario: ScenarioPreview;
   mode: PracticeMode;
+  showWordFeedback?: boolean;
+  showUserBubble?: boolean;
+  // 🌟 THÊM PROPS NÀY
+  onToggleFeedback?: () => void;
+  isFeedbackVisible?: boolean;
 }
 
-export const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario, mode }) => {
+export const ScenarioCard: React.FC<ScenarioCardProps> = ({
+  scenario,
+  mode,
+  showWordFeedback = false,
+  showUserBubble = true,
+  onToggleFeedback,
+  isFeedbackVisible = false,
+}) => {
   return (
     <View>
-      {/* AI Question */}
       <ChatBubbleAI
         message={{
           id: '1',
@@ -22,26 +33,32 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario, mode }) =>
           text: scenario.question,
           translation: scenario.translation,
           timestamp: Date.now(),
-          score: scenario.progress,
         }}
         role={scenario.role}
         showAvatar={true}
         mode={mode}
       />
 
-      {/* User Example Answer */}
-      <ChatBubbleUser
-        message={{
-          id: '2',
-          role: 'user',
-          text: scenario.exampleAnswer,
-          translation: scenario.exampleAnswerTranslation,
-          timestamp: Date.now(),
-        }}
-        role="YOUR RESPONSE"
-        showAvatar={true}
-        mode={mode}
-      />
+      {showUserBubble ? (
+        <ChatBubbleUser
+          message={{
+            id: '2',
+            role: 'user',
+            text: scenario.exampleAnswer,
+            translation: scenario.exampleAnswerTranslation,
+            timestamp: Date.now(),
+            score: scenario.score,
+            pronunciationSegments: scenario.pronunciationSegments,
+          }}
+          role="BẠN"
+          showAvatar={true}
+          mode={mode}
+          showWordFeedback={showWordFeedback}
+          // 🌟 TRUYỀN XUỐNG DƯỚI
+          onToggleFeedback={onToggleFeedback}
+          isFeedbackVisible={isFeedbackVisible}
+        />
+      ) : null}
     </View>
   );
 };

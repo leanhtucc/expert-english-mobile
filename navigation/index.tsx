@@ -1,31 +1,46 @@
+import React, { useMemo } from 'react';
+
 import {
   NavigationContainer,
   NavigatorScreenParams,
   createNavigationContainerRef,
 } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { TransitionPresets, createStackNavigator } from '@react-navigation/stack';
 
-import CreatePasswordScreen from '@/screens/auth/CreatePassword';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { CreatePasswordScreen } from '@/screens/auth/CreatePassword';
 import { EnterEmailScreen } from '@/screens/auth/enterEmail';
 import LoginEmailScreen from '@/screens/auth/loginEmail';
 import { VerifyOTPScreen } from '@/screens/auth/verifyOTP';
+import DetailedDayScreen from '@/screens/home/DetailLessionScreen';
+import VocabularyListScreen from '@/screens/home/VocabularyList';
 import { OnboardingScreen } from '@/screens/onboarding';
-import { ChangePasswordScreen, PersonalInformationScreen } from '@/screens/profile';
+import RenewalScreen from '@/screens/onboarding/RenewalScreen';
+import {
+  CertificatesScreen,
+  ChangePasswordScreen,
+  PersonalInformationScreen,
+} from '@/screens/profile';
+import { ProgressAnalysisScreen } from '@/screens/progressForUser/screens/ProgressAnalysisScreen';
+import { StreakCompleteScreen } from '@/screens/progressForUser/screens/StreakCompleteScreen';
+import { WeekUnlockScreen } from '@/screens/progressForUser/screens/WeekUnlockScreen';
 import { AIFeedbackScreen, PracticeSetupScreen } from '@/screens/speakingSession';
 import { AIRoadmapLoadingScreen, LearningPathScreen, SurveyScreen } from '@/screens/survey';
+import { RecordingScreen } from '@/screens/vocabulary/recording/RecordingScreen';
+import VocabularyLearning from '@/screens/vocabulary/vocabularyLearning';
 
 import InitialNavigator from './InitialNavigator';
+import { buildNavigationTheme } from './navigationTheme';
 import TabNavigator from './tab-navigator';
 
-// Tab Navigator Param List
+// ... (Giữ nguyên phần export type param list và các hàm navigate, goBack, resetRoot) ...
 export type TabNavigatorParamList = {
   Home: undefined;
   Explore: undefined;
 };
 
-// Root Stack Param List
 export type RootStackParamList = {
-  // Onboarding
   Onboarding: undefined;
   Start: { step?: number } | undefined;
   Login: undefined;
@@ -44,10 +59,19 @@ export type RootStackParamList = {
   PremiumInterstitial: undefined;
   TabNavigator: NavigatorScreenParams<TabNavigatorParamList> | { screen?: string };
   Modal: undefined;
-  PracticeSetup: undefined;
+  PracticeSetup: { lessonId?: string } | undefined;
   PersonalInformationScreen: undefined;
   ChangePasswordScreen: undefined;
+  VocabularyListScreen: undefined;
+  DayDetailScreen: { dayId: string };
+  StreakComplete: undefined;
+  ProgressAnalysis: undefined;
+  WeekUnlock: undefined;
+  Certificates: undefined;
+  RenewalScreen: undefined;
+  RecordingScreen: undefined;
   AIFeedback: { userAnswer: string; mode: string };
+  VocabularyLearning: undefined;
 };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -77,89 +101,145 @@ export function resetRoot(routeName: keyof RootStackParamList) {
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function RootStack() {
+  const colorScheme = useColorScheme() ?? 'light';
+  const navTheme = useMemo(() => buildNavigationTheme(colorScheme), [colorScheme]);
+  const bg = Colors[colorScheme].background;
+
   return (
-    <NavigationContainer ref={navigationRef} initialState={undefined}>
+    <NavigationContainer ref={navigationRef} initialState={undefined} theme={navTheme}>
       <Stack.Navigator
-        initialRouteName="Onboarding"
+        initialRouteName="InitialNavigator"
         screenOptions={{
-          gestureEnabled: true,
-          gestureDirection: 'horizontal',
+          headerShown: false,
+          gestureEnabled: false,
+          cardStyle: { backgroundColor: bg },
         }}
       >
         <Stack.Screen
           name="Onboarding"
           component={OnboardingScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="EnterEmail"
           component={EnterEmailScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="VerifyOTP"
           component={VerifyOTPScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="CreatePassword"
           component={CreatePasswordScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="LoginEmail"
           component={LoginEmailScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
-        <Stack.Screen name="Survey" component={SurveyScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="Survey"
+          component={SurveyScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
         <Stack.Screen
           name="LearningPath"
           component={LearningPathScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="AIRoadmapLoading"
           component={AIRoadmapLoadingScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
-
         <Stack.Screen
           name="InitialNavigator"
           component={InitialNavigator}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
-
-        {/* Speaking Practice Screens */}
         <Stack.Screen
           name="PracticeSetup"
           component={PracticeSetupScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="PersonalInformationScreen"
           component={PersonalInformationScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
           name="ChangePasswordScreen"
           component={ChangePasswordScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
-        {/* <Stack.Screen
-          name="SpeakingConversation"
-          component={SpeakingConversationScreen}
-          options={{ headerShown: false }}
-        /> */}
         <Stack.Screen
           name="AIFeedback"
           component={AIFeedbackScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
-          name="TabNavigator"
-          component={TabNavigator}
-          options={{ headerShown: false }}
+          name="VocabularyLearning"
+          component={VocabularyLearning}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
+        <Stack.Screen
+          name="DayDetailScreen"
+          component={DetailedDayScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="VocabularyListScreen"
+          component={VocabularyListScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="StreakComplete"
+          component={StreakCompleteScreen}
+          options={{
+            ...TransitionPresets.FadeFromBottomAndroid,
+          }}
+        />
+        <Stack.Screen
+          name="ProgressAnalysis"
+          component={ProgressAnalysisScreen}
+          options={{
+            ...TransitionPresets.SlideFromRightIOS,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+          }}
+        />
+        <Stack.Screen
+          name="RecordingScreen"
+          component={RecordingScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="WeekUnlock"
+          component={WeekUnlockScreen}
+          options={{
+            ...TransitionPresets.SlideFromRightIOS,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+          }}
+        />
+        <Stack.Screen
+          name="Certificates"
+          component={CertificatesScreen}
+          options={{
+            ...TransitionPresets.SlideFromRightIOS,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+          }}
+        />
+        <Stack.Screen
+          name="RenewalScreen"
+          component={RenewalScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen name="TabNavigator" component={TabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );

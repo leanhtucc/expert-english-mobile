@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import { ImageMascoForHomesvg } from '@/components/icon';
+import { ImageMascoForHomes } from '@/components/icon';
 
 interface HeroGoalCardProps {
   level?: string;
@@ -11,8 +11,8 @@ interface HeroGoalCardProps {
 
 export const HeroGoalCard: React.FC<HeroGoalCardProps> = ({
   level = 'LEVEL B2',
-  title = 'Ready to crush your goals?',
-  subtitle = 'You have 3 lessons scheduled for today.',
+  title = 'Cùng bắt đầu học tiếng Anh ngay hôm nay!',
+  subtitle = 'Bạn có 3 bài học cho hôm nay.',
 }) => {
   return (
     <View className="mx-5 rounded-3xl bg-[#C8102E]">
@@ -33,7 +33,7 @@ export const HeroGoalCard: React.FC<HeroGoalCardProps> = ({
           className="overflow-hidden rounded-tl-[20px] rounded-br-3xl"
           style={{ marginRight: -20 }}
         >
-          <ImageMascoForHomesvg width={160} height={180} />
+          <ImageMascoForHomes width={160} height={180} />
         </View>
       </View>
     </View>

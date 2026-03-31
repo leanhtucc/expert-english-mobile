@@ -31,6 +31,9 @@ export const VerifyOTPScreen: React.FC = () => {
   const [otp, setOtp] = useState('');
 
   const handleOTPComplete = async (otpValue: string) => {
+    // THÊM DÒNG NÀY ĐỂ CHẶN DOUBLE SUBMIT
+    if (loading) return;
+
     // Gọi verify qua Hook
     const verificationToken = await verifyEmailOTP(email, otpValue);
 

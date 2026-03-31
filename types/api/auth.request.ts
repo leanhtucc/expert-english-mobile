@@ -30,12 +30,25 @@ export interface LoginWithGoogleRequest {
   idToken: string;
 }
 
-/**
- * Đăng ký sau khi verify OTP
- * Sử dụng verificationToken trả về từ /auth/otp/login
- */
 export interface RegisterRequest {
-  email: string;
+  platform: 'Web' | 'Mobile';
   password: string;
-  verificationToken: string;
+  username: string;
+  email: string;
+  firstname?: string;
+  lastname?: string;
+}
+export interface UpdateProfileRequest {
+  fullname?: string;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  dob?: string;
+  gender?: string;
+  avatar?: string;
+  avatarUrl?: string;
+}
+export interface ExchangePasswordRequest {
+  oldPass: string;
+  newPass: string;
 }

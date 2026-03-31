@@ -21,12 +21,12 @@ import { AuthHeader, EmailIcon, EmailInput, LoginButton, PasswordInput } from '.
 type LoginEmailScreenNavigationProp = StackNavigationProp<any>;
 type LoginEmailScreenRouteProp = RouteProp<any, any>;
 
-export const LoginEmailScreen: React.FC = () => {
+const LoginEmailScreen: React.FC = () => {
   const navigation = useNavigation<LoginEmailScreenNavigationProp>();
   const route = useRoute<LoginEmailScreenRouteProp>();
   const { email: initialEmail = '' } = route.params || {};
 
-  const { loading, loginWithEmail } = useAuth(); // Sử dụng Hook
+  const { loading, loginWithEmail, fetchUserInfo } = useAuth();
 
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
@@ -55,14 +55,16 @@ export const LoginEmailScreen: React.FC = () => {
 
     if (hasError) return;
 
-    // Gọi API Login: Lúc này email sẽ là "admin", password là "admin"
     const isSuccess = await loginWithEmail(email, password);
 
     if (isSuccess) {
+      // Vẫn lấy thông tin user để lưu vào Auth Context/State
+      await fetchUserInfo();
+
+      // Bỏ logic check isSurvey, ĐI THẲNG VÀO MÀN SURVEY
       navigation.navigate('Survey', {});
     }
   };
-
   const isFormValid = email.trim() !== '' && password.trim() !== '';
 
   return (

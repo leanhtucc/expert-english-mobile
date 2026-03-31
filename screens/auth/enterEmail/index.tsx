@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -22,30 +22,42 @@ type EnterEmailScreenNavigationProp = StackNavigationProp<any>;
 
 export const EnterEmailScreen: React.FC = () => {
   const navigation = useNavigation<EnterEmailScreenNavigationProp>();
-  const { loading } = useAuth(); // Sử dụng Hook
+  const { loading } = useAuth(); // Đã ẩn sendEmailOTP vì không dùng tới
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
-  // // Validate email format
-  // const isValidEmail = (email: string): boolean => {
+  // ==========================================
+  // 🚧 TẠM THỜI BỎ QUA CHECK FORMAT EMAIL 🚧
+  // ==========================================
+  // const isValidEmail = (emailStr: string): boolean => {
   //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //   return emailRegex.test(email);
+  //   return emailRegex.test(emailStr);
   // };
 
   // Handle submit
   const handleSubmit = async () => {
     setError('');
 
-    if (!email.trim()) {
-      setError('Vui lòng nhập email hoặc tài khoản');
+    const formattedEmail = email.trim();
+
+    // Vẫn giữ lại check rỗng để tránh user bấm nút khi chưa nhập gì
+    if (!formattedEmail) {
+      setError('Vui lòng nhập thông tin.');
       return;
     }
 
-    // ĐI TẮT: Bỏ qua gọi API sendEmailOTP, nhảy thẳng tới màn hình Login
-    // Leader bảo dùng admin/admin nên ta truyền chuỗi vừa nhập sang màn sau
-    navigation.navigate('LoginEmail', { email: email.trim() });
+    // 🚧 TẠM THỜI BỎ QUA LỖI SAI ĐỊNH DẠNG 🚧
+    // if (!isValidEmail(formattedEmail)) {
+    //   setError('Email không đúng định dạng.');
+    //   return;
+    // }
+
+    // Bắn thẳng sang màn Login
+    console.log('🚧 Bỏ qua check định dạng và OTP, đi thẳng tới màn LoginEmail');
+    navigation.navigate('LoginEmail', { email: formattedEmail });
   };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
@@ -71,7 +83,7 @@ export const EnterEmailScreen: React.FC = () => {
               <LoginIcon />
               <LoginHeader
                 title="Your Email"
-                subtitle="Please enter your email address to recover your password."
+                subtitle="Please enter your email address to continue."
               />
               <EmailInput value={email} onChangeText={setEmail} error={error} />
               <SubmitButton onPress={handleSubmit} disabled={!email.trim()} loading={loading} />

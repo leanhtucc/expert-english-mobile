@@ -8,16 +8,19 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
-      "env": {
-        "APP_ENV": "development"
-      },
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleDebug"
+      }
+    },
+    "develop-apk": {
+      "distribution": "internal",
+      "channel": "development",
+      "android": {
+        "buildType": "apk"
       },
-      "ios": {
-        "buildConfiguration": "Debug",
-        "simulator": true
+      "env": {
+        "APP_ENV": "development"
       }
     },
     "develop-apk": {
@@ -36,31 +39,41 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
-      "env": {
-        "APP_ENV": "staging",
-        "EXPO_PUBLIC_API_URL": "https://prolingo-be.iuptit.com",
-        "EXPO_PUBLIC_ENVIRONMENT": "staging"
-      },
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "APP_ENV": "staging"
+      }
+    },
+    "production-apk": {
+      "distribution": "internal",
+      "channel": "production",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "APP_ENV": "production"
+      }
+    },
+    "production-release": {
+      "distribution": "store",
+      "channel": "production",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "APP_ENV": "production"
       }
     },
     "production": {
       "channel": "production",
-      "env": {
-        "APP_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "https://prolingo-be.iuptit.com",
-        "EXPO_PUBLIC_ENVIRONMENT": "production"
-      },
       "android": {
         "buildType": "app-bundle"
       },
-      "ios": {
-        "autoIncrement": true
+      "env": {
+        "APP_ENV": "production"
       }
     }
-  },
-  "submit": {
-    "production": {}
   }
 }

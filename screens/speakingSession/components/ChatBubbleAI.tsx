@@ -8,10 +8,10 @@ import Animated, {
 import React, { useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { IconAvatar1, IconMicrophone, IconPlayVoice } from '@/components/icon';
+import { IconAvatar1, IconSpeedSpeaking, IconVoiceVocab } from '@/components/icon';
 import { ChatMessage, PracticeMode } from '@/types/speaking.types';
 
-import { ProgressBar } from './ProgressBar';
+import { TypingIndicator } from './TypingIndicator';
 
 interface ChatBubbleAIProps {
   message: ChatMessage;
@@ -19,6 +19,8 @@ interface ChatBubbleAIProps {
   role?: string;
   onPlayAudio?: () => void;
   mode?: PracticeMode;
+  /** true: nội dung bubble chỉ hiện 3 chấm (đang tải / chờ). */
+  showTypingIndicator?: boolean;
 }
 
 export const ChatBubbleAI: React.FC<ChatBubbleAIProps> = ({
@@ -27,6 +29,7 @@ export const ChatBubbleAI: React.FC<ChatBubbleAIProps> = ({
   role = 'PROJECT MANAGER',
   onPlayAudio,
   mode = 'dual-explorer',
+  showTypingIndicator = false,
 }) => {
   const showEnglish = mode !== 'translation-hero';
   const showVietnamese = mode !== 'english-master';
@@ -60,45 +63,44 @@ export const ChatBubbleAI: React.FC<ChatBubbleAIProps> = ({
 
       {/* Message Card */}
       <View className="rounded-bl-3xl rounded-br-3xl rounded-tr-3xl border border-gray-200 bg-white p-4 shadow-sm">
-        {/* Question */}
-        {showEnglish && (
-          <View className="mb-3">
-            <Text className="text-base font-medium leading-6 text-gray-900">
-              &ldquo;{message.text}&rdquo;
-            </Text>
-          </View>
-        )}
+        {showTypingIndicator ? (
+          <TypingIndicator />
+        ) : (
+          <>
+            {showEnglish && (
+              <View className="mb-3">
+                <Text className="text-base font-bold leading-6 text-gray-900">{message.text}</Text>
+              </View>
+            )}
 
-        {/* Translation */}
-        {showVietnamese && message.translation && (
-          <View className={showEnglish ? 'mb-4' : 'mb-3'}>
-            <Text
-              className={
-                mode === 'translation-hero'
-                  ? 'text-base font-medium leading-6 text-gray-900'
-                  : 'text-sm leading-5 text-gray-500'
-              }
-            >
-              &ldquo;{message.translation}&rdquo;
-            </Text>
-          </View>
-        )}
+            {showVietnamese && message.translation && (
+              <View className={showEnglish ? 'mb-4' : 'mb-3'}>
+                <Text
+                  className={
+                    mode === 'translation-hero'
+                      ? 'text-base font-medium leading-6 text-gray-900'
+                      : 'text-sm leading-5 text-gray-500'
+                  }
+                >
+                  {message.translation}
+                </Text>
+              </View>
+            )}
 
-        {/* Progress Bar and Audio Controls */}
-        {message.score !== undefined && (
-          <View className="flex-row items-center">
-            <TouchableOpacity className="h-9 w-9 items-center justify-center">
-              <IconMicrophone width={18} height={18} color="#3B82F6" />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={onPlayAudio} className="h-9 w-9 items-center justify-center">
-              <IconPlayVoice width={18} height={18} color="#EF4444" />
-            </TouchableOpacity>
-
-            <View className="flex-1">
-              <ProgressBar progress={message.score} height={8} showLabel={true} />
+            <View className="mt-1 flex-row items-center gap-3">
+              <TouchableOpacity
+                onPress={onPlayAudio}
+                className="h-9 w-9 items-center justify-center"
+                hitSlop={8}
+              >
+                <IconVoiceVocab width={22} height={22} color="#D32F2F" />
+              </TouchableOpacity>
+              <View className="flex-row items-center gap-1">
+                <IconSpeedSpeaking width={20} height={20} color="#6B7280" />
+                <Text className="text-sm font-semibold text-gray-600">0.75x</Text>
+              </View>
             </View>
-          </View>
+          </>
         )}
       </View>
     </Animated.View>

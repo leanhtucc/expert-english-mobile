@@ -4,13 +4,14 @@ import React, { useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StatusBar,
+  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { RouteProp } from '@react-navigation/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -33,23 +34,35 @@ type CreatePasswordScreenRouteProp = RouteProp<any, any>;
 export const CreatePasswordScreen: React.FC = () => {
   const navigation = useNavigation<CreatePasswordScreenNavigationProp>();
   const route = useRoute<CreatePasswordScreenRouteProp>();
-  const { email = '', verificationToken = '' } = route.params || {};
+  // Nhận email và verificationToken từ màn VerifyOTP truyền sang
+  const { email = '' } = route.params || {};
 
   const { loading, registerNewAccount } = useAuth(); // Gọi Hook
 
   const scrollViewRef = useRef<ScrollView>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
 
+  const [username, setUsername] = useState(''); // Thêm trường username nếu API bắt buộc
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
   const handleSignup = async () => {
+    setUsernameError('');
     setPasswordError('');
     setConfirmPasswordError('');
     let hasError = false;
 
+    // Validate Username
+    if (!username.trim()) {
+      setUsernameError('Vui lòng nhập tên tài khoản (username)');
+      hasError = true;
+    }
+
+    // Validate Password
     if (!password.trim()) {
       setPasswordError('Vui lòng nhập mật khẩu');
       hasError = true;
@@ -68,11 +81,19 @@ export const CreatePasswordScreen: React.FC = () => {
 
     if (hasError) return;
 
-    // Đăng ký account qua Hook
-    const isSuccess = await registerNewAccount(email, password, verificationToken);
+    // GỌI HÀM ĐĂNG KÝ
+    const isSuccess = await registerNewAccount(username.trim(), email, password);
 
     if (isSuccess) {
-      navigation.navigate('TabNavigator', {});
+      // Đăng ký thành công -> Bắn thẳng về màn Đăng Nhập
+      // Reset navigation stack để user không back lại được màn hình đăng ký
+      navigation.reset({
+        index: 0,
+        routes: [
+          { name: 'EnterEmail' }, // Cho màn nhập email làm gốc
+          { name: 'LoginEmail', params: { email: email } }, // Đẩy vào màn Login với email vừa tạo
+        ],
+      });
     }
   };
 
@@ -82,7 +103,8 @@ export const CreatePasswordScreen: React.FC = () => {
     }, 300);
   };
 
-  const isFormValid = password.trim() !== '' && confirmPassword.trim() !== '';
+  const isFormValid =
+    username.trim() !== '' && password.trim() !== '' && confirmPassword.trim() !== '';
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -111,15 +133,28 @@ export const CreatePasswordScreen: React.FC = () => {
               <EmailIcon />
               <AuthHeader
                 title="Signup with Email"
-                subtitle="Please enter your email and password to login your account"
+                subtitle="Complete your profile to get started"
               />
+
               <EmailInput value={email} onChangeText={() => {}} error={''} editable={false} />
+
+              {/* Nếu API Register của bạn BẮT BUỘC cần Username, bạn phải có trường nhập này. Nếu không cần thì xoá đi nhé */}
+              <TextInput
+                className="mb-4 h-[52px] rounded-[16px] border-[1px] border-slate-200 bg-slate-50 px-4 text-[15px] text-[#1E293B]"
+                placeholder="Enter your username"
+                placeholderTextColor="#9CA3AF"
+                value={username}
+                onChangeText={setUsername}
+              />
+              {usernameError ? <Text className="mb-4 text-red-500">{usernameError}</Text> : null}
+
               <PasswordInput
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter your new password"
                 error={passwordError}
               />
+
               <PasswordInput
                 ref={confirmPasswordRef}
                 value={confirmPassword}
@@ -128,6 +163,7 @@ export const CreatePasswordScreen: React.FC = () => {
                 error={confirmPasswordError}
                 onFocus={handleConfirmPasswordFocus}
               />
+
               <SignupButton onPress={handleSignup} disabled={!isFormValid} loading={loading} />
               <TermsText />
             </View>

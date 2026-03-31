@@ -12,14 +12,14 @@ interface Props {
 export const LearningGoalCard = ({ minutes, progress, onChange }: Props) => (
   <View className="mb-4 rounded-3xl p-5" style={{ backgroundColor: PRIMARY }}>
     <View className="mb-2 flex-row items-center justify-between">
-      <Text className="text-[17px] font-medium text-white">Daily Target</Text>
+      <Text className="text-[17px] font-medium text-white">Mục tiêu mỗi ngày</Text>
 
       <TouchableOpacity className="rounded-full bg-white/20 px-3 py-1.5" onPress={onChange}>
-        <Text className="text-[11px] font-bold uppercase tracking-wider text-white">CHANGE</Text>
+        <Text className="text-[11px] font-bold uppercase tracking-wider text-white">ĐỔI</Text>
       </TouchableOpacity>
     </View>
 
-    <Text className="mb-4 text-[20px] font-medium text-white">{minutes} minutes per day</Text>
+    <Text className="mb-4 text-[20px] font-medium text-white">{minutes} phút mỗi ngày</Text>
 
     <View className="h-2.5 w-full overflow-hidden rounded-full bg-white/30">
       <View className="h-full rounded-full bg-white" style={{ width: `${progress * 100}%` }} />

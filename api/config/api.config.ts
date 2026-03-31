@@ -13,7 +13,7 @@ export const apiConfig = {
   /**
    * Request timeout in milliseconds
    */
-  timeout: 30000,
+  timeout: 300000,
 
   /**
    * Default headers for all requests

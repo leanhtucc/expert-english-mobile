@@ -32,3 +32,6 @@ ios/
 # IDE
 .vscode/
 .idea/
+
+# Example app (standalone playground)
+app-example/

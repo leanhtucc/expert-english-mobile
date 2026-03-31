@@ -14,6 +14,7 @@ const SvgIconRobot = (props: SvgProps) => (
         id="b"
         width={484}
         height={488}
+        preserveAspectRatio="none"
       />
     </Defs>
   </Svg>

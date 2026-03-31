@@ -1,73 +1,51 @@
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { Animated, View } from 'react-native';
 
-import React, { useEffect } from 'react';
-import { View } from 'react-native';
+type Props = {
+  dotColor?: string;
+};
 
-export const TypingIndicator: React.FC = () => {
-  const dot1Scale = useSharedValue(1);
-  const dot2Scale = useSharedValue(1);
-  const dot3Scale = useSharedValue(1);
+/**
+ * Ba chấm “đang gõ” trong bubble AI.
+ */
+export function TypingIndicator({ dotColor = '#6B7280' }: Props) {
+  const a0 = useRef(new Animated.Value(0.35)).current;
+  const a1 = useRef(new Animated.Value(0.35)).current;
+  const a2 = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
-    const animationConfig = {
-      duration: 400,
+    const makeLoop = (v: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(v, { toValue: 1, duration: 320, useNativeDriver: true }),
+          Animated.timing(v, { toValue: 0.35, duration: 320, useNativeDriver: true }),
+        ])
+      );
+
+    const l0 = makeLoop(a0, 0);
+    const l1 = makeLoop(a1, 160);
+    const l2 = makeLoop(a2, 320);
+    l0.start();
+    l1.start();
+    l2.start();
+    return () => {
+      l0.stop();
+      l1.stop();
+      l2.stop();
     };
-
-    dot1Scale.value = withRepeat(
-      withSequence(withTiming(1.3, animationConfig), withTiming(1, animationConfig)),
-      -1,
-      false
-    );
-
-    dot2Scale.value = withDelay(
-      150,
-      withRepeat(
-        withSequence(withTiming(1.3, animationConfig), withTiming(1, animationConfig)),
-        -1,
-        false
-      )
-    );
-
-    dot3Scale.value = withDelay(
-      300,
-      withRepeat(
-        withSequence(withTiming(1.3, animationConfig), withTiming(1, animationConfig)),
-        -1,
-        false
-      )
-    );
-  }, [dot1Scale, dot2Scale, dot3Scale]);
-
-  const dot1Style = useAnimatedStyle(() => ({
-    transform: [{ scale: dot1Scale.value }],
-  }));
-
-  const dot2Style = useAnimatedStyle(() => ({
-    transform: [{ scale: dot2Scale.value }],
-  }));
-
-  const dot3Style = useAnimatedStyle(() => ({
-    transform: [{ scale: dot3Scale.value }],
-  }));
+  }, [a0, a1, a2]);
 
   return (
-    <View className="mb-4 flex-row items-start pr-12">
-      <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-blue-500">
-        <View className="text-sm font-bold text-white" />
-      </View>
-
-      <View className="flex-row gap-2 rounded-2xl rounded-tl-sm bg-gray-100 px-5 py-4">
-        <Animated.View style={dot1Style} className="h-2 w-2 rounded-full bg-gray-400" />
-        <Animated.View style={dot2Style} className="h-2 w-2 rounded-full bg-gray-400" />
-        <Animated.View style={dot3Style} className="h-2 w-2 rounded-full bg-gray-400" />
-      </View>
+    <View className="flex-row items-center gap-1.5 py-1">
+      {[a0, a1, a2].map((op, i) => (
+        <Animated.Text
+          key={i}
+          style={{ opacity: op, color: dotColor, fontSize: 22, lineHeight: 26, fontWeight: '800' }}
+        >
+          •
+        </Animated.Text>
+      ))}
     </View>
   );
-};
+}
