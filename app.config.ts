@@ -36,6 +36,9 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-router',
+    'expo-asset',
+    '@sentry/react-native',
+    'expo-audio',
     [
       'expo-splash-screen',
       {
