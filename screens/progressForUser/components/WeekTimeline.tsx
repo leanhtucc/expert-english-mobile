@@ -8,7 +8,7 @@ import { WeekItem } from '../types/progress.types';
 export const WeekTimeline = ({ items }: { items: WeekItem[] }) => {
   return (
     // Chừa khoảng trống bên dưới (mb-8) để text hiển thị dạng absolute không bị cắt
-    <View className="mt-5 mb-8 flex-row items-center justify-between px-2">
+    <View className="mb-8 mt-5 flex-row items-center justify-between px-2">
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         const isDone = item.status === 'done';

@@ -31,10 +31,12 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
   const {
     currentQuestion,
     selectedAnswer,
+    eliminatedAnswers,
     isAnswered,
     progress: internalProgress,
     isCorrect,
     handleSelectAnswer,
+    eliminateSelectedAnswer,
     handleNext,
     resetAnswer,
   } = useMultipleChoice({
@@ -69,15 +71,24 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
       }
 
       timer = setTimeout(() => {
+        eliminateSelectedAnswer();
         resetAnswer();
         wrongReportedRef.current = false;
-      }, 1500);
+      }, 700);
     }
 
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isAnswered, isCorrect, resetAnswer, onComplete, selectedAnswer, isTransitioning]);
+  }, [
+    isAnswered,
+    isCorrect,
+    resetAnswer,
+    onComplete,
+    selectedAnswer,
+    isTransitioning,
+    eliminateSelectedAnswer,
+  ]);
 
   const handlePressHint = () => {
     setIsHintUsed(true);
@@ -135,10 +146,11 @@ export const MultipleChoiceScreen: React.FC<MultipleChoiceScreenProps> = ({
           <View className="w-full" key={currentQuestion.id || currentQuestion.question}>
             {currentQuestion.options.map((option, index) => (
               <OptionButton
-                key={index}
+                key={`${option}-${index}`}
                 label={option}
                 isSelected={selectedAnswer === option}
                 isCorrect={option === currentQuestion.correctAnswer}
+                isHidden={eliminatedAnswers.includes(option)}
                 isAnswered={displayAsAnswered} // 🌟 Sử dụng trạng thái chống nháy
                 onPress={() => handleSelectAnswer(option)}
               />

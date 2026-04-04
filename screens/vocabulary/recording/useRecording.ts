@@ -5,12 +5,55 @@ import { Audio } from 'expo-av';
 
 import { submitSpeakingPronunciation } from '@/api/submitSpeakingPronunciation';
 
+import { SPEAKING_DEFAULT_LOW_SCORE, SPEAKING_NEXT_THRESHOLD } from './constants';
 import { Question, SpeakingState } from './types';
 
 interface UseRecordingProps {
   questions: Question[];
   onComplete?: (results: any) => void;
   lessonId?: string;
+}
+
+const UNCLEAR_FEEDBACK_KEYWORDS = [
+  'khong nghe ro',
+  'không nghe rõ',
+  'khong nhan dien',
+  'không nhận diện',
+  'no speech',
+  'unclear',
+  'not clear',
+  'cannot recognize',
+  'unable to transcribe',
+  'could not understand',
+];
+
+function normalizeSpeakingScore(
+  result: {
+    score?: number;
+    transcript?: string;
+    overallFeedback?: string;
+    learnerHint?: string;
+  } | null
+): number {
+  if (!result) {
+    return SPEAKING_DEFAULT_LOW_SCORE;
+  }
+
+  const transcript = String(result.transcript ?? '').trim();
+  const feedbackBlob = `${result.overallFeedback ?? ''} ${result.learnerHint ?? ''}`.toLowerCase();
+  const hasUnclearKeyword = UNCLEAR_FEEDBACK_KEYWORDS.some(keyword =>
+    feedbackBlob.includes(keyword)
+  );
+
+  const rawScore = Number.isFinite(result.score) ? Math.round(Number(result.score)) : 0;
+  const safeScore = Math.max(0, Math.min(100, rawScore));
+
+  // Nếu không nói hoặc AI không nghe rõ, trả về mức sàn 10% để người học thử lại.
+  if (!transcript || hasUnclearKeyword) {
+    return SPEAKING_DEFAULT_LOW_SCORE;
+  }
+
+  return safeScore;
 }
 
 export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecordingProps) => {
@@ -22,6 +65,7 @@ export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecord
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const currentQuestion = questions.length > 0 ? questions[currentIndex] : null;
+  const canGoNext = score !== null && score > SPEAKING_NEXT_THRESHOLD;
 
   useEffect(() => {
     (async () => {
@@ -120,11 +164,9 @@ export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecord
           lessonId: lessonId,
         });
 
-        if (result) {
-          setScore(Math.round(result.score));
-        } else {
-          setScore(0);
-        }
+        setScore(normalizeSpeakingScore(result));
+      } else {
+        setScore(SPEAKING_DEFAULT_LOW_SCORE);
       }
       setState('RESULT');
     } catch (error) {
@@ -140,12 +182,20 @@ export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecord
   };
 
   const handleNext = () => {
+    if (!canGoNext) {
+      Alert.alert(
+        'Chưa đạt yêu cầu',
+        `Bạn cần đạt trên ${SPEAKING_NEXT_THRESHOLD}% để tiếp tục. Hãy thử nói lại nhé.`
+      );
+      return;
+    }
+
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setScore(null);
       setState('IDLE');
     } else {
-      onComplete?.(score ?? 0);
+      onComplete?.(score ?? SPEAKING_DEFAULT_LOW_SCORE);
     }
   };
 
@@ -155,6 +205,8 @@ export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecord
     currentIndex,
     totalQuestions: questions.length,
     score,
+    canGoNext,
+    nextThreshold: SPEAKING_NEXT_THRESHOLD,
     playSampleAudio,
     startRecording,
     stopRecordingAndScore,

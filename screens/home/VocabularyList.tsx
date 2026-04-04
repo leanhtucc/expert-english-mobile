@@ -139,7 +139,7 @@ const VocabularyItemCompact = ({
         <Text className="text-[16px] font-bold" style={{ color: palette.textMain }}>
           {item.word}
         </Text>
-        <View className="mt-1 mb-1 self-start">
+        <View className="mb-1 mt-1 self-start">
           <TagBadge text={item.partOfSpeech?.toUpperCase() || 'NEW'} />
         </View>
         <Text className="text-[13px]" style={{ color: palette.textSub }}>
@@ -188,7 +188,7 @@ const VocabularyItemExpanded = ({
           <Text className="text-[18px] font-bold" style={{ color: palette.textMain }}>
             {item.word}
           </Text>
-          <View className="mt-1 mb-1 self-start">
+          <View className="mb-1 mt-1 self-start">
             <TagBadge text={item.partOfSpeech?.toUpperCase() || 'NEW'} />
           </View>
           <Text className="text-[14px]" style={{ color: palette.textSub }}>
@@ -226,7 +226,7 @@ const VocabularyItemExpanded = ({
 };
 
 export default function VocabularyListScreen() {
-  const [isMeaningShown, setIsMeaningShown] = useState(false);
+  const [isMeaningHidden, setIsMeaningHidden] = useState(false);
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { lessonId } = route.params || {};
@@ -236,7 +236,7 @@ export default function VocabularyListScreen() {
 
   const toggleSwitch = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIsMeaningShown(previousState => !previousState);
+    setIsMeaningHidden(previousState => !previousState);
   };
 
   const handleBack = () => {
@@ -268,18 +268,18 @@ export default function VocabularyListScreen() {
             <View className="flex-1 pr-4">
               <Text
                 className="text-[17px] font-bold"
-                style={{ color: isMeaningShown ? palette.textMain : palette.textSub }}
+                style={{ color: isMeaningHidden ? palette.textMain : palette.textSub }}
               >
                 Ẩn nghĩa từ vựng
               </Text>
               <Text
                 className="mt-1 text-[13px]"
                 style={{
-                  color: isMeaningShown ? palette.textSub : palette.textSub,
-                  opacity: isMeaningShown ? 1 : 0.75,
+                  color: palette.textSub,
+                  opacity: isMeaningHidden ? 1 : 0.75,
                 }}
               >
-                {isMeaningShown ? 'Đang hiển thị toàn bộ nội dung' : 'Đang ẩn nghĩa và ví dụ'}
+                {isMeaningHidden ? 'Đang ẩn nghĩa và ví dụ' : 'Đang hiển thị toàn bộ nội dung'}
               </Text>
             </View>
             <TouchableOpacity
@@ -289,9 +289,9 @@ export default function VocabularyListScreen() {
                 width: 56,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: isMeaningShown ? palette.primary : palette.switchTrackOff,
+                backgroundColor: isMeaningHidden ? palette.primary : palette.switchTrackOff,
                 justifyContent: 'center',
-                alignItems: isMeaningShown ? 'flex-end' : 'flex-start',
+                alignItems: isMeaningHidden ? 'flex-end' : 'flex-start',
                 paddingHorizontal: 2,
               }}
             >
@@ -320,10 +320,10 @@ export default function VocabularyListScreen() {
           </Text>
         }
         renderItem={({ item }) =>
-          isMeaningShown ? (
-            <VocabularyItemExpanded item={item} onPlayAudio={playAudio} palette={palette} />
-          ) : (
+          isMeaningHidden ? (
             <VocabularyItemCompact item={item} onPlayAudio={playAudio} palette={palette} />
+          ) : (
+            <VocabularyItemExpanded item={item} onPlayAudio={playAudio} palette={palette} />
           )
         }
       />

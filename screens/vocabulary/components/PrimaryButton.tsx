@@ -24,14 +24,14 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      className={`flex-row items-center justify-center rounded-2xl bg-red-600 py-4 px-4 ${disabled || loading ? 'opacity-50' : 'active:bg-red-700'} ${className}`}
+      className={`flex-row items-center justify-center rounded-2xl bg-red-600 px-4 py-4 ${disabled || loading ? 'opacity-50' : 'active:bg-red-700'} ${className}`}
     >
       {loading ? (
         <ActivityIndicator color="white" />
       ) : (
         <>
           {icon && <View className="mr-2">{icon}</View>}
-          <Text className="text-center text-base font-semibold text-white">{label}</Text>
+          <Text className="text-center text-lg font-semibold text-white">{label}</Text>
           {rightIcon && <View className="ml-2">{rightIcon}</View>}
         </>
       )}

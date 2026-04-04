@@ -25,7 +25,7 @@ export const SpeakingPracticeLauncher: React.FC = () => {
     <View className="p-4">
       <TouchableOpacity
         onPress={() => navigation.navigate('PracticeSetup')}
-        className="rounded-2xl bg-red-500 py-4 px-6 shadow-lg"
+        className="rounded-2xl bg-red-500 px-6 py-4 shadow-lg"
         activeOpacity={0.8}
       >
         <View className="flex-row items-center justify-center">

@@ -9,14 +9,9 @@ import { PrimaryButton } from '../components/PrimaryButton';
 interface FlashcardControlsProps {
   onKnowIt: () => void;
   onDontKnow: () => void;
-  disabled?: boolean;
 }
 
-export const FlashcardControls: React.FC<FlashcardControlsProps> = ({
-  onKnowIt,
-  onDontKnow,
-  disabled = false,
-}) => {
+export const FlashcardControls: React.FC<FlashcardControlsProps> = ({ onKnowIt, onDontKnow }) => {
   return (
     <View className="mt-4 w-full flex-row items-center px-4 pb-2">
       {/* NÚT DON'T KNOW */}
@@ -24,7 +19,6 @@ export const FlashcardControls: React.FC<FlashcardControlsProps> = ({
         <SecondaryButton
           label="DON'T KNOW"
           onPress={onDontKnow}
-          disabled={disabled}
           icon={<FontAwesome name="close" size={16} color="#475569" />}
           labelClassName="text-[#475569] text-[15px]"
           centered={true}
@@ -37,7 +31,6 @@ export const FlashcardControls: React.FC<FlashcardControlsProps> = ({
         <PrimaryButton
           label="KNOW IT"
           onPress={onKnowIt}
-          disabled={disabled}
           icon={<FontAwesome name="check" size={16} color="#fff" />}
         />
       </View>

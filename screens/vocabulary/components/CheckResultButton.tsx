@@ -2,7 +2,7 @@ import { FontAwesome } from '@expo/vector-icons';
 // Added Feather import
 import throttle from 'lodash.throttle';
 
-import { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

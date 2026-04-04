@@ -81,7 +81,7 @@ export const ProgressAnalysisScreen = ({ navigation }: any) => {
           {data.skillStats.map((skill, index) => (
             <View
               key={skill.id}
-              className={`flex-row items-center justify-between rounded-2xl bg-[#FFF0EF] py-4 px-4 ${index !== data.skillStats.length - 1 ? 'mb-3' : ''}`}
+              className={`flex-row items-center justify-between rounded-2xl bg-[#FFF0EF] px-4 py-4 ${index !== data.skillStats.length - 1 ? 'mb-3' : ''}`}
             >
               <View className="flex-row items-center">
                 <IconCheckVocab width={16} height={16} color="#D90429" />

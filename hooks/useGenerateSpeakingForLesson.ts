@@ -36,6 +36,7 @@ async function fetchGenerateSpeaking(lessonId: string): Promise<FetchResult> {
       exercisesByLesson: getRes.data,
       generateSpeaking: null,
     };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     // 2. Nếu lấy thất bại hoặc không có bài, thực hiện lệnh tạo bài tập
     const body: GenerateSpeakingForLessonRequest = {
@@ -52,6 +53,7 @@ async function fetchGenerateSpeaking(lessonId: string): Promise<FetchResult> {
         exercisesByLesson: getAfterRes.data,
         generateSpeaking: postRes.data,
       };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (getAfterErr) {
       // Trường hợp tệ nhất: Tạo xong nhưng vẫn không lấy được
       return {

@@ -100,7 +100,7 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
-        <View className="w-full px-5 pt-4 pb-2">
+        <View className="w-full px-5 pb-2 pt-4">
           <ProgressBar
             current={displayProgress.current}
             total={displayProgress.total}

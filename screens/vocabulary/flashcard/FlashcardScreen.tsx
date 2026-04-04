@@ -57,6 +57,8 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
             card={currentCard}
             isFlipped={isFlipped}
             onFlip={handleFlip}
+            onSwipeLeft={handleDontKnow}
+            onSwipeRight={handleKnowIt}
             onPlayAudio={handlePlayAudio}
           />
         </View>
@@ -66,11 +68,7 @@ export const FlashcardScreen: React.FC<FlashcardScreenProps> = ({
         style={{ paddingBottom: Math.max(insets.bottom, 16) }}
         className="w-full border-t border-slate-200 bg-white"
       >
-        <FlashcardControls
-          onKnowIt={handleKnowIt}
-          onDontKnow={handleDontKnow}
-          disabled={!isFlipped}
-        />
+        <FlashcardControls onKnowIt={handleKnowIt} onDontKnow={handleDontKnow} />
       </View>
     </SafeAreaView>
   );

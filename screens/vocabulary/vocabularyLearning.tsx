@@ -159,6 +159,7 @@ export default function VocabularyLearning() {
   };
 
   // 🌟 SỬA ĐỔI: Hàm Submit ngầm không chứa handleClose() để tránh văng người dùng ra ngoài
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleAutoSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -194,7 +195,7 @@ export default function VocabularyLearning() {
       hasAutoSubmittedRef.current = true;
       handleAutoSubmit();
     }
-  }, [currentStep]);
+  }, [currentStep, handleAutoSubmit]);
 
   // ==========================================
   // RENDER LOGIC

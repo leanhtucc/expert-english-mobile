@@ -69,7 +69,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
     <View
       className={`w-full overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm ${className}`}
     >
-      <View className="flex-1 items-center justify-center py-8 px-6">
+      <View className="flex-1 items-center justify-center px-6 py-8">
         {/* Render phần nội dung câu hỏi */}
         {renderSmartQuestion()}
 

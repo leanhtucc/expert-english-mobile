@@ -51,7 +51,7 @@ const HorizontalModuleTracker: React.FC<{ modules: RoadmapModuleData[] }> = ({ m
         const isCurrent = mod.status === 'current';
         const isLocked = mod.status === 'locked';
 
-        const lineClass = isCompleted ? 'bg-[#C8102E]' : 'bg-[#FCF0F1]';
+        const lineClass = isCompleted ? 'bg-[#F7D7DE]' : 'bg-[#FCECEF]';
 
         return [
           <View key={`node-${mod.id}`} className="relative z-10 items-center">
@@ -104,10 +104,19 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
   if (status === 'completed') {
     return (
       <View
-        className="h-10 w-10 items-center justify-center rounded-full"
-        style={{ backgroundColor: isDark ? '#3F1D1D' : '#FEE2E2' }}
+        className="h-11 w-11 items-center justify-center rounded-full"
+        style={{ backgroundColor: isDark ? '#3F1D1D' : '#FDECEF' }}
       >
-        <View className="h-7 w-7 items-center justify-center rounded-full bg-[#C8102E]">
+        <View
+          className="h-8 w-8 items-center justify-center rounded-full bg-[#C8102E]"
+          style={{
+            shadowColor: '#C8102E',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: isDark ? 0.25 : 0.16,
+            shadowRadius: 8,
+            elevation: 3,
+          }}
+        >
           <IconCheckCourse width={16} height={16} color="white" />
         </View>
       </View>
@@ -117,11 +126,20 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
   if (status === 'active') {
     return (
       <View
-        className="h-10 w-10 items-center justify-center rounded-full"
-        style={{ backgroundColor: isDark ? '#3F1D1D' : '#FEE2E2' }}
+        className="h-11 w-11 items-center justify-center rounded-full"
+        style={{ backgroundColor: isDark ? '#3F1D1D' : '#FDECEF' }}
       >
-        <View className="h-7 w-7 items-center justify-center rounded-full border-2 border-[#C8102E] bg-[#C8102E]">
-          <View className="h-2 w-2 rounded-full bg-white" />
+        <View
+          className="h-8 w-8 items-center justify-center rounded-full border-2 border-[#C8102E] bg-[#C8102E]"
+          style={{
+            shadowColor: '#C8102E',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: isDark ? 0.22 : 0.14,
+            shadowRadius: 8,
+            elevation: 3,
+          }}
+        >
+          <View className="h-2.5 w-2.5 rounded-full bg-white" />
         </View>
       </View>
     );
@@ -129,14 +147,14 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
 
   return (
     <View
-      className="h-10 w-10 items-center justify-center rounded-full"
-      style={{ backgroundColor: isDark ? colors.surface : '#F3F4F6' }}
+      className="h-11 w-11 items-center justify-center rounded-full"
+      style={{ backgroundColor: isDark ? colors.surface : '#EEF2F7' }}
     >
       <View
-        className="h-7 w-7 items-center justify-center rounded-full"
-        style={{ backgroundColor: isDark ? colors.borderMuted : '#E5E7EB' }}
+        className="h-8 w-8 items-center justify-center rounded-full"
+        style={{ backgroundColor: isDark ? colors.borderMuted : '#DDE5EF' }}
       >
-        <IconLockLession width={16} height={16} color="#B5A9A9" />
+        <IconLockLession width={16} height={16} color="#94A3B8" />
       </View>
     </View>
   );
@@ -147,15 +165,10 @@ const RoadmapItem: React.FC<
 > = ({ _id, displayDate, name_en, status, isLast, onPress }) => {
   const { colors, isDark } = useAppTheme();
   const isActive = status === 'active';
+  const isCompleted = status === 'completed';
   const isLocked = status === 'locked';
 
-  const lineColor = isLocked
-    ? isDark
-      ? colors.border
-      : '#F3F4F6'
-    : isDark
-      ? '#5C1F1F'
-      : '#FEE2E2';
+  const lineColor = isDark ? colors.border : '#E7ECF2';
 
   const cardStyle = isDark
     ? {
@@ -165,40 +178,62 @@ const RoadmapItem: React.FC<
       }
     : isActive
       ? {
-          backgroundColor: 'rgba(254, 242, 242, 0.5)',
-          borderColor: '#FECACA',
-          borderWidth: 1,
-        }
-      : {
           backgroundColor: '#FFFFFF',
-          borderColor: '#F9FAFB',
-          borderWidth: 1,
-        };
+          borderColor: '#F3C5CF',
+          borderWidth: 1.5,
+          shadowColor: '#C8102E',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.08,
+          shadowRadius: 14,
+          elevation: 3,
+        }
+      : isCompleted
+        ? {
+            backgroundColor: '#F1F5F9',
+            borderColor: '#E7ECF2',
+            borderWidth: 1,
+          }
+        : {
+            backgroundColor: '#F8FAFC',
+            borderColor: '#EAF0F6',
+            borderWidth: 1,
+          };
 
-  const dateColor = isActive ? '#C8102E' : colors.muted;
-  const titleColor = isLocked ? colors.muted : colors.text;
+  const dateColor = isDark ? colors.muted : isActive ? '#C8102E' : isLocked ? '#B8C2D0' : '#94A3B8';
+
+  const titleColor = isDark
+    ? isLocked
+      ? colors.muted
+      : colors.text
+    : isLocked
+      ? '#6B7280'
+      : '#0F172A';
 
   return (
     <TouchableOpacity
       className="flex-row"
-      activeOpacity={isLocked ? 1 : 0.7}
+      activeOpacity={isLocked ? 1 : 0.72}
       onPress={() => onPress?.(_id, status)}
     >
       <View className="w-14 items-center">
         <RoadmapDot status={status} />
         {!isLast && (
-          <View className="w-[2px] flex-1" style={{ minHeight: 30, backgroundColor: lineColor }} />
+          <View className="w-[2px] flex-1" style={{ minHeight: 36, backgroundColor: lineColor }} />
         )}
       </View>
 
-      <View className="mb-5 ml-2 flex-1 rounded-2xl px-4 py-4 shadow-sm" style={cardStyle}>
+      <View className="mb-4 ml-2 flex-1 rounded-[18px] px-4 py-3.5" style={cardStyle}>
         <Text
-          className="mb-1 text-[11px] font-bold uppercase tracking-wider"
+          className="mb-1 text-[11px] font-bold uppercase tracking-[1px]"
           style={{ color: dateColor }}
         >
           {displayDate}
         </Text>
-        <Text className="text-[15px] font-bold" style={{ color: titleColor }} numberOfLines={1}>
+        <Text
+          className="text-[15px] font-extrabold leading-[21px]"
+          style={{ color: titleColor }}
+          numberOfLines={2}
+        >
           {name_en}
         </Text>
       </View>

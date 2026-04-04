@@ -38,10 +38,13 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
     currentIndex,
     totalQuestions,
     score,
+    canGoNext,
+    nextThreshold,
     playSampleAudio,
     startRecording,
     stopRecordingAndScore,
     handleRetry,
+    handleNext,
   } = useRecording({ questions: safeQuestions, onComplete, lessonId });
 
   const displayProgress = externalProgress || {
@@ -63,7 +66,7 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
-        <View className="w-full px-5 pt-4 pb-2">
+        <View className="w-full px-5 pb-2 pt-4">
           <ProgressBar
             current={displayProgress.current}
             total={displayProgress.total}
@@ -133,7 +136,7 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
               onStop={stopRecordingAndScore}
             />
           ) : (
-            <View className="flex-row items-center justify-between pt-4 pb-4">
+            <View className="flex-row items-center justify-between pb-4 pt-4">
               <TouchableOpacity
                 onPress={handleRetry}
                 className="mr-3 flex-row items-center justify-center rounded-full bg-[#FCE4E4] px-6 py-[18px]"
@@ -143,21 +146,28 @@ export const RecordingScreen: React.FC<RecordingScreenProps> = ({
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => {
-                  onComplete?.(score ?? 0);
-                }}
-                className="flex-1 flex-row items-center justify-center rounded-full bg-[#C8102E] py-[18px]"
+                onPress={handleNext}
+                disabled={!canGoNext}
+                className={`flex-1 flex-row items-center justify-center rounded-full py-[18px] ${
+                  canGoNext ? 'bg-[#C8102E]' : 'bg-[#F29CA9]'
+                }`}
                 style={{
-                  shadowColor: '#C8102E',
-                  shadowOpacity: 0.2,
+                  shadowColor: canGoNext ? '#C8102E' : '#F29CA9',
+                  shadowOpacity: canGoNext ? 0.2 : 0.08,
                   shadowRadius: 5,
-                  elevation: 4,
+                  elevation: canGoNext ? 4 : 1,
                 }}
               >
                 <Text className="mr-2 text-[16px] font-bold text-white">Next</Text>
                 <Feather name="arrow-right" size={20} color="#FFF" />
               </TouchableOpacity>
             </View>
+          )}
+
+          {score !== null && !canGoNext && (
+            <Text className="pb-2 text-center text-[13px] font-medium text-[#9E001F]">
+              Điểm hiện tại {score}%. Bạn cần trên {nextThreshold}% để qua câu tiếp theo.
+            </Text>
           )}
         </View>
       </View>

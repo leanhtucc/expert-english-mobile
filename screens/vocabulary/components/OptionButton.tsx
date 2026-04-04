@@ -9,6 +9,7 @@ export interface OptionButtonProps {
   label: string;
   isSelected?: boolean;
   isCorrect?: boolean;
+  isHidden?: boolean;
   isAnswered?: boolean;
   onPress: () => void;
   className?: string;
@@ -18,18 +19,22 @@ export const OptionButton: React.FC<OptionButtonProps> = ({
   label,
   isSelected = false,
   isCorrect = false,
+  isHidden = false,
   isAnswered = false,
   onPress,
   className = '',
 }) => {
   // Trạng thái user chọn SAI
-  const isWrongAnswer = isAnswered && isSelected && !isCorrect;
+  const isWrongAnswer = !isHidden && isAnswered && isSelected && !isCorrect;
 
   // Trạng thái user chọn ĐÚNG
-  const isRightAnswer = isAnswered && isSelected && isCorrect;
+  const isRightAnswer = !isHidden && isAnswered && isSelected && isCorrect;
 
   // 1. TÍNH TOÁN MÀU CONTAINER VÀ VIỀN
   const getContainerStyle = () => {
+    if (isHidden) {
+      return 'border-[#E2E8F0] bg-[#F8FAFC] opacity-60'; // Đáp án đã bị loại: vẫn hiển thị nhưng bị khóa
+    }
     if (isWrongAnswer) {
       return 'border-[#E2E8F0] bg-[#F8FAFC] opacity-60'; // Thẻ bị mờ đi khi chọn sai
     }
@@ -44,6 +49,7 @@ export const OptionButton: React.FC<OptionButtonProps> = ({
 
   // 2. TÍNH TOÁN MÀU CHỮ
   const getTextColor = () => {
+    if (isHidden) return 'text-[#9CA3AF] line-through decoration-1';
     if (isWrongAnswer) return 'text-[#9CA3AF] line-through decoration-1';
     if (isRightAnswer) return 'text-[#16A34A]';
     if (isSelected && !isAnswered) return 'text-[#E11D48]';
@@ -53,7 +59,7 @@ export const OptionButton: React.FC<OptionButtonProps> = ({
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={isAnswered}
+      disabled={isAnswered || isHidden}
       activeOpacity={0.7}
       className={`mb-4 min-h-[68px] flex-row items-center justify-between rounded-[24px] border-[2px] px-5 py-4 shadow-sm ${getContainerStyle()} ${className}`}
     >
@@ -63,21 +69,26 @@ export const OptionButton: React.FC<OptionButtonProps> = ({
 
       {/* 3. TÍNH TOÁN ICON BÊN PHẢI */}
       <View className="ml-2 items-center justify-center">
+        {/* NẾU ĐÁP ÁN ĐÃ BỊ LOẠI */}
+        {isHidden && <Feather name="x-circle" size={24} color="#9CA3AF" />}
+
         {/* NẾU CHỌN ĐÚNG */}
-        {isRightAnswer && <IconCheckAnswer width={24} height={24} color="#16a34a" />}
+        {!isHidden && isRightAnswer && <IconCheckAnswer width={24} height={24} color="#16a34a" />}
 
         {/* NẾU CHỌN SAI */}
-        {isWrongAnswer && <Feather name="x-circle" size={24} color="#dc2626" />}
+        {!isHidden && isWrongAnswer && <Feather name="x-circle" size={24} color="#dc2626" />}
 
         {/* NẾU ĐANG CHỌN (CHƯA CHỐT) */}
-        {isSelected && !isAnswered && (
+        {!isHidden && isSelected && !isAnswered && (
           <View className="h-6 w-6 items-center justify-center rounded-full border-[2.5px] border-[#E11D48]">
             <View className="h-2.5 w-2.5 rounded-full bg-[#E11D48]" />
           </View>
         )}
 
         {/* NẾU CHƯA LÀM GÌ HOẶC KHÔNG PHẢI THẺ ĐƯỢC CHỌN */}
-        {!isSelected && <View className="h-6 w-6 rounded-full border-[2px] border-slate-300" />}
+        {!isHidden && !isSelected && (
+          <View className="h-6 w-6 rounded-full border-[2px] border-slate-300" />
+        )}
       </View>
     </TouchableOpacity>
   );

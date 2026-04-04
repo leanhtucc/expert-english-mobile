@@ -30,7 +30,7 @@ export const HeroGoalCard: React.FC<HeroGoalCardProps> = ({
 
         {/* Right illustration — rounded corners, anchored to bottom */}
         <View
-          className="overflow-hidden rounded-tl-[20px] rounded-br-3xl"
+          className="overflow-hidden rounded-br-3xl rounded-tl-[20px]"
           style={{ marginRight: -20 }}
         >
           <ImageMascoForHomes width={160} height={180} />

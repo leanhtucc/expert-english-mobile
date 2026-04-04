@@ -25,7 +25,7 @@ const COLORS = {
 
 // 1. Header Màn hình
 const Header = ({ title, onBack }: { title: string; onBack: () => void }) => (
-  <View className="flex-row items-center justify-between px-5 pt-2 pb-4">
+  <View className="flex-row items-center justify-between px-5 pb-4 pt-2">
     <TouchableOpacity
       activeOpacity={0.7}
       className="h-10 w-10 justify-center"
@@ -172,7 +172,7 @@ export default function DetailedDayScreen({ navigation }: { navigation: any }) {
           />
 
           <View className="relative mt-2">
-            <View className="absolute left-[23px] top-[10px] bottom-[30px] z-0 w-[1.5px] bg-gray-100" />
+            <View className="absolute bottom-[30px] left-[23px] top-[10px] z-0 w-[1.5px] bg-gray-100" />
 
             <LessonItem
               status="completed"
@@ -204,7 +204,7 @@ export default function DetailedDayScreen({ navigation }: { navigation: any }) {
             />
 
             <View className="relative mt-2">
-              <View className="absolute left-[23px] top-[10px] bottom-[30px] z-0 w-[1.5px] bg-gray-100" />
+              <View className="absolute bottom-[30px] left-[23px] top-[10px] z-0 w-[1.5px] bg-gray-100" />
 
               <LessonItem
                 status="locked"

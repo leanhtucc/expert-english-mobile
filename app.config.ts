@@ -31,6 +31,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
     predictiveBackGestureEnabled: false,
   },
   web: {
+    bundler: 'metro',
     output: 'static',
     favicon: './assets/images/icon-app.png',
   },

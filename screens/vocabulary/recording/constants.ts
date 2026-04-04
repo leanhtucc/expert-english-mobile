@@ -6,3 +6,6 @@ export const COLORS = {
   textSub: '#64748B',
   white: '#FFFFFF',
 };
+
+export const SPEAKING_DEFAULT_LOW_SCORE = 10;
+export const SPEAKING_NEXT_THRESHOLD = 50;

@@ -22,7 +22,7 @@ export const WeekUnlockScreen = ({ navigation }: any) => {
         showsVerticalScrollIndicator={false}
       >
         {/* Robot Image Card */}
-        <View className="mt-6 mb-6 h-[280px] w-full items-center justify-center overflow-hidden shadow-lg">
+        <View className="mb-6 mt-6 h-[280px] w-full items-center justify-center overflow-hidden shadow-lg">
           <ImageMascoNewRoadmap width={300} height={300} />
         </View>
 

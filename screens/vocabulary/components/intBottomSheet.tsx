@@ -67,7 +67,7 @@ export const HintBottomSheet: React.FC<HintBottomSheetProps> = ({
       translateY.value = withSpring(SCREEN_HEIGHT, { damping: 20, stiffness: 90 });
       opacity.value = withTiming(0, { duration: 300 });
     }
-  }, [isVisible]);
+  }, [isVisible, opacity, translateY]);
 
   const animatedSheetStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -125,7 +125,7 @@ export const HintBottomSheet: React.FC<HintBottomSheetProps> = ({
 
                   <View className="flex-1 justify-center pt-1">
                     <Text className="text-[18px] font-bold text-[#1E293B]">{item.word}</Text>
-                    <View className="mt-1 mb-1 self-start">
+                    <View className="mb-1 mt-1 self-start">
                       <View
                         className={`items-center justify-center rounded-[6px] px-2 py-0.5 ${posStyle.bg}`}
                       >
