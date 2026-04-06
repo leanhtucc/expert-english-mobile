@@ -16,6 +16,7 @@ import { IconAvatar2, IconSpeedSpeaking, IconVoiceVocab } from '@/components/ico
 import { ChatMessage, HighlightedText, PracticeMode } from '@/types/speaking.types';
 
 import { ProgressBar } from './ProgressBar';
+import { TypingIndicator } from './TypingIndicator';
 
 interface ChatBubbleUserProps {
   message: ChatMessage;
@@ -26,6 +27,7 @@ interface ChatBubbleUserProps {
   // 🌟 THÊM 2 PROPS NÀY ĐỂ ĐIỀU KHIỂN NÚT NHẬN XÉT
   onToggleFeedback?: () => void;
   isFeedbackVisible?: boolean;
+  showTypingIndicator?: boolean;
 }
 
 const PINK_BG = '#FFF0EF';
@@ -39,6 +41,7 @@ export const ChatBubbleUser: React.FC<ChatBubbleUserProps> = ({
   showWordFeedback = false,
   onToggleFeedback,
   isFeedbackVisible = false,
+  showTypingIndicator = false,
 }) => {
   const showEnglish = mode !== 'translation-hero';
   const showVietnamese = mode !== 'english-master';
@@ -98,74 +101,79 @@ export const ChatBubbleUser: React.FC<ChatBubbleUserProps> = ({
           className="min-w-0 max-w-[92%] rounded-3xl border px-4 py-4 shadow-sm"
           style={{ backgroundColor: PINK_BG, borderColor: PINK_BORDER }}
         >
-          {showEnglish && renderEnglish()}
+          {showTypingIndicator ? (
+            <TypingIndicator dotColor="#D32F2F" />
+          ) : (
+            <>
+              {showEnglish && renderEnglish()}
 
-          {showVietnamese && message.translation && (
-            <Text
-              className={
-                mode === 'translation-hero'
-                  ? 'text-[15px] font-semibold leading-6 text-gray-900'
-                  : 'text-[13px] leading-5 text-gray-500'
-              }
-            >
-              {message.translation}
-            </Text>
-          )}
-
-          {/* 🌟 CHỈNH SỬA LẠI ROW NÀY: Thêm nút Xem/Ẩn nhận xét */}
-          <View className="mt-3 flex-row items-center justify-between">
-            <View className="flex-row items-center gap-2">
-              <TouchableOpacity className="h-9 w-9 items-center justify-center" hitSlop={8}>
-                <IconVoiceVocab width={20} height={20} color="#D32F2F" />
-              </TouchableOpacity>
-              <View className="flex-row items-center gap-0.5">
-                <IconSpeedSpeaking width={18} height={18} color="#6B7280" />
-                <Text className="text-xs font-semibold text-gray-600">0.75x</Text>
-              </View>
-            </View>
-
-            {onToggleFeedback && message.score !== undefined && (
-              <TouchableOpacity
-                onPress={onToggleFeedback}
-                activeOpacity={0.7}
-                // Thêm items-center để icon và text thẳng hàng tuyệt đối
-                className="flex-row items-center justify-center rounded-full px-3 py-1.5"
-                style={{
-                  backgroundColor: isFeedbackVisible ? '#D32F2F' : '#FCE4E4',
-                  minHeight: 32, // Đảm bảo chiều cao cố định để không bị lệch
-                }}
-              >
-                <Feather
-                  name={isFeedbackVisible ? 'chevron-up' : 'message-circle'}
-                  size={14}
-                  color={isFeedbackVisible ? '#FFFFFF' : '#D32F2F'}
-                  style={{ marginRight: 4 }} // Thay gap bằng marginRight để kiểm soát chính xác hơn
-                />
+              {showVietnamese && message.translation && (
                 <Text
-                  className="text-[12px] font-bold tracking-tight"
-                  style={{
-                    color: isFeedbackVisible ? '#FFFFFF' : '#D32F2F',
-                    textAlignVertical: 'center', // Căn giữa chữ theo chiều dọc trên Android
-                    lineHeight: 16, // Khớp với size của icon
-                  }}
+                  className={
+                    mode === 'translation-hero'
+                      ? 'text-[15px] font-semibold leading-6 text-gray-900'
+                      : 'text-[13px] leading-5 text-gray-500'
+                  }
                 >
-                  {isFeedbackVisible ? 'Đóng' : 'Nhận xét'}
+                  {message.translation}
                 </Text>
-              </TouchableOpacity>
-            )}
-          </View>
+              )}
 
-          {message.score !== undefined && (
-            <View className="mt-3 w-full min-w-0 self-stretch" style={{ maxWidth: '100%' }}>
-              <ProgressBar
-                progress={message.score}
-                height={6}
-                showLabel
-                fillColor="#22c55e"
-                trackColor="#E5E7EB"
-                labelColor="#16a34a"
-              />
-            </View>
+              {/* 🌟 CHỈNH SỬA LẠI ROW NÀY: Thêm nút Xem/Ẩn nhận xét */}
+              <View className="mt-3 flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <TouchableOpacity className="h-9 w-9 items-center justify-center" hitSlop={8}>
+                    <IconVoiceVocab width={20} height={20} color="#D32F2F" />
+                  </TouchableOpacity>
+                  <View className="flex-row items-center gap-0.5">
+                    <IconSpeedSpeaking width={18} height={18} color="#6B7280" />
+                    <Text className="text-xs font-semibold text-gray-600">0.75x</Text>
+                  </View>
+                </View>
+
+                {onToggleFeedback && message.score !== undefined && (
+                  <TouchableOpacity
+                    onPress={onToggleFeedback}
+                    activeOpacity={0.7}
+                    // Thêm items-center để icon và text thẳng hàng tuyệt đối
+                    className="flex-row items-center justify-center rounded-full px-3 py-1.5"
+                    style={{
+                      backgroundColor: isFeedbackVisible ? '#D32F2F' : '#FCE4E4',
+                      minHeight: 32, // Đảm bảo chiều cao cố định để không bị lệch
+                    }}
+                  >
+                    <Feather
+                      name={isFeedbackVisible ? 'chevron-up' : 'message-circle'}
+                      size={14}
+                      color={isFeedbackVisible ? '#FFFFFF' : '#D32F2F'}
+                      style={{ marginRight: 4 }} // Thay gap bằng marginRight để kiểm soát chính xác hơn
+                    />
+                    <Text
+                      className="text-[12px] font-bold tracking-tight"
+                      style={{
+                        color: isFeedbackVisible ? '#FFFFFF' : '#D32F2F',
+                        textAlignVertical: 'center', // Căn giữa chữ theo chiều dọc trên Android
+                        lineHeight: 16, // Khớp với size của icon
+                      }}
+                    >
+                      {isFeedbackVisible ? 'Đóng' : 'Nhận xét'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              {message.score !== undefined && (
+                <View className="mt-3 w-full min-w-0 self-stretch" style={{ maxWidth: '100%' }}>
+                  <ProgressBar
+                    progress={message.score}
+                    height={6}
+                    showLabel
+                    fillColor="#22c55e"
+                    trackColor="#E5E7EB"
+                    labelColor="#16a34a"
+                  />
+                </View>
+              )}
+            </>
           )}
         </View>
       </View>
