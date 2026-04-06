@@ -16,7 +16,7 @@ import './global.css';
 
 // Initialize Sentry for error tracking
 Sentry.init({
-  dsn: 'https://ea6dd677088dcb31aabbd85249df6c02@o4510742785228800.ingest.de.sentry.io/4510742789423184',
+  dsn: 'https://50d82d30af60d6ac7cf98e0b2b4307ca@o4510742785228800.ingest.de.sentry.io/4511154607423568',
   sendDefaultPii: true,
   enabled: !__DEV__, // Only enable in production
   tracesSampleRate: 1.0, // Adjust in production
