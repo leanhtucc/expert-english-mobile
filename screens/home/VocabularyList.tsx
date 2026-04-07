@@ -178,7 +178,7 @@ export default function VocabularyListScreen() {
       />
 
       <View
-        className="absolute bottom-10 left-0 right-0 border-t px-5 py-4 pb-8"
+        className="absolute bottom-0 left-0 right-0 border-t px-5 py-4 pb-8"
         style={{ borderTopColor: palette.border, backgroundColor: palette.bottomBarBg }}
       >
         <TouchableOpacity
