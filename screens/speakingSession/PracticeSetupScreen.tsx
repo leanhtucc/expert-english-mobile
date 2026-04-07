@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 import { IconBackButton, IconMicrophone, IconRepeat } from '@/components/icon';
@@ -15,6 +15,11 @@ import { useSpeakingPronunciationRecorder } from '@/hooks/useSpeakingPronunciati
 import { useSubmitSpeakingPronunciation } from '@/hooks/useSubmitSpeakingPronunciation';
 import { RootStackParamList } from '@/navigation';
 import { useAuthStore } from '@/stores/auth.store';
+import {
+  SPEAKING_EXERCISE_LV1,
+  SPEAKING_EXERCISE_LV2,
+  SpeakingExerciseTypeRef,
+} from '@/types/api/speakingExercise.request';
 import {
   parseExercisesByLessonResponse,
   speakingExerciseToScenarioPreview,
@@ -28,7 +33,15 @@ import { ChatBubbleAI } from './components/ChatBubbleAI';
 import { ChatBubbleUser } from './components/ChatBubbleUser';
 import { WaveformAnimation } from './components/WaveformAnimation';
 
-type PracticeSetupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PracticeSetup'>;
+type PracticeSetupScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+type PracticeSetupRouteProp = RouteProp<RootStackParamList, 'PracticeSetup'>;
+type SpeakingTab = 'basic' | 'advanced';
+type SpeakingTabState = {
+  currentExerciseIndex: number;
+  hasRecorded: boolean;
+  chatMessages: ChatMessage[];
+  isFinished: boolean;
+};
 type ChatListProps = {
   isWaitingForSpeaking: boolean;
   hasScenario: boolean;
@@ -130,36 +143,76 @@ const ChatList = React.memo(
 );
 ChatList.displayName = 'ChatList';
 
+const prettyLog = (label: string, payload: unknown) => {
+  try {
+    console.log(label, JSON.stringify(payload, null, 2));
+  } catch {
+    console.log(label, payload);
+  }
+};
+
 export const PracticeSetupScreen: React.FC = () => {
   const nextQuestionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const route = useRoute<PracticeSetupRouteProp>();
+  const [activeSpeakingTab, setActiveSpeakingTab] = useState<SpeakingTab>('basic');
   const accessToken = useAuthStore(state => state.accessToken);
   const { data: roadmapData, loading: roadmapLoading } = useRoadmapData(accessToken || '');
-  const lessonId = useMemo(() => getTodayLessonIdFromRoadmap(roadmapData), [roadmapData]);
-
-  const { exercisesByLesson, isLoading: speakingApiLoading } = useGenerateSpeakingForLesson({
-    lessonId,
-    enabled: !!lessonId,
-  });
-  const exercises = useMemo(
-    () => parseExercisesByLessonResponse(exercisesByLesson),
-    [exercisesByLesson]
+  const lessonId = useMemo(
+    () => route.params?.lessonId || getTodayLessonIdFromRoadmap(roadmapData),
+    [route.params?.lessonId, roadmapData]
   );
 
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const selectedExerciseType: SpeakingExerciseTypeRef = useMemo(
+    () => (activeSpeakingTab === 'advanced' ? SPEAKING_EXERCISE_LV2 : SPEAKING_EXERCISE_LV1),
+    [activeSpeakingTab]
+  );
+
+  const {
+    data: generateSpeakingResponse,
+    exercisesByLesson,
+    isLoading: speakingApiLoading,
+  } = useGenerateSpeakingForLesson({
+    lessonId,
+    exerciseType: selectedExerciseType,
+    enabled: !!lessonId,
+  });
+  const exercises = useMemo(() => {
+    const parsed = parseExercisesByLessonResponse(exercisesByLesson);
+    const strict = parsed.filter(ex => {
+      const byTypeId = ex?.type_id === selectedExerciseType._id;
+      const byTypeCode = (ex as any)?.type_info?.code === selectedExerciseType.code;
+      return byTypeId || byTypeCode;
+    });
+    if (strict.length > 0) return strict;
+
+    // Fallback cho backend response thiếu metadata type.
+    const level = activeSpeakingTab === 'advanced' ? 2 : 1;
+    return parsed.filter(ex => ex?.content?.speaking_level === level);
+  }, [exercisesByLesson, selectedExerciseType._id, selectedExerciseType.code, activeSpeakingTab]);
+
+  const [tabStates, setTabStates] = useState<Record<SpeakingTab, SpeakingTabState>>({
+    basic: { currentExerciseIndex: 0, hasRecorded: false, chatMessages: [], isFinished: false },
+    advanced: { currentExerciseIndex: 0, hasRecorded: false, chatMessages: [], isFinished: false },
+  });
   const [isRecording, setIsRecording] = useState(false);
   const [isAwaitingCoachResponse, setIsAwaitingCoachResponse] = useState(false);
-  const [hasRecorded, setHasRecorded] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-
-  // 🌟 STATE QUẢN LÝ VIỆC HIỆN TỔNG KẾT NỘI BỘ
-  const [isFinished, setIsFinished] = useState(false);
+  const currentExerciseIndex = tabStates[activeSpeakingTab].currentExerciseIndex;
+  const hasRecorded = tabStates[activeSpeakingTab].hasRecorded;
+  const chatMessages = tabStates[activeSpeakingTab].chatMessages;
+  const isFinished = tabStates[activeSpeakingTab].isFinished;
 
   useEffect(() => {
-    setCurrentExerciseIndex(0);
+    setTabStates({
+      basic: { currentExerciseIndex: 0, hasRecorded: false, chatMessages: [], isFinished: false },
+      advanced: {
+        currentExerciseIndex: 0,
+        hasRecorded: false,
+        chatMessages: [],
+        isFinished: false,
+      },
+    });
     setIsAwaitingCoachResponse(false);
-    setIsFinished(false);
-    setChatMessages([]);
-  }, [lessonId, exercises.length]);
+  }, [lessonId]);
 
   useEffect(() => {
     return () => {
@@ -221,20 +274,27 @@ export const PracticeSetupScreen: React.FC = () => {
       nextQuestionTimeoutRef.current = null;
     }
     const prevIndex = Math.max(0, currentExerciseIndex - 1);
-    setCurrentExerciseIndex(prevIndex);
-    setHasRecorded(false);
+    setTabStates(prev => ({
+      ...prev,
+      [activeSpeakingTab]: {
+        ...prev[activeSpeakingTab],
+        currentExerciseIndex: prevIndex,
+        hasRecorded: false,
+        chatMessages: prev[activeSpeakingTab].chatMessages.filter(message => {
+          if (!message.id.startsWith('question-')) return false;
+          const turn = Number((message.id.split('-')[1] ?? '-1').trim());
+          return Number.isNaN(turn) || turn <= prevIndex;
+        }),
+      },
+    }));
     setIsAwaitingCoachResponse(false);
-    setChatMessages(prev =>
-      prev.filter(message => {
-        if (!message.id.startsWith('question-')) return false;
-        const turn = Number((message.id.split('-')[1] ?? '-1').trim());
-        return Number.isNaN(turn) || turn <= prevIndex;
-      })
-    );
   };
 
   const startRecording = async () => {
-    setHasRecorded(false);
+    setTabStates(prev => ({
+      ...prev,
+      [activeSpeakingTab]: { ...prev[activeSpeakingTab], hasRecorded: false },
+    }));
     const ok = await startPronunciationRecording();
     if (ok) setIsRecording(true);
   };
@@ -244,7 +304,10 @@ export const PracticeSetupScreen: React.FC = () => {
     const isLastExercise = currentExerciseIndex >= exercises.length - 1;
     const uri = await stopPronunciationRecording();
     setIsRecording(false);
-    setHasRecorded(true);
+    setTabStates(prev => ({
+      ...prev,
+      [activeSpeakingTab]: { ...prev[activeSpeakingTab], hasRecorded: true },
+    }));
     setIsAwaitingCoachResponse(true);
     let fb = null;
     try {
@@ -252,7 +315,7 @@ export const PracticeSetupScreen: React.FC = () => {
     } finally {
       setIsAwaitingCoachResponse(false);
     }
-    console.log('[PracticeSetup] submitAfterRecording response:', fb);
+    prettyLog('[PracticeSetup] submitAfterRecording response', fb);
 
     if (activeScenario) {
       const now = Date.now();
@@ -263,30 +326,39 @@ export const PracticeSetupScreen: React.FC = () => {
         [learnerHint, overallFeedback].filter(Boolean).join('\n\n') ||
         'Mình đã nhận câu trả lời của bạn. Chúng ta sang câu tiếp theo nhé.';
 
-      setChatMessages(prev => [
+      setTabStates(prev => ({
         ...prev,
-        {
-          id: `user-${currentExerciseIndex}-${now}`,
-          role: 'user',
-          text: userText,
-          translation: activeScenario.exampleAnswerTranslation,
-          score: fb?.score,
-          timestamp: now,
+        [activeSpeakingTab]: {
+          ...prev[activeSpeakingTab],
+          chatMessages: [
+            ...prev[activeSpeakingTab].chatMessages,
+            {
+              id: `user-${currentExerciseIndex}-${now}`,
+              role: 'user',
+              text: userText,
+              translation: activeScenario.exampleAnswerTranslation,
+              score: fb?.score,
+              timestamp: now,
+            },
+            {
+              id: `coach-${currentExerciseIndex}-${now}`,
+              role: 'ai',
+              text: aiText,
+              timestamp: now + 1,
+            },
+          ],
         },
-        {
-          id: `coach-${currentExerciseIndex}-${now}`,
-          role: 'ai',
-          text: aiText,
-          timestamp: now + 1,
-        },
-      ]);
+      }));
     }
 
     if (exercises.length === 0) return;
 
     // Hiện phản hồi bot xong thì chuyển câu hỏi tiếp theo ngay.
     if (isLastExercise) {
-      setIsFinished(true);
+      setTabStates(prev => ({
+        ...prev,
+        [activeSpeakingTab]: { ...prev[activeSpeakingTab], isFinished: true },
+      }));
     } else {
       const nextIndex = Math.min(exercises.length - 1, currentExerciseIndex + 1);
       if (nextQuestionTimeoutRef.current) {
@@ -294,8 +366,14 @@ export const PracticeSetupScreen: React.FC = () => {
       }
       // Delay nhẹ để người dùng kịp đọc phản hồi trước khi sang câu kế.
       nextQuestionTimeoutRef.current = setTimeout(() => {
-        setCurrentExerciseIndex(nextIndex);
-        setHasRecorded(false);
+        setTabStates(prev => ({
+          ...prev,
+          [activeSpeakingTab]: {
+            ...prev[activeSpeakingTab],
+            currentExerciseIndex: nextIndex,
+            hasRecorded: false,
+          },
+        }));
         nextQuestionTimeoutRef.current = null;
       }, 2500);
     }
@@ -307,16 +385,20 @@ export const PracticeSetupScreen: React.FC = () => {
       nextQuestionTimeoutRef.current = null;
     }
     const prevIndex = Math.max(0, currentExerciseIndex - 1);
-    setCurrentExerciseIndex(prevIndex);
+    setTabStates(prev => ({
+      ...prev,
+      [activeSpeakingTab]: {
+        ...prev[activeSpeakingTab],
+        currentExerciseIndex: prevIndex,
+        hasRecorded: false,
+        chatMessages: prev[activeSpeakingTab].chatMessages.filter(message => {
+          if (!message.id.startsWith('question-')) return false;
+          const turn = Number((message.id.split('-')[1] ?? '-1').trim());
+          return Number.isNaN(turn) || turn <= prevIndex;
+        }),
+      },
+    }));
     setIsAwaitingCoachResponse(false);
-    setHasRecorded(false);
-    setChatMessages(prev =>
-      prev.filter(message => {
-        if (!message.id.startsWith('question-')) return false;
-        const turn = Number((message.id.split('-')[1] ?? '-1').trim());
-        return Number.isNaN(turn) || turn <= prevIndex;
-      })
-    );
 
     const ok = await startPronunciationRecording();
     if (ok) setIsRecording(true);
@@ -324,21 +406,48 @@ export const PracticeSetupScreen: React.FC = () => {
 
   useEffect(() => {
     if (!scenario) return;
-    setChatMessages(prev => {
-      const hasQuestion = prev.some(m => m.id.startsWith(`question-${currentExerciseIndex}-`));
+    setTabStates(prev => {
+      const current = prev[activeSpeakingTab];
+      const hasQuestion = current.chatMessages.some(m =>
+        m.id.startsWith(`question-${currentExerciseIndex}-`)
+      );
       if (hasQuestion) return prev;
-      return [
+      return {
         ...prev,
-        {
-          id: `question-${currentExerciseIndex}-${Date.now()}`,
-          role: 'ai',
-          text: scenario.question,
-          translation: scenario.translation,
-          timestamp: Date.now(),
+        [activeSpeakingTab]: {
+          ...current,
+          chatMessages: [
+            ...current.chatMessages,
+            {
+              id: `question-${currentExerciseIndex}-${Date.now()}`,
+              role: 'ai',
+              text: scenario.question,
+              translation: scenario.translation,
+              timestamp: Date.now(),
+            },
+          ],
         },
-      ];
+      };
     });
-  }, [currentExerciseIndex, scenario]);
+  }, [activeSpeakingTab, currentExerciseIndex, scenario]);
+
+  useEffect(() => {
+    if (!lessonId) return;
+    prettyLog('[PracticeSetup] exercisesByLesson response', {
+      lessonId,
+      levelCode: selectedExerciseType.code,
+      response: exercisesByLesson,
+    });
+  }, [lessonId, selectedExerciseType.code, exercisesByLesson]);
+
+  useEffect(() => {
+    if (!lessonId || !generateSpeakingResponse) return;
+    prettyLog('[PracticeSetup] generateSpeaking response', {
+      lessonId,
+      levelCode: selectedExerciseType.code,
+      response: generateSpeakingResponse,
+    });
+  }, [lessonId, selectedExerciseType.code, generateSpeakingResponse]);
 
   // 🌟 NẾU ĐÃ BẤM HOÀN THÀNH: Render màn hình tổng kết đè lên luôn
   if (isFinished) {
@@ -389,31 +498,40 @@ export const PracticeSetupScreen: React.FC = () => {
         />
         <View className="mt-6 flex-row gap-3">
           <TouchableOpacity
+            onPress={() => {
+              setActiveSpeakingTab('basic');
+            }}
             className="flex-1 rounded-2xl py-3"
             style={{
               borderWidth: 2,
-              borderColor: COLORS.primary,
-              backgroundColor: COLORS.pinkSoft,
+              borderColor: activeSpeakingTab === 'basic' ? COLORS.primary : COLORS.inactiveBorder,
+              backgroundColor:
+                activeSpeakingTab === 'basic' ? COLORS.pinkSoft : COLORS.inactiveTabBg,
             }}
           >
             <Text
               className="text-center text-sm font-bold uppercase tracking-wide"
-              style={{ color: COLORS.primary }}
+              style={{ color: activeSpeakingTab === 'basic' ? COLORS.primary : '#9CA3AF' }}
             >
               CƠ BẢN
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={() => {
+              setActiveSpeakingTab('advanced');
+            }}
             className="flex-1 rounded-2xl py-3"
             style={{
               borderWidth: 2,
-              borderColor: COLORS.inactiveBorder,
-              backgroundColor: COLORS.inactiveTabBg,
+              borderColor:
+                activeSpeakingTab === 'advanced' ? COLORS.primary : COLORS.inactiveBorder,
+              backgroundColor:
+                activeSpeakingTab === 'advanced' ? COLORS.pinkSoft : COLORS.inactiveTabBg,
             }}
           >
             <Text
               className="text-center text-sm font-bold uppercase tracking-wide"
-              style={{ color: '#9CA3AF' }}
+              style={{ color: activeSpeakingTab === 'advanced' ? COLORS.primary : '#9CA3AF' }}
             >
               NÂNG CAO
             </Text>
