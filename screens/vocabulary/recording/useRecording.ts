@@ -4,6 +4,7 @@ import { Alert } from 'react-native';
 import { Audio } from 'expo-av';
 
 import { submitSpeakingPronunciation } from '@/api/submitSpeakingPronunciation';
+import { useSpeakingPronunciationRecorder } from '@/hooks/useSpeakingPronunciationRecorder';
 
 import { SPEAKING_DEFAULT_LOW_SCORE, SPEAKING_NEXT_THRESHOLD } from './constants';
 import { Question, SpeakingState } from './types';
@@ -61,27 +62,18 @@ export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecord
   const [state, setState] = useState<SpeakingState>('IDLE');
   const [score, setScore] = useState<number | null>(null);
 
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const currentQuestion = questions.length > 0 ? questions[currentIndex] : null;
   const canGoNext = score !== null && score > SPEAKING_NEXT_THRESHOLD;
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Quyền truy cập', 'Ứng dụng cần quyền sử dụng Micro để thu âm.');
-      }
-    })();
-  }, []);
+  const recorder = useSpeakingPronunciationRecorder();
 
   useEffect(() => {
     return () => {
-      if (recording) recording.stopAndUnloadAsync().catch(() => {});
       if (sound) sound.unloadAsync().catch(() => {});
     };
-  }, [recording, sound]);
+  }, [sound]);
 
   const playSampleAudio = async () => {
     // Ngăn chặn việc bấm chồng chéo nếu đang ghi âm, đang xử lý điểm, hoặc đang phát âm thanh
@@ -94,7 +86,6 @@ export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecord
       return;
 
     // LƯU LẠI TRẠNG THÁI HIỆN TẠI ĐỂ BIẾT MÀ QUAY VỀ
-    // (Nếu đang ở IDLE -> quay về IDLE. Nếu đang ở RESULT -> quay về RESULT)
     const previousState = state;
 
     if (!currentQuestion.audioUrl) {
@@ -132,12 +123,13 @@ export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecord
   const startRecording = async () => {
     try {
       if (sound) await sound.unloadAsync().catch(() => {});
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecording(newRecording);
-      setState('RECORDING');
+      const success = await recorder.start();
+      if (success) {
+        setState('RECORDING');
+      } else {
+        Alert.alert('Lỗi', 'Không thể bắt đầu ghi âm. Vui lòng kiểm tra quyền truy cập Micro.');
+        setState('IDLE');
+      }
     } catch (err) {
       console.error('Không thể bắt đầu thu âm', err);
       setState('IDLE');
@@ -145,13 +137,10 @@ export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecord
   };
 
   const stopRecordingAndScore = async () => {
-    if (!recording) return;
     setState('PROCESSING');
 
     try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      setRecording(null);
+      const uri = await recorder.stop();
 
       if (uri && currentQuestion) {
         const actualVocabId = currentQuestion.vocab_id || currentQuestion.id;
@@ -207,6 +196,7 @@ export const useRecording = ({ questions = [], onComplete, lessonId }: UseRecord
     score,
     canGoNext,
     nextThreshold: SPEAKING_NEXT_THRESHOLD,
+    micLevel: recorder.micLevel,
     playSampleAudio,
     startRecording,
     stopRecordingAndScore,

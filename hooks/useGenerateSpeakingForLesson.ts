@@ -88,8 +88,12 @@ async function fetchGenerateSpeaking(
       response: getRes.data,
     });
 
+    console.log(
+      '[GenerateSpeaking] fetchGenerateSpeaking found exercises:',
+      getRes.data?.data?.length
+    );
     return {
-      exercisesByLesson: getRes.data,
+      exercisesByLesson: getRes.data.data,
       generateSpeaking: null,
     };
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -122,8 +126,9 @@ async function fetchGenerateSpeaking(
         totalExercises: extractExercises(getAfterRes.data).length,
         response: getAfterRes.data,
       });
+      console.log('[GenerateSpeaking] fetched after generate:', getAfterRes.data?.data?.length);
       return {
-        exercisesByLesson: getAfterRes.data,
+        exercisesByLesson: getAfterRes.data?.data || [],
         generateSpeaking: postRes.data,
       };
     } catch (getAfterErr) {

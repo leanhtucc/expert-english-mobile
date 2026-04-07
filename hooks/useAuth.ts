@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { authApi } from '@/api';
 import { useAuthStore } from '@/stores/auth.store';
@@ -136,7 +136,7 @@ export const useAuth = () => {
       setLoading(false);
     }
   };
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     try {
       const response = await authApi.getDataUser();
       const userData = (response.data as UserProfileResponse).data;
@@ -155,7 +155,7 @@ export const useAuth = () => {
       console.log('🚨 FULL ERROR OBJECT:', error);
       return null;
     }
-  };
+  }, []);
   const updateProfile = async (id: string, fullname: string) => {
     setLoading(true);
     try {

@@ -75,8 +75,8 @@ export const VerifyOTPScreen: React.FC = () => {
             <View className="mt-10 flex-1">
               <VerifyIcon />
               <VerifyHeader
-                title="Verify your Email"
-                subtitle={`We've sent a 6-digit verification code to ${email}`}
+                title="Xác thực Email"
+                subtitle={`Chúng tôi đã gửi mã xác thực 6 chữ số đến ${email}`}
               />
               <OTPInput length={6} onComplete={handleOTPComplete} onChangeOTP={setOtp} />
 

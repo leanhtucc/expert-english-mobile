@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { IconCheckCourse, IconLockLession } from '@/components/icon';
@@ -29,7 +29,7 @@ interface LearningRoadmapProps {
   onLessonPress?: (lessonId: string, status: RoadmapStatus) => void;
 }
 
-const HorizontalModuleTracker: React.FC<{ modules: RoadmapModuleData[] }> = ({ modules }) => {
+const HorizontalModuleTracker: React.FC<{ modules: RoadmapModuleData[] }> = memo(({ modules }) => {
   if (!modules || modules.length === 0) return null;
 
   const displayModules = [...modules];
@@ -96,9 +96,10 @@ const HorizontalModuleTracker: React.FC<{ modules: RoadmapModuleData[] }> = ({ m
       })}
     </View>
   );
-};
+});
+HorizontalModuleTracker.displayName = 'HorizontalModuleTracker';
 
-const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
+const RoadmapDot: React.FC<{ status: RoadmapStatus }> = memo(({ status }) => {
   const { colors, isDark } = useAppTheme();
 
   if (status === 'completed') {
@@ -158,11 +159,12 @@ const RoadmapDot: React.FC<{ status: RoadmapStatus }> = ({ status }) => {
       </View>
     </View>
   );
-};
+});
+RoadmapDot.displayName = 'RoadmapDot';
 
 const RoadmapItem: React.FC<
   RoadmapItemData & { isLast?: boolean; onPress?: (id: string, status: RoadmapStatus) => void }
-> = ({ _id, displayDate, name_en, status, isLast, onPress }) => {
+> = memo(({ _id, displayDate, name_en, status, isLast, onPress }) => {
   const { colors, isDark } = useAppTheme();
   const isActive = status === 'active';
   const isCompleted = status === 'completed';
@@ -239,54 +241,53 @@ const RoadmapItem: React.FC<
       </View>
     </TouchableOpacity>
   );
-};
+});
+RoadmapItem.displayName = 'RoadmapItem';
 
 // ========================================================
 // COMPONENT CHÍNH (WRAPPER)
 // ========================================================
-export const LearningRoadmap: React.FC<LearningRoadmapProps> = ({
-  pathTitle,
-  modules,
-  items,
-  onLessonPress,
-}) => {
-  const { colors } = useAppTheme();
+export const LearningRoadmap: React.FC<LearningRoadmapProps> = memo(
+  ({ pathTitle, modules, items, onLessonPress }) => {
+    const { colors } = useAppTheme();
 
-  if (!items || items.length === 0) {
+    if (!items || items.length === 0) {
+      return (
+        <View className="mx-5 items-center py-10">
+          <Text style={{ color: colors.muted }}>Chưa có lộ trình học tập.</Text>
+        </View>
+      );
+    }
+
     return (
-      <View className="mx-5 items-center py-10">
-        <Text style={{ color: colors.muted }}>Chưa có lộ trình học tập.</Text>
+      <View className="mx-5 mb-10">
+        {/* Tiêu đề Khóa học */}
+        <View className="mb-5 flex-row items-center justify-between">
+          <View className="mb-2">
+            <Text className="text-[22px] font-black tracking-tight text-[#0F172A]">
+              Learning Roadmap
+            </Text>
+            {pathTitle && <Text className="mt-1 text-[14px] text-[#8C7A78]">{pathTitle}</Text>}
+          </View>
+        </View>
+
+        {/* Dải phân cách Tuần (Nằm ngang) */}
+        <HorizontalModuleTracker modules={modules || []} />
+
+        {/* Danh sách bài học (Dọc) */}
+        {items.map((item, index) => (
+          <RoadmapItem
+            key={item._id}
+            _id={item._id}
+            displayDate={item.displayDate}
+            name_en={item.name_en}
+            status={item.status}
+            isLast={index === items.length - 1}
+            onPress={onLessonPress}
+          />
+        ))}
       </View>
     );
   }
-
-  return (
-    <View className="mx-5 mb-10">
-      {/* Tiêu đề Khóa học */}
-      <View className="mb-5 flex-row items-center justify-between">
-        <View className="mb-2">
-          <Text className="text-[22px] font-black tracking-tight text-[#0F172A]">
-            Learning Roadmap
-          </Text>
-          {pathTitle && <Text className="mt-1 text-[14px] text-[#8C7A78]">{pathTitle}</Text>}
-        </View>
-      </View>
-
-      {/* Dải phân cách Tuần (Nằm ngang) */}
-      <HorizontalModuleTracker modules={modules || []} />
-
-      {/* Danh sách bài học (Dọc) */}
-      {items.map((item, index) => (
-        <RoadmapItem
-          key={item._id}
-          _id={item._id}
-          displayDate={item.displayDate}
-          name_en={item.name_en}
-          status={item.status}
-          isLast={index === items.length - 1}
-          onPress={onLessonPress}
-        />
-      ))}
-    </View>
-  );
-};
+);
+LearningRoadmap.displayName = 'LearningRoadmap';

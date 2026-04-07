@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -42,13 +42,28 @@ export const HomeScreen: React.FC = () => {
     fetchUserInfo().then(user => user && setUserName(user.username));
   }, [fetchUserInfo]);
 
-  const handleLessonPress = (lessonId: string, status: string) => {
-    if (status === 'locked') {
-      showToast('Vui lòng hoàn thành các bài học trước đó!');
+  const handleLessonPress = useCallback(
+    (lessonId: string, status: string) => {
+      if (status === 'locked') {
+        showToast('Vui lòng hoàn thành các bài học trước đó!');
+        return;
+      }
+      navigation.navigate('VocabularyListScreen', { lessonId });
+    },
+    [navigation, showToast]
+  );
+
+  const handleOpenMenu = useCallback(() => setIsMenuVisible(true), []);
+  const handleCloseMenu = useCallback(() => setIsMenuVisible(false), []);
+
+  const handleStartTodayLesson = useCallback(() => {
+    const lessonId = todayLesson?._id;
+    if (!lessonId) {
+      showToast('Không tìm thấy bài học hiện tại!');
       return;
     }
     navigation.navigate('VocabularyListScreen', { lessonId });
-  };
+  }, [navigation, todayLesson?._id, showToast]);
 
   // ==========================================
   // RENDER UI
@@ -81,7 +96,7 @@ export const HomeScreen: React.FC = () => {
         className="z-10"
       >
         {/* NÚT MENU CỦA HEADER ĐỂ MỞ DRAWER */}
-        <HeaderGreeting name={userName} onMenuPress={() => setIsMenuVisible(true)} />
+        <HeaderGreeting name={userName} onMenuPress={handleOpenMenu} />
 
         <HeroGoalCard level={currentPath?.target_level?.toUpperCase() || 'BEGINNER'} />
 
@@ -90,14 +105,7 @@ export const HomeScreen: React.FC = () => {
             title={todayLesson?.name_vi || todayLesson?.name_en || 'Chưa có bài học'}
             category={todayLesson?.lesson_type?.toUpperCase() || 'VOCABULARY'}
             description={todayLesson?.name_en || 'Hãy bắt đầu hành trình học tập ngay hôm nay!'}
-            onPress={() => {
-              const lessonId = todayLesson?._id;
-              if (!lessonId) {
-                showToast('Không tìm thấy bài học hiện tại!');
-                return;
-              }
-              navigation.navigate('VocabularyListScreen', { lessonId });
-            }}
+            onPress={handleStartTodayLesson}
           />
         </View>
 
@@ -142,10 +150,7 @@ export const HomeScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <QuestMasterDrawer
-        visible={isMenuVisible}
-        onClose={() => setIsMenuVisible(false)} // Action đóng
-      />
+      <QuestMasterDrawer visible={isMenuVisible} onClose={handleCloseMenu} />
     </SafeAreaView>
   );
 };
