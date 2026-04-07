@@ -54,21 +54,21 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
 
-    // 1. INTERVAL TỐC ĐỘ VỪA PHẢI (Mục tiêu ~15-20 giây)
+    // 1. INTERVAL TỐC ĐỘ CHẬM HƠN (Mục tiêu ~40 giây)
     const interval = setInterval(() => {
       setProgress(prev => {
         let increment = 0;
 
-        // Mỗi 800ms tăng trung bình 4-6% -> ~15-18 giây sẽ chạm mốc 95%
+        // Mỗi 800ms tăng theo mức dưới đây -> ~40 giây sẽ chạm mốc 98%
         if (prev < 50) {
-          // Giai đoạn 1: 0-50% (Chạy đều tay)
-          increment = 3 + Math.random() * 3;
-        } else if (prev < 90) {
-          // Giai đoạn 2: 50-90% (Chậm lại một chút để tạo cảm giác xử lý sâu)
+          // Giai đoạn 1: 0-50% (Mất khoảng 16s - 20 steps)
           increment = 1.5 + Math.random() * 2;
+        } else if (prev < 90) {
+          // Giai đoạn 2: 50-90% (Mất khoảng 16s - 20 steps)
+          increment = 1 + Math.random() * 2;
         } else if (prev < 98) {
-          // Giai đoạn 3: 90-98% (Bò rất chậm để chờ tín hiệu API)
-          increment = 0.3 + Math.random() * 0.7;
+          // Giai đoạn 3: 90-98% (Bò rất chậm để chờ tín hiệu API, mất khoảng 8s - 10 steps)
+          increment = 0.5 + Math.random() * 0.6;
         } else {
           // Treo nhẹ ở 99% nếu API chưa xong
           increment = 0.05;

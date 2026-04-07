@@ -39,10 +39,7 @@ export const SessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
 
   const handleGoHome = () => {
     if (onClose) onClose();
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Home' }],
-    });
+    navigation.navigate('TabNavigator', { screen: 'Home' });
   };
 
   return (
@@ -60,10 +57,10 @@ export const SessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
           paddingBottom: insets.bottom + 24,
         }}
       >
-        {/* Nút Tắt */}
+        {/* Nút Back về Home */}
         <View className="mb-8 w-full flex-row items-center">
           <TouchableOpacity onPress={handleGoHome} className="-ml-2 p-2">
-            <Feather name="x" size={28} color="#0F172A" />
+            <Feather name="arrow-left" size={28} color="#0F172A" />
           </TouchableOpacity>
           <View className="mr-[30px] flex-1 items-center">
             <Text className="text-[18px] font-bold text-[#0F172A]">Session Summary</Text>

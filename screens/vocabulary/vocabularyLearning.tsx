@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
 
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
@@ -15,7 +15,7 @@ import { FlashcardScreen } from './flashcard/FlashcardScreen';
 import { ImageQuizScreen } from './image-quiz';
 import { MatchTermsScreen } from './match-terms';
 import { MultipleChoiceScreen } from './multiple-choice';
-import { RecordingScreen } from './recording';
+import { SpeakingPracticeContainer } from './recording/SpeakingPracticeContainer';
 import { LessonSummaryScreen } from './result';
 import { SessonSummaryScreen } from './result/SessonSummaryScreen';
 
@@ -48,7 +48,13 @@ interface UserAnswerItem {
   correctContent: string;
 }
 
-type Step = 'FLASHCARD' | 'FLASHCARD_SUMMARY' | 'PREPARING_QUIZ' | 'DOING_QUIZ' | 'FINAL_SUMMARY';
+type Step =
+  | 'FLASHCARD'
+  | 'FLASHCARD_SUMMARY'
+  | 'PREPARING_QUIZ'
+  | 'DOING_QUIZ'
+  | 'FINAL_SUMMARY'
+  | 'RECORDING_PRACTICE';
 
 export default function VocabularyLearning() {
   const navigation = useNavigation();
@@ -69,6 +75,9 @@ export default function VocabularyLearning() {
   const [userAnswers, setUserAnswers] = useState<UserAnswerItem[]>([]);
   const startTimeRef = useRef(Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSpeakingDoneLocal, setIsSpeakingDoneLocal] = useState(
+    route.params?.isSpeakingDone || false
+  );
 
   // 🌟 FIX: Thêm cờ để chống việc gọi API submit nhiều lần khi render lại
   const hasAutoSubmittedRef = useRef(false);
@@ -93,13 +102,18 @@ export default function VocabularyLearning() {
       return pA - pB;
     });
 
-    return sorted.map(exercise => {
-      const newEx = JSON.parse(JSON.stringify(exercise));
-      if (newEx.type === 'multiple_choice' && newEx.questionData?.options) {
-        newEx.questionData.options = shuffleArray(newEx.questionData.options);
-      }
-      return newEx;
-    });
+    return sorted
+      .filter(ex => {
+        const t = ex.type || ex.type_info?.code || '';
+        return t !== 'speaking' && t !== 'speaking_lv1';
+      })
+      .map(exercise => {
+        const newEx = JSON.parse(JSON.stringify(exercise));
+        if (newEx.type === 'multiple_choice' && newEx.questionData?.options) {
+          newEx.questionData.options = shuffleArray(newEx.questionData.options);
+        }
+        return newEx;
+      });
   }, [rawQuizList]);
 
   const hasFetchedRef = useRef(false);
@@ -128,39 +142,41 @@ export default function VocabularyLearning() {
 
   const handleClose = () => navigation.canGoBack() && navigation.goBack();
 
-  const handleAnswerSubmit = (
-    scoreAchieved: number,
-    answerData: { selection: string; correct: string; isCorrect: boolean }
-  ) => {
-    if (answerData.isCorrect) {
-      setQuizScore(prev => prev + scoreAchieved);
+  const handleAnswerSubmit = useCallback(
+    (
+      scoreAchieved: number,
+      answerData: { selection: string; correct: string; isCorrect: boolean }
+    ) => {
+      if (answerData.isCorrect) {
+        setQuizScore(prev => prev + scoreAchieved);
 
-      const newAnswer: UserAnswerItem = {
-        exercise_id: processedQuizList[currentQuizIndex]._id,
-        is_correct: answerData.isCorrect,
-        score: scoreAchieved,
-        userSelection: answerData.selection,
-        correctContent: answerData.correct,
-      };
-      setUserAnswers(prev => [...prev, newAnswer]);
+        const newAnswer: UserAnswerItem = {
+          exercise_id: processedQuizList[currentQuizIndex]._id,
+          is_correct: answerData.isCorrect,
+          score: scoreAchieved,
+          userSelection: answerData.selection,
+          correctContent: answerData.correct,
+        };
+        setUserAnswers(prev => [...prev, newAnswer]);
 
-      setWrongAttempts(0);
-      setShowHintSheet(false);
+        setWrongAttempts(0);
+        setShowHintSheet(false);
 
-      if (currentQuizIndex < processedQuizList.length - 1) {
-        setCurrentQuizIndex(prev => prev + 1);
+        if (currentQuizIndex < processedQuizList.length - 1) {
+          setCurrentQuizIndex(prev => prev + 1);
+        } else {
+          setCurrentStep('FINAL_SUMMARY');
+        }
       } else {
-        setCurrentStep('FINAL_SUMMARY');
+        const newAttempts = wrongAttempts + 1;
+        setWrongAttempts(newAttempts);
       }
-    } else {
-      const newAttempts = wrongAttempts + 1;
-      setWrongAttempts(newAttempts);
-    }
-  };
+    },
+    [currentQuizIndex, processedQuizList, wrongAttempts]
+  );
 
   // 🌟 SỬA ĐỔI: Hàm Submit ngầm không chứa handleClose() để tránh văng người dùng ra ngoài
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleAutoSubmit = async () => {
+  const handleAutoSubmit = useCallback(async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
@@ -187,7 +203,7 @@ export default function VocabularyLearning() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [isSubmitting, lessonId, userAnswers]);
 
   // 🌟 THÊM MỚI: Tự động chạy hàm Submit khi màn hình chuyển sang FINAL_SUMMARY
   useEffect(() => {
@@ -247,7 +263,6 @@ export default function VocabularyLearning() {
     const getCorrectAnswer = () => {
       if (currentQuiz.type === 'multiple_choice') return currentQuiz.questionData.correctAnswer;
       if (currentQuiz.type === 'fill_in_blank') return currentQuiz.questionData.correctAnswer;
-      if (currentQuiz.type === 'speaking') return currentQuiz.questionData.text;
       return 'matched_success';
     };
 
@@ -330,24 +345,7 @@ export default function VocabularyLearning() {
           />
         );
         break;
-      case 'speaking':
-        QuizComponent = (
-          <RecordingScreen
-            key={currentKey}
-            questions={[currentQuiz.questionData]}
-            onComplete={() =>
-              handleAnswerSubmit(100, {
-                selection: 'user_recorded_audio',
-                correct: getCorrectAnswer(),
-                isCorrect: true,
-              })
-            }
-            progress={progressData}
-            onClose={handleClose}
-            onBack={handleClose}
-          />
-        );
-        break;
+
       default:
         QuizComponent = (
           <View className="flex-1 items-center justify-center bg-white">
@@ -370,7 +368,6 @@ export default function VocabularyLearning() {
   }
 
   if (currentStep === 'FINAL_SUMMARY') {
-    const isSpeakingDone = route.params?.isSpeakingDone || false;
     const accuracy =
       processedQuizList.length > 0
         ? Math.round((quizScore / (processedQuizList.length * 100)) * 100)
@@ -385,21 +382,35 @@ export default function VocabularyLearning() {
       <LessonSummaryScreen
         data={{ totalWords: processedQuizList.length, accuracy, timeSpent: `${mins}:${secs}` }}
         // 🌟 Điều khiển Ẩn/Hiện Radar bằng cờ này
-        showRadarChart={isSpeakingDone}
+        showRadarChart={isSpeakingDoneLocal}
         // 🌟 Đổi chữ trong Nút Action
-        primaryActionText={isSpeakingDone ? 'Next lesson' : 'Start Speaking'}
+        primaryActionText={isSpeakingDoneLocal ? 'Next lesson' : 'Start Speaking'}
         onPrimaryAction={() => {
-          if (isSpeakingDone) {
+          if (isSpeakingDoneLocal) {
             // Đã luyện xong cả Speaking -> Bấm Next Lesson thì đóng luồng học
             handleClose();
           } else {
-            // Chưa luyện Speaking -> Điều hướng sang màn hình PracticeSetup
-            (navigation as any).navigate('PracticeSetup', { lessonId });
+            // Chưa luyện Speaking -> Chuyển sang màn ghi âm
+            setCurrentStep('RECORDING_PRACTICE');
           }
         }}
         onClose={handleClose}
       />
     );
   }
+
+  if (currentStep === 'RECORDING_PRACTICE') {
+    return (
+      <SpeakingPracticeContainer
+        lessonId={lessonId}
+        onClose={handleClose}
+        onBack={() => {
+          setIsSpeakingDoneLocal(true);
+          setCurrentStep('FINAL_SUMMARY');
+        }}
+      />
+    );
+  }
+
   return <ActivityIndicator size="large" color="#E11D48" className="flex-1 bg-white" />;
 }

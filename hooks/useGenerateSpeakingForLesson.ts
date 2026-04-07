@@ -32,8 +32,12 @@ async function fetchGenerateSpeaking(lessonId: string): Promise<FetchResult> {
       throw new Error('No exercises found, generating new ones...');
     }
 
+    console.log(
+      '[GenerateSpeaking] fetchGenerateSpeaking found exercises:',
+      getRes.data?.data?.length
+    );
     return {
-      exercisesByLesson: getRes.data,
+      exercisesByLesson: getRes.data.data,
       generateSpeaking: null,
     };
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -49,8 +53,9 @@ async function fetchGenerateSpeaking(lessonId: string): Promise<FetchResult> {
     // 3. Sau khi tạo xong, lấy lại danh sách một lần nữa
     try {
       const getAfterRes = await learningApi.getExercisesByLesson(lessonId);
+      console.log('[GenerateSpeaking] fetched after generate:', getAfterRes.data?.data?.length);
       return {
-        exercisesByLesson: getAfterRes.data,
+        exercisesByLesson: getAfterRes.data?.data || [],
         generateSpeaking: postRes.data,
       };
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

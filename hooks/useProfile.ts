@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
 
 import { authApi } from '@/api';
+import { useAuthStore } from '@/stores/auth.store';
 import { useToastStore } from '@/stores/toast.store';
 
 import { LearningGoal, ProfileStats, UserProfile } from '../screens/profile/types/profile.types';
@@ -41,18 +42,27 @@ export function useProfile() {
 
   async function logout() {
     try {
-      const refreshToken = (await AsyncStorage.getItem('refreshToken')) || 'dummy_refresh_token';
+      const { refreshToken, clearAuth } = useAuthStore.getState();
 
-      await authApi.logout({ refreshToken });
+      if (refreshToken) {
+        await authApi.logout({ refreshToken });
+      }
 
+      clearAuth();
       await AsyncStorage.clear();
 
       showToast('Logged out successfully.', 'success');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Logout failed:', error);
-      showToast('Logout failed. Please try again.', 'error');
+      useAuthStore.getState().clearAuth();
       await AsyncStorage.clear();
+
+      if (error?.response?.status === 401) {
+        showToast('Logged out successfully.', 'success');
+      } else {
+        showToast('Logout failed. Please try again.', 'error');
+      }
       return true;
     }
   }

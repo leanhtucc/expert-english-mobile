@@ -11,9 +11,15 @@ interface MicrophoneButtonProps {
   state: SpeakingState;
   onStart: () => void;
   onStop: () => void;
+  micLevel?: number;
 }
 
-export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({ state, onStart, onStop }) => {
+export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({
+  state,
+  onStart,
+  onStop,
+  micLevel,
+}) => {
   const isProcessing = state === 'PROCESSING';
   const isRecording = state === 'RECORDING';
   const isHidden = state === 'RESULT';
@@ -32,7 +38,10 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({ state, onSta
       >
         {isRecording ? (
           <View style={{ position: 'absolute', top: 0, width: '100%' }}>
-            <WaveformAnimation isRecording={isRecording} />
+            <WaveformAnimation
+              isRecording={isRecording}
+              amplitudes={micLevel !== undefined ? [micLevel] : []}
+            />
           </View>
         ) : (
           // 2. KHI CHƯA THU / ĐANG XỬ LÝ: Hiện cục Mic

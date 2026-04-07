@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 
-import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import React, { memo } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+
+import { Image } from 'expo-image';
 
 import { IconVerified } from '@/components/icon';
 
@@ -15,13 +17,15 @@ interface Props {
   onEdit?: () => void;
 }
 
-export const AvatarSection = ({ avatar, name, email, level, onEdit }: Props) => (
+export const AvatarSection = memo(({ avatar, name, email, level, onEdit }: Props) => (
   <View className="mb-6 mt-5 items-center">
     <View className="relative">
       <Image
         source={{ uri: avatar }}
         className="rounded-full border-4"
         style={{ width: AVATAR_SIZE, height: AVATAR_SIZE, borderColor: PRIMARY }}
+        transition={200}
+        contentFit="cover"
       />
       <TouchableOpacity
         className="absolute bottom-0 right-0 rounded-full bg-red-600 p-1"
@@ -45,4 +49,5 @@ export const AvatarSection = ({ avatar, name, email, level, onEdit }: Props) => 
       </TouchableOpacity>
     </View>
   </View>
-);
+));
+AvatarSection.displayName = 'AvatarSection';

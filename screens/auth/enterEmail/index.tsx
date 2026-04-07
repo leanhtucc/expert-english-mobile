@@ -81,10 +81,7 @@ export const EnterEmailScreen: React.FC = () => {
 
             <View className="mt-12 flex flex-1">
               <LoginIcon />
-              <LoginHeader
-                title="Your Email"
-                subtitle="Please enter your email address to continue."
-              />
+              <LoginHeader title="Nhập email của bạn" subtitle="Vui lòng nhập email để tiếp tục" />
               <EmailInput value={email} onChangeText={setEmail} error={error} />
               <SubmitButton onPress={handleSubmit} disabled={!email.trim()} loading={loading} />
             </View>

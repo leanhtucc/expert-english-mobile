@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 
-import React, { useState } from 'react';
-import { FlatList, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { FlatList, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconMascoCertificates } from '@/components/icon';
@@ -21,33 +21,37 @@ export default function CertificatesScreen() {
   });
 
   // Header Component của FlatList
-  const ListHeader = () => (
-    <View className="pt-6">
-      {/* Title Section */}
-      <Text className="mx-5 mb-3 text-[11px] font-bold uppercase tracking-[1.5px] text-[#9E001F]">
-        ACADEMIC RECORDS
-      </Text>
+  const ListHeader = useMemo(() => {
+    const Component = () => (
+      <View className="pt-6">
+        {/* Title Section */}
+        <Text className="mx-5 mb-3 text-[11px] font-bold uppercase tracking-[1.5px] text-[#9E001F]">
+          ACADEMIC RECORDS
+        </Text>
 
-      {/* Summary Card - Đã thu gọn và style giống ảnh */}
-      <View className="mx-5 mb-8 flex-row items-center justify-between rounded-[20px] bg-[#FFF4F4] p-5">
-        <View>
-          <Text className="mb-1 text-[13px] font-medium text-[#8C7A78]">Tổng số chứng chỉ</Text>
-          <View className="flex-row items-baseline gap-1.5">
-            <Text className="text-[40px] font-black tracking-tight text-[#1E293B]">24</Text>
-            <Text className="text-[13px] font-medium text-[#8C7A78]">đã tích lũy</Text>
+        {/* Summary Card - Đã thu gọn và style giống ảnh */}
+        <View className="mx-5 mb-8 flex-row items-center justify-between rounded-[20px] bg-[#FFF4F4] p-5">
+          <View>
+            <Text className="mb-1 text-[13px] font-medium text-[#8C7A78]">Tổng số chứng chỉ</Text>
+            <View className="flex-row items-baseline gap-1.5">
+              <Text className="text-[40px] font-black tracking-tight text-[#1E293B]">24</Text>
+              <Text className="text-[13px] font-medium text-[#8C7A78]">đã tích lũy</Text>
+            </View>
+          </View>
+
+          {/* Mascot được bọc trong khối nền trắng bo góc */}
+          <View className="h-[75px] w-[75px] items-center justify-center overflow-hidden rounded-[16px] bg-white shadow-sm">
+            <IconMascoCertificates width={95} height={95} className="mt-4" />
           </View>
         </View>
 
-        {/* Mascot được bọc trong khối nền trắng bo góc */}
-        <View className="h-[75px] w-[75px] items-center justify-center overflow-hidden rounded-[16px] bg-white shadow-sm">
-          <IconMascoCertificates width={95} height={95} className="mt-4" />
-        </View>
+        {/* Tab Navigation */}
+        <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
       </View>
-
-      {/* Tab Navigation */}
-      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
-    </View>
-  );
+    );
+    Component.displayName = 'ListHeader';
+    return Component;
+  }, [activeTab]);
 
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8F7]" edges={['top']}>
@@ -69,6 +73,10 @@ export default function CertificatesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
         ListHeaderComponent={ListHeader}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        windowSize={5}
+        removeClippedSubviews={Platform.OS === 'android'}
         renderItem={({ item }) => <CertificateCard data={item} />}
         ListEmptyComponent={
           <View className="mt-10 items-center justify-center">
