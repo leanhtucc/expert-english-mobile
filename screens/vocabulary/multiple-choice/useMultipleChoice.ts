@@ -20,20 +20,32 @@ export const useMultipleChoice = ({ questions, onComplete }: UseMultipleChoicePr
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [eliminatedAnswers, setEliminatedAnswers] = useState<string[]>([]);
   const [, setCorrectCount] = useState(0);
 
   const currentQuestion = questions[currentIndex];
   // Vì VocabularyLearning truyền vào mảng 1 phần tử, nên isLastQuestion luôn True (đúng ý đồ luồng)
   const isLastQuestion = currentIndex === questions.length - 1;
   const isCorrect = selectedAnswer === currentQuestion?.correctAnswer;
+  const visibleOptions = (currentQuestion?.options || []).filter(
+    option => !eliminatedAnswers.includes(option)
+  );
 
   const handleSelectAnswer = useCallback(
     (answer: string) => {
-      if (isAnswered) return;
+      if (isAnswered || eliminatedAnswers.includes(answer)) return;
       setSelectedAnswer(answer);
     },
-    [isAnswered]
+    [isAnswered, eliminatedAnswers]
   );
+
+  const eliminateSelectedAnswer = useCallback(() => {
+    if (!selectedAnswer || selectedAnswer === currentQuestion?.correctAnswer) return;
+
+    setEliminatedAnswers(prev =>
+      prev.includes(selectedAnswer) ? prev : [...prev, selectedAnswer]
+    );
+  }, [selectedAnswer, currentQuestion?.correctAnswer]);
 
   const handleNext = useCallback(() => {
     if (!isAnswered) {
@@ -52,6 +64,7 @@ export const useMultipleChoice = ({ questions, onComplete }: UseMultipleChoicePr
       setCurrentIndex(prev => prev + 1);
       setSelectedAnswer(null);
       setIsAnswered(false);
+      setEliminatedAnswers([]);
     }
   }, [isAnswered, isLastQuestion, selectedAnswer, currentQuestion?.correctAnswer, onComplete]);
 
@@ -59,6 +72,7 @@ export const useMultipleChoice = ({ questions, onComplete }: UseMultipleChoicePr
     setCurrentIndex(0);
     setSelectedAnswer(null);
     setIsAnswered(false);
+    setEliminatedAnswers([]);
     setCorrectCount(0);
   }, []);
   const resetAnswer = useCallback(() => {
@@ -71,6 +85,8 @@ export const useMultipleChoice = ({ questions, onComplete }: UseMultipleChoicePr
     currentIndex,
     totalQuestions: questions.length,
     selectedAnswer,
+    visibleOptions,
+    eliminatedAnswers,
     isAnswered,
     isCorrect,
     isLastQuestion,
@@ -79,6 +95,7 @@ export const useMultipleChoice = ({ questions, onComplete }: UseMultipleChoicePr
       total: questions.length,
     },
     handleSelectAnswer,
+    eliminateSelectedAnswer,
     handleNext,
     reset,
     resetAnswer,

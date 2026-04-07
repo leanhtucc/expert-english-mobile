@@ -1,10 +1,7 @@
 import * as Sentry from '@sentry/react-native';
 
-import 'react-native-reanimated';
-
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { StatusBar } from 'expo-status-bar';
@@ -15,10 +12,11 @@ import RootStack from '@/navigation';
 import '@/translations';
 
 import Toast from './components/Toast';
+import './global.css';
 
 // Initialize Sentry for error tracking
 Sentry.init({
-  dsn: 'https://ea6dd677088dcb31aabbd85249df6c02@o4510742785228800.ingest.de.sentry.io/4510742789423184',
+  dsn: 'https://50d82d30af60d6ac7cf98e0b2b4307ca@o4510742785228800.ingest.de.sentry.io/4511154607423568',
   sendDefaultPii: true,
   enabled: !__DEV__, // Only enable in production
   tracesSampleRate: 1.0, // Adjust in production
@@ -55,10 +53,8 @@ function App() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: palette.background }}>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <SafeAreaProvider>
-        <KeyboardProvider>
-          <RootStack />
-          <Toast />
-        </KeyboardProvider>
+        <RootStack />
+        <Toast />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

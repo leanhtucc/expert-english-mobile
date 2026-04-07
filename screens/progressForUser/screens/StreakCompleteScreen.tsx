@@ -31,7 +31,7 @@ export const StreakCompleteScreen = ({ navigation }: any) => {
           </Animated.Text>
           <Animated.Text
             entering={FadeInDown.delay(300)}
-            className="mt-4 mb-10 text-center text-[15px] leading-6 text-[#7A6F6F]"
+            className="mb-10 mt-4 text-center text-[15px] leading-6 text-[#7A6F6F]"
           >
             Bạn đã duy trì thói quen học tập tuyệt{'\n'}vời. Bạn đang dẫn đầu top 5% học{'\n'}viên
             tích cực nhất.

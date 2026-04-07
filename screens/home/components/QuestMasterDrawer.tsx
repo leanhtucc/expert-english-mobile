@@ -1,6 +1,6 @@
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import {
   Animated,
   Dimensions,
@@ -29,83 +29,87 @@ export interface MissionData {
   isRenew?: boolean;
 }
 
-const MissionCard: React.FC<{ data: MissionData; onPress?: () => void }> = ({ data, onPress }) => {
-  const {
-    title,
-    subtitle,
-    progress,
-    deadline,
-    iconName,
-    iconColor,
-    iconBgColor,
-    hasNotificationDot,
-    isCompleted,
-    isRenew,
-  } = data;
+const MissionCard: React.FC<{ data: MissionData; onPress?: () => void }> = memo(
+  ({ data, onPress }) => {
+    const {
+      title,
+      subtitle,
+      progress,
+      deadline,
+      iconName,
+      iconColor,
+      iconBgColor,
+      hasNotificationDot,
+      isCompleted,
+      isRenew,
+    } = data;
 
-  const isCardActive = progress !== undefined;
+    const isCardActive = progress !== undefined;
 
-  return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={onPress}
-      className={`mx-5 mb-4 overflow-hidden rounded-[20px] p-4 ${
-        isCardActive ? 'bg-[#FFE4E6]' : 'border border-slate-100 bg-white'
-      } ${isRenew ? 'opacity-70' : ''}`}
-    >
-      {isCardActive && <View className="absolute bottom-0 left-0 top-0 w-1.5 bg-[#C8102E]" />}
+    return (
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={onPress}
+        className={`mx-5 mb-4 overflow-hidden rounded-[20px] p-4 ${
+          isCardActive ? 'bg-[#FFE4E6]' : 'border border-slate-100 bg-white'
+        } ${isRenew ? 'opacity-70' : ''}`}
+      >
+        {isCardActive && <View className="absolute bottom-0 left-0 top-0 w-1.5 bg-[#C8102E]" />}
 
-      <View className={`flex-row items-center ${isCardActive ? 'pl-1' : ''}`}>
-        <View
-          className="h-[46px] w-[46px] items-center justify-center rounded-xl"
-          style={{ backgroundColor: iconBgColor }}
-        >
-          <Feather name={iconName} size={24} color={iconColor} />
-          {hasNotificationDot && (
-            <View className="absolute right-[-4px] top-[-4px] h-3.5 w-3.5 rounded-full border-2 border-white bg-[#C8102E]" />
-          )}
-        </View>
+        <View className={`flex-row items-center ${isCardActive ? 'pl-1' : ''}`}>
+          <View
+            className="h-[46px] w-[46px] items-center justify-center rounded-xl"
+            style={{ backgroundColor: iconBgColor }}
+          >
+            <Feather name={iconName} size={24} color={iconColor} />
+            {hasNotificationDot && (
+              <View className="absolute right-[-4px] top-[-4px] h-3.5 w-3.5 rounded-full border-2 border-white bg-[#C8102E]" />
+            )}
+          </View>
 
-        <View className="ml-3 flex-1">
-          <Text className="text-[16px] font-black text-[#1E293B]">{title}</Text>
-          {!isCardActive && <Text className="mb-1 text-[12px] text-[#64748B]">{subtitle}</Text>}
+          <View className="ml-3 flex-1">
+            <Text className="text-[16px] font-black text-[#1E293B]">{title}</Text>
+            {!isCardActive && <Text className="mb-1 text-[12px] text-[#64748B]">{subtitle}</Text>}
 
-          {isCardActive && progress !== undefined && (
-            <View className="my-1.5 flex-row items-center gap-2">
-              <View className="h-1.5 flex-1 rounded-full bg-white/60">
-                <View
-                  className="h-full rounded-full bg-[#C8102E]"
-                  style={{ width: `${progress}%` }}
-                />
+            {isCardActive && progress !== undefined && (
+              <View className="my-1.5 flex-row items-center gap-2">
+                <View className="h-1.5 flex-1 rounded-full bg-white/60">
+                  <View
+                    className="h-full rounded-full bg-[#C8102E]"
+                    style={{ width: `${progress}%` }}
+                  />
+                </View>
+                <Text className="text-[10px] font-bold text-[#C8102E]">{progress}%</Text>
               </View>
-              <Text className="text-[10px] font-bold text-[#C8102E]">{progress}%</Text>
+            )}
+
+            <View className="flex-row items-center gap-1">
+              {isRenew ? (
+                <>
+                  <MaterialIcons name="update" size={14} color="#C8102E" />
+                  <Text className="text-[11px] font-bold text-[#C8102E]">Gia hạn ngay</Text>
+                </>
+              ) : deadline ? (
+                <>
+                  <MaterialIcons name="history" size={12} color="#C8102E" />
+                  <Text className="text-[11px] font-bold text-[#C8102E]">Hết hạn: {deadline}</Text>
+                </>
+              ) : null}
+            </View>
+          </View>
+
+          {isCompleted && (
+            <View className="ml-2 h-6 w-6 items-center justify-center rounded-full bg-[#C8102E]">
+              <Feather name="check" size={14} color="white" />
             </View>
           )}
-
-          <View className="flex-row items-center gap-1">
-            {isRenew ? (
-              <>
-                <MaterialIcons name="update" size={14} color="#C8102E" />
-                <Text className="text-[11px] font-bold text-[#C8102E]">Gia hạn ngay</Text>
-              </>
-            ) : deadline ? (
-              <>
-                <MaterialIcons name="history" size={12} color="#C8102E" />
-                <Text className="text-[11px] font-bold text-[#C8102E]">Hết hạn: {deadline}</Text>
-              </>
-            ) : null}
-          </View>
         </View>
+      </TouchableOpacity>
+    );
+  }
+);
+MissionCard.displayName = 'MissionCard';
 
-        {isCompleted && (
-          <View className="ml-2 h-6 w-6 items-center justify-center rounded-full bg-[#C8102E]">
-            <Feather name="check" size={14} color="white" />
-          </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-};
 // ...
 
 interface QuestMasterDrawerProps {
@@ -158,7 +162,7 @@ const FAKE_MISSIONS: MissionData[] = [
   },
 ];
 
-export const QuestMasterDrawer: React.FC<QuestMasterDrawerProps> = ({ visible, onClose }) => {
+export const QuestMasterDrawer: React.FC<QuestMasterDrawerProps> = memo(({ visible, onClose }) => {
   const translateX = useRef(new Animated.Value(-drawerWidth)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
 
@@ -252,4 +256,5 @@ export const QuestMasterDrawer: React.FC<QuestMasterDrawerProps> = ({ visible, o
       </Animated.View>
     </View>
   );
-};
+});
+QuestMasterDrawer.displayName = 'QuestMasterDrawer';

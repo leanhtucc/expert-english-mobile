@@ -91,14 +91,14 @@ const LoginEmailScreen: React.FC = () => {
             <View className="mt-12 flex-1">
               <EmailIcon />
               <AuthHeader
-                title="Login with Email"
-                subtitle="Please enter your email and password to login your account"
+                title="Đăng nhập với Email"
+                subtitle="Vui lòng nhập email và mật khẩu để đăng nhập tài khoản của bạn"
               />
               <EmailInput value={email} onChangeText={setEmail} error={emailError} />
               <PasswordInput
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu"
                 error={passwordError}
               />
               <LoginButton onPress={handleLogin} disabled={!isFormValid} loading={loading} />

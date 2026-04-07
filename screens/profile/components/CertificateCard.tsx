@@ -1,7 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons';
 
-import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import React, { memo } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+
+import { Image } from 'expo-image';
 
 import { IconCertificateRenew, IconCertificatesCourse } from '@/components/icon';
 
@@ -16,7 +18,7 @@ export interface Certificate {
 }
 
 // Badge nằm gọn bên trong file này
-const StatusBadge: React.FC<{ status: CertificateStatus }> = ({ status }) => {
+const StatusBadge: React.FC<{ status: CertificateStatus }> = memo(({ status }) => {
   const isCompleted = status === 'completed';
   const label = isCompleted ? 'COMPLETED' : 'EXPIRED';
   const dotColor = isCompleted ? 'bg-[#10B981]' : 'bg-[#EF4444]';
@@ -30,9 +32,10 @@ const StatusBadge: React.FC<{ status: CertificateStatus }> = ({ status }) => {
       </Text>
     </View>
   );
-};
+});
+StatusBadge.displayName = 'StatusBadge';
 
-export const CertificateCard: React.FC<{ data: Certificate }> = ({ data }) => {
+export const CertificateCard: React.FC<{ data: Certificate }> = memo(({ data }) => {
   const isExpired = data.status === 'expired';
 
   return (
@@ -54,7 +57,8 @@ export const CertificateCard: React.FC<{ data: Certificate }> = ({ data }) => {
         <Image
           source={{ uri: data.imageUrl }}
           className={`h-full w-full ${isExpired ? 'opacity-60 grayscale' : ''}`}
-          resizeMode="cover"
+          contentFit="cover"
+          transition={200}
         />
         <StatusBadge status={data.status} />
       </View>
@@ -99,4 +103,5 @@ export const CertificateCard: React.FC<{ data: Certificate }> = ({ data }) => {
       </View>
     </TouchableOpacity>
   );
-};
+});
+CertificateCard.displayName = 'CertificateCard';

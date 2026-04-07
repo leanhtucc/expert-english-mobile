@@ -132,8 +132,8 @@ export const CreatePasswordScreen: React.FC = () => {
             <View className="mt-6 flex-1">
               <EmailIcon />
               <AuthHeader
-                title="Signup with Email"
-                subtitle="Complete your profile to get started"
+                title="Tạo mật khẩu mới"
+                subtitle="Nhập mật khẩu mới cho tài khoản của bạn"
               />
 
               <EmailInput value={email} onChangeText={() => {}} error={''} editable={false} />
@@ -141,7 +141,7 @@ export const CreatePasswordScreen: React.FC = () => {
               {/* Nếu API Register của bạn BẮT BUỘC cần Username, bạn phải có trường nhập này. Nếu không cần thì xoá đi nhé */}
               <TextInput
                 className="mb-4 h-[52px] rounded-[16px] border-[1px] border-slate-200 bg-slate-50 px-4 text-[15px] text-[#1E293B]"
-                placeholder="Enter your username"
+                placeholder="Nhập tên tài khoản"
                 placeholderTextColor="#9CA3AF"
                 value={username}
                 onChangeText={setUsername}
@@ -151,7 +151,7 @@ export const CreatePasswordScreen: React.FC = () => {
               <PasswordInput
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Enter your new password"
+                placeholder="Nhập mật khẩu mới"
                 error={passwordError}
               />
 
@@ -159,7 +159,7 @@ export const CreatePasswordScreen: React.FC = () => {
                 ref={confirmPasswordRef}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Enter your password again"
+                placeholder="Nhập lại mật khẩu"
                 error={confirmPasswordError}
                 onFocus={handleConfirmPasswordFocus}
               />

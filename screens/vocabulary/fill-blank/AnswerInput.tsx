@@ -7,6 +7,7 @@ interface AnswerInputProps {
   options: string[];
   selectedAnswer: string | null;
   correctAnswer: string;
+  eliminatedAnswers?: string[];
   isAnswered: boolean;
   onSelectAnswer: (answer: string) => void;
 }
@@ -15,6 +16,7 @@ export const AnswerInput: React.FC<AnswerInputProps> = ({
   options,
   selectedAnswer,
   correctAnswer,
+  eliminatedAnswers = [],
   isAnswered,
   onSelectAnswer,
 }) => {
@@ -31,6 +33,7 @@ export const AnswerInput: React.FC<AnswerInputProps> = ({
             label={label}
             isSelected={selectedAnswer === option}
             isCorrect={option === correctAnswer}
+            isHidden={eliminatedAnswers.includes(option)}
             isAnswered={isAnswered}
             onPress={() => onSelectAnswer(option)}
           />

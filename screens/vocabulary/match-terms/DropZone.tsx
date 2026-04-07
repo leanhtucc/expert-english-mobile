@@ -17,7 +17,7 @@ export const DropZone: React.FC<DropZoneProps> = ({ label, isEmpty, children }) 
       >
         {isEmpty ? (
           <View className="flex-1 items-center justify-center p-4">
-            <Text className="text-center text-sm text-gray-400">Tap items to match</Text>
+            <Text className="text-center text-sm text-gray-400">Kéo thả các mục để ghép</Text>
           </View>
         ) : (
           children

@@ -89,5 +89,9 @@ export const learningApi = {
 
   /** multipart/form-data: audio_file, vocab_id, reference_text, lesson_id (tuỳ chọn) */
   submitSpeakingPronunciation: (formData: FormData) =>
-    apiClient.postForm<unknown>(EXERCISES_ROUTES.submitSpeakingPronunciation, formData),
+    apiClient.post<unknown>(EXERCISES_ROUTES.submitSpeakingPronunciation, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
 };

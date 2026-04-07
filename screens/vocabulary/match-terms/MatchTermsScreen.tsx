@@ -100,7 +100,7 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
-        <View className="w-full px-5 pt-4 pb-2">
+        <View className="w-full px-5 pb-2 pt-4">
           <ProgressBar
             current={displayProgress.current}
             total={displayProgress.total}
@@ -117,10 +117,10 @@ export const MatchTermsScreen: React.FC<MatchTermsScreenProps> = ({
           <View className="flex-row items-start justify-between px-5 py-6">
             <View className="flex-1 pr-4">
               <Text className="mb-1.5 text-[22px] font-black tracking-tight text-[#1E293B]">
-                Connect the Terms
+                Ghép các thuật ngữ
               </Text>
               <Text className="text-[14.5px] leading-5 text-[#64748B]">
-                Tap a word on the left, then tap its meaning on the right.
+                Kéo thả các mục để ghép
               </Text>
             </View>
 

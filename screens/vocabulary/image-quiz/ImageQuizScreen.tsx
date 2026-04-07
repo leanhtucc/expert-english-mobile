@@ -68,7 +68,7 @@ export const ImageQuizScreen: React.FC<ImageQuizScreenProps> = ({
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
-        <View className="w-full px-5 pt-5 pb-2">
+        <View className="w-full px-5 pb-2 pt-5">
           <ProgressBar
             current={displayProgress.current}
             total={displayProgress.total}

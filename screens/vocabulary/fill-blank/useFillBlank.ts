@@ -19,6 +19,7 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [eliminatedAnswers, setEliminatedAnswers] = useState<string[]>([]);
   const [, setCorrectCount] = useState(0);
 
   const currentQuestion = questions[currentIndex];
@@ -28,11 +29,19 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
 
   const handleSelectAnswer = useCallback(
     (answer: string) => {
-      if (isAnswered) return;
+      if (isAnswered || eliminatedAnswers.includes(answer)) return;
       setSelectedAnswer(answer);
     },
-    [isAnswered]
+    [isAnswered, eliminatedAnswers]
   );
+
+  const eliminateSelectedAnswer = useCallback(() => {
+    if (!selectedAnswer || selectedAnswer === currentQuestion?.correctAnswer) return;
+
+    setEliminatedAnswers(prev =>
+      prev.includes(selectedAnswer) ? prev : [...prev, selectedAnswer]
+    );
+  }, [selectedAnswer, currentQuestion?.correctAnswer]);
 
   const handleNext = useCallback(() => {
     if (!isAnswered) {
@@ -51,6 +60,7 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
       setCurrentIndex(prev => prev + 1);
       setSelectedAnswer(null);
       setIsAnswered(false);
+      setEliminatedAnswers([]);
     }
   }, [isAnswered, isLastQuestion, selectedAnswer, currentQuestion?.correctAnswer, onComplete]);
 
@@ -58,6 +68,7 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
     setCurrentIndex(0);
     setSelectedAnswer(null);
     setIsAnswered(false);
+    setEliminatedAnswers([]);
     setCorrectCount(0);
   }, []);
   const resetAnswer = useCallback(() => {
@@ -70,6 +81,7 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
     currentIndex,
     totalQuestions: questions.length,
     selectedAnswer,
+    eliminatedAnswers,
     isAnswered,
     isCorrect,
     isLastQuestion,
@@ -83,6 +95,7 @@ export const useFillBlank = ({ questions, onComplete }: UseFillBlankProps) => {
       total: questions.length,
     },
     handleSelectAnswer,
+    eliminateSelectedAnswer,
     handleNext,
     reset,
     resetAnswer,

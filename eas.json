@@ -30,7 +30,9 @@
         "APP_ENV": "development",
         "EXPO_PUBLIC_API_URL": "https://prolingo-be.iuptit.com",
         "EXPO_PUBLIC_ENVIRONMENT": "development",
-        "EXPO_PUBLIC_DEBUG_MODE": "true"
+        "EXPO_PUBLIC_DEBUG_MODE": "true",
+        "SENTRY_ORG": "anh-tu-studio",
+        "SENTRY_PROJECT": "experenglish"
       },
       "android": {
         "buildType": "apk"
@@ -43,7 +45,9 @@
         "buildType": "apk"
       },
       "env": {
-        "APP_ENV": "staging"
+        "APP_ENV": "staging",
+        "SENTRY_ORG": "anh-tu-studio",
+        "SENTRY_PROJECT": "experenglish"
       }
     },
     "production-apk": {
@@ -53,7 +57,9 @@
         "buildType": "apk"
       },
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "SENTRY_ORG": "anh-tu-studio",
+        "SENTRY_PROJECT": "experenglish"
       }
     },
     "production-release": {
@@ -63,7 +69,9 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "SENTRY_ORG": "anh-tu-studio",
+        "SENTRY_PROJECT": "experenglish"
       }
     },
     "production": {
@@ -72,7 +80,9 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "SENTRY_ORG": "anh-tu-studio",
+        "SENTRY_PROJECT": "experenglish"
       }
     }
   }

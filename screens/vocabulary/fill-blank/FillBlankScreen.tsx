@@ -31,11 +31,13 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
   const {
     currentQuestion,
     selectedAnswer,
+    eliminatedAnswers,
     isAnswered,
     isCorrect,
     progress: internalProgress,
     sentenceParts,
     handleSelectAnswer,
+    eliminateSelectedAnswer,
     handleNext,
     resetAnswer,
   } = useFillBlank({
@@ -68,15 +70,16 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
         wrongReportedRef.current = true;
       }
       timer = setTimeout(() => {
+        eliminateSelectedAnswer();
         resetAnswer();
         wrongReportedRef.current = false; // Reset cờ sai cho phép đếm lỗi lần sau
-      }, 1500);
+      }, 700);
     }
 
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isAnswered, isCorrect, resetAnswer, onComplete, isTransitioning]);
+  }, [isAnswered, isCorrect, resetAnswer, onComplete, isTransitioning, eliminateSelectedAnswer]);
 
   const handlePressHint = () => {
     setIsHintUsed(true);
@@ -106,7 +109,7 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
       </View>
 
       <View className="flex-1 bg-[#F8FAFC]">
-        <View className="w-full px-5 pt-4 pb-5">
+        <View className="w-full px-5 pb-5 pt-4">
           <ProgressBar
             current={displayProgress.current}
             total={displayProgress.total}
@@ -138,6 +141,7 @@ export const FillBlankScreen: React.FC<FillBlankScreenProps> = ({
               options={currentQuestion.options}
               selectedAnswer={selectedAnswer}
               correctAnswer={currentQuestion.correctAnswer}
+              eliminatedAnswers={eliminatedAnswers}
               isAnswered={displayAsAnswered} // 🌟 Truyền state đã chặn nháy
               onSelectAnswer={handleSelectAnswer}
             />

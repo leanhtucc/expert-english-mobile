@@ -31,6 +31,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
     predictiveBackGestureEnabled: false,
   },
   web: {
+    bundler: 'metro',
     output: 'static',
     favicon: './assets/images/icon-app.png',
   },
@@ -54,9 +55,9 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
     [
       '@sentry/react-native/expo',
       {
-        url: 'https://sentry.io/',
-        project: 'react-native',
-        organization: 'anh-tu-studio',
+        url: process.env.SENTRY_URL || 'https://sentry.io/',
+        project: process.env.SENTRY_PROJECT || 'experenglish',
+        organization: process.env.SENTRY_ORG || 'anh-tu-studio',
       },
     ],
   ],

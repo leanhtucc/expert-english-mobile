@@ -56,12 +56,12 @@ export default function LeaderboardScreen() {
         {/* Podium section */}
         <View className="relative overflow-hidden">
           {/* Background gradient for podium only */}
-          <View className="absolute left-0 right-0 top-0 bottom-0">
+          <View className="absolute bottom-0 left-0 right-0 top-0">
             <ImageLinearBackground width="100%" height="100%" />
           </View>
 
           {/* Podium content with padding */}
-          <View className="px-4 pt-12 pb-0">
+          <View className="px-4 pb-0 pt-12">
             {/* Podium columns: 2nd | 1st | 3rd */}
             <View className="flex-row items-end justify-center gap-3">
               <PodiumColumn
@@ -90,7 +90,7 @@ export default function LeaderboardScreen() {
         </View>
 
         {/* Ranking list */}
-        <View className="px-4 pt-10 pb-4" style={{ backgroundColor: 'transparent' }}>
+        <View className="px-4 pb-4 pt-10" style={{ backgroundColor: 'transparent' }}>
           {rest.map((player, index) => {
             const showGap =
               index > 0 &&

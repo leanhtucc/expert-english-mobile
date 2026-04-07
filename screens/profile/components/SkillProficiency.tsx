@@ -182,7 +182,7 @@ export const SkillProficiency = () => {
       </View>
 
       {/* --- PHẦN 2: THỐNG KÊ HÀNG NGÀY --- */}
-      <View className="p-5 pt-6 pb-8">
+      <View className="p-5 pb-8 pt-6">
         <Text className="mb-6 text-lg font-bold" style={{ color: colors.text }}>
           Thống kê hàng ngày
         </Text>

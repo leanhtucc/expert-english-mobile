@@ -14,3 +14,9 @@ export const SPEAKING_EXERCISE_LV1: SpeakingExerciseTypeRef = {
   code: 'speaking_lv1',
   _id: '69c78fbbfafeaed720861032',
 };
+
+/** speaking_lv2 — id cố định từ API */
+export const SPEAKING_EXERCISE_LV2: SpeakingExerciseTypeRef = {
+  code: 'speaking_lv2',
+  _id: '69c78fbbfafeaed720861032',
+};

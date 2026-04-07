@@ -105,7 +105,7 @@ export default function RenewalScreen() {
         contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="mt-4 mb-8 w-full items-center justify-center">
+        <View className="mb-8 mt-4 w-full items-center justify-center">
           <IconMascoWelcomback width={220} height={220} />
         </View>
 

@@ -47,6 +47,8 @@ const SPEAKING_RECORD: RecordingOptions = {
 export function useSpeakingPronunciationRecorder() {
   const [micLevel, setMicLevel] = useState(0.22);
   const smoothRef = useRef(0.22);
+  const lastMicEmitAtRef = useRef(0);
+  const lastMicEmitValueRef = useRef(0.22);
   const webTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingActiveRef = useRef(false);
 
@@ -65,7 +67,16 @@ export function useSpeakingPronunciationRecorder() {
     }
     const a = next > smoothRef.current ? 0.82 : 0.38;
     smoothRef.current = smoothRef.current * (1 - a) + next * a;
-    setMicLevel(smoothRef.current);
+
+    // Throttle update để tránh re-render toàn màn hình quá dày (gây lag khi đang record).
+    const now = Date.now();
+    const shouldEmitByTime = now - lastMicEmitAtRef.current >= 75;
+    const shouldEmitByDelta = Math.abs(smoothRef.current - lastMicEmitValueRef.current) >= 0.06;
+    if (shouldEmitByTime || shouldEmitByDelta) {
+      lastMicEmitAtRef.current = now;
+      lastMicEmitValueRef.current = smoothRef.current;
+      setMicLevel(smoothRef.current);
+    }
   }, [recorderState.isRecording, recorderState.metering]);
 
   useEffect(() => {
@@ -83,6 +94,8 @@ export function useSpeakingPronunciationRecorder() {
 
   const start = useCallback(async (): Promise<boolean> => {
     smoothRef.current = 0.22;
+    lastMicEmitAtRef.current = Date.now();
+    lastMicEmitValueRef.current = 0.22;
     setMicLevel(0.22);
 
     if (recordingActiveRef.current) {
@@ -95,7 +108,15 @@ export function useSpeakingPronunciationRecorder() {
         t += 0.18;
         const v = 0.38 + Math.sin(t) * 0.28 + (Math.random() - 0.5) * 0.18;
         smoothRef.current = smoothRef.current * 0.5 + v * 0.5;
-        setMicLevel(smoothRef.current);
+        const now = Date.now();
+        if (
+          now - lastMicEmitAtRef.current >= 75 ||
+          Math.abs(smoothRef.current - lastMicEmitValueRef.current) >= 0.06
+        ) {
+          lastMicEmitAtRef.current = now;
+          lastMicEmitValueRef.current = smoothRef.current;
+          setMicLevel(smoothRef.current);
+        }
       }, 50);
       recordingActiveRef.current = true;
       return true;

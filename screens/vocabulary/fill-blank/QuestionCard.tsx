@@ -27,6 +27,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   isHintUsed = false,
   onPressHint,
 }) => {
+  const hasSelectedAnswer = Boolean(selectedAnswer);
+
   return (
     <View className="w-full rounded-[24px] border border-slate-100 bg-white p-5 shadow-sm">
       {/* Câu hỏi có điền chỗ trống */}
@@ -34,11 +36,17 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
         {beforeBlank}
         <Text
           className={`font-black ${
-            !isAnswered ? 'text-slate-300' : isCorrect ? 'text-[#16a34a]' : 'text-[#e11d48]'
+            !hasSelectedAnswer
+              ? 'text-slate-300'
+              : !isAnswered
+                ? 'text-[#0F172A]'
+                : isCorrect
+                  ? 'text-[#16a34a]'
+                  : 'text-[#e11d48]'
           }`}
           style={{ textDecorationLine: 'underline' }}
         >
-          {isAnswered && selectedAnswer ? ` ${selectedAnswer} ` : ' ____________ '}
+          {hasSelectedAnswer ? ` ${selectedAnswer} ` : ' ____________ '}
         </Text>
         {afterBlank}
       </Text>
