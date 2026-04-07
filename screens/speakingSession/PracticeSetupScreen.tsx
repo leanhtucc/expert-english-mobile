@@ -1,6 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -19,20 +19,119 @@ import {
   parseExercisesByLessonResponse,
   speakingExerciseToScenarioPreview,
 } from '@/types/api/speakingExercise.response';
-import type { PronunciationFeedback } from '@/types/api/submitPronunciation.response';
-import { ScenarioPreview } from '@/types/speaking.types';
+import { ChatMessage, ScenarioPreview } from '@/types/speaking.types';
 import { getTodayLessonIdFromRoadmap } from '@/utils/roadmapTodayLesson';
 
 import { ProgressBar } from '../vocabulary/components';
 import { LessonSummaryScreen } from '../vocabulary/result';
 import { ChatBubbleAI } from './components/ChatBubbleAI';
-import { PronunciationFeedbackCard } from './components/PronunciationFeedbackCard';
-import { ScenarioCard } from './components/ScenarioCard';
+import { ChatBubbleUser } from './components/ChatBubbleUser';
 import { WaveformAnimation } from './components/WaveformAnimation';
 
 type PracticeSetupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PracticeSetup'>;
+type ChatListProps = {
+  isWaitingForSpeaking: boolean;
+  hasScenario: boolean;
+  chatMessages: ChatMessage[];
+  isAwaitingCoachResponse: boolean;
+  currentExerciseIndex: number;
+};
+
+const ChatList = React.memo(
+  ({
+    isWaitingForSpeaking,
+    hasScenario,
+    chatMessages,
+    isAwaitingCoachResponse,
+    currentExerciseIndex,
+  }: ChatListProps) => {
+    const scrollRef = useRef<ScrollView | null>(null);
+
+    useEffect(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, [chatMessages, isAwaitingCoachResponse, isWaitingForSpeaking, currentExerciseIndex]);
+
+    return (
+      <ScrollView
+        ref={scrollRef}
+        className="flex-1"
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 20,
+          flexGrow: 1,
+        }}
+        onContentSizeChange={() => {
+          scrollRef.current?.scrollToEnd({ animated: true });
+        }}
+      >
+        {isWaitingForSpeaking ? (
+          <View className="min-h-[320px] flex-1 justify-start pt-2">
+            <ChatBubbleAI
+              message={{ id: 'loading', role: 'ai', text: '', timestamp: Date.now() }}
+              role="SPEAKING"
+              showTypingIndicator
+            />
+          </View>
+        ) : hasScenario ? (
+          <View>
+            {chatMessages.length > 0 && (
+              <View>
+                {chatMessages.map(message =>
+                  message.role === 'ai' ? (
+                    <ChatBubbleAI
+                      key={message.id}
+                      message={{
+                        id: message.id,
+                        role: 'ai',
+                        text: message.text,
+                        translation: message.translation,
+                        timestamp: message.timestamp,
+                      }}
+                      role="GIẢNG VIÊN"
+                    />
+                  ) : (
+                    <ChatBubbleUser
+                      key={message.id}
+                      message={{
+                        id: message.id,
+                        role: 'user',
+                        text: message.text,
+                        translation: message.translation,
+                        score: message.score,
+                        timestamp: message.timestamp,
+                      }}
+                      role="HỌC VIÊN"
+                      showWordFeedback={false}
+                    />
+                  )
+                )}
+
+                {isAwaitingCoachResponse && (
+                  <ChatBubbleUser
+                    message={{
+                      id: `student-typing-${currentExerciseIndex}`,
+                      role: 'user',
+                      text: '',
+                      timestamp: Date.now(),
+                    }}
+                    role="HỌC VIÊN"
+                    showWordFeedback={false}
+                    showTypingIndicator
+                  />
+                )}
+              </View>
+            )}
+          </View>
+        ) : null}
+      </ScrollView>
+    );
+  }
+);
+ChatList.displayName = 'ChatList';
 
 export const PracticeSetupScreen: React.FC = () => {
+  const nextQuestionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const accessToken = useAuthStore(state => state.accessToken);
   const { data: roadmapData, loading: roadmapLoading } = useRoadmapData(accessToken || '');
   const lessonId = useMemo(() => getTodayLessonIdFromRoadmap(roadmapData), [roadmapData]);
@@ -48,47 +147,34 @@ export const PracticeSetupScreen: React.FC = () => {
 
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
+  const [isAwaitingCoachResponse, setIsAwaitingCoachResponse] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
-  const [pronunciationFeedback, setPronunciationFeedback] = useState<PronunciationFeedback | null>(
-    null
-  );
-  const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   // 🌟 STATE QUẢN LÝ VIỆC HIỆN TỔNG KẾT NỘI BỘ
   const [isFinished, setIsFinished] = useState(false);
 
   useEffect(() => {
     setCurrentExerciseIndex(0);
-    setPronunciationFeedback(null);
-    setShowFeedbackDetails(false);
+    setIsAwaitingCoachResponse(false);
     setIsFinished(false);
+    setChatMessages([]);
   }, [lessonId, exercises.length]);
 
-  // Trong file PracticeSetupScreen.tsx
+  useEffect(() => {
+    return () => {
+      if (nextQuestionTimeoutRef.current) {
+        clearTimeout(nextQuestionTimeoutRef.current);
+        nextQuestionTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const scenario: ScenarioPreview | null = useMemo(() => {
     const ex = exercises[currentExerciseIndex];
     if (!ex) return null;
-
-    const baseScenario = speakingExerciseToScenarioPreview(ex);
-
-    if (pronunciationFeedback) {
-      return {
-        ...baseScenario,
-        score: pronunciationFeedback.score,
-        pronunciationSegments: [
-          {
-            // 🌟 CHỈNH Ở ĐÂY: Ưu tiên baseScenario.exampleAnswer (từ vựng gốc)
-            // thay vì pronunciationFeedback.transcript (kết quả AI nghe được)
-            text: baseScenario.exampleAnswer || pronunciationFeedback.referenceText || '...',
-            isCorrect: pronunciationFeedback.passed,
-          },
-        ],
-      };
-    }
-
-    return baseScenario;
-  }, [exercises, currentExerciseIndex, pronunciationFeedback]);
+    return speakingExerciseToScenarioPreview(ex);
+  }, [exercises, currentExerciseIndex]);
 
   const isWaitingForSpeaking =
     roadmapLoading || (!!lessonId && speakingApiLoading && exercises.length === 0);
@@ -103,7 +189,6 @@ export const PracticeSetupScreen: React.FC = () => {
       primary: '#D32F2F',
       bg: isDark ? colors.background : '#FFF8F7',
       pinkSoft: isDark ? colors.surface : '#FFF0EF',
-      nextBlue: '#7DD3FC',
       headerBg: colors.surfaceElevated,
       border: colors.border,
       textMain: colors.text,
@@ -127,43 +212,133 @@ export const PracticeSetupScreen: React.FC = () => {
     scenario,
     lessonId,
   });
+  const isMicDisabled = isAwaitingCoachResponse || hasRecorded;
+  const isRetryDisabled = isAwaitingCoachResponse;
 
   const goPrevExercise = () => {
-    setCurrentExerciseIndex(i => Math.max(0, i - 1));
+    if (nextQuestionTimeoutRef.current) {
+      clearTimeout(nextQuestionTimeoutRef.current);
+      nextQuestionTimeoutRef.current = null;
+    }
+    const prevIndex = Math.max(0, currentExerciseIndex - 1);
+    setCurrentExerciseIndex(prevIndex);
     setHasRecorded(false);
-    setPronunciationFeedback(null);
-    setShowFeedbackDetails(false);
-  };
-
-  const goNextExercise = () => {
-    if (exercises.length === 0) return;
-    setCurrentExerciseIndex(i => Math.min(exercises.length - 1, i + 1));
-    setHasRecorded(false);
-    setPronunciationFeedback(null);
-    setShowFeedbackDetails(false);
+    setIsAwaitingCoachResponse(false);
+    setChatMessages(prev =>
+      prev.filter(message => {
+        if (!message.id.startsWith('question-')) return false;
+        const turn = Number((message.id.split('-')[1] ?? '-1').trim());
+        return Number.isNaN(turn) || turn <= prevIndex;
+      })
+    );
   };
 
   const startRecording = async () => {
     setHasRecorded(false);
-    setPronunciationFeedback(null);
-    setShowFeedbackDetails(false);
     const ok = await startPronunciationRecording();
     if (ok) setIsRecording(true);
   };
 
   const stopRecording = async () => {
+    const activeScenario = scenario;
+    const isLastExercise = currentExerciseIndex >= exercises.length - 1;
     const uri = await stopPronunciationRecording();
     setIsRecording(false);
     setHasRecorded(true);
-    const fb = await submitAfterRecording(uri);
-    setPronunciationFeedback(fb);
+    setIsAwaitingCoachResponse(true);
+    let fb = null;
+    try {
+      fb = await submitAfterRecording(uri);
+    } finally {
+      setIsAwaitingCoachResponse(false);
+    }
+    console.log('[PracticeSetup] submitAfterRecording response:', fb);
+
+    if (activeScenario) {
+      const now = Date.now();
+      const userText = fb?.transcript?.trim() || activeScenario.exampleAnswer || '...';
+      const learnerHint = fb?.learnerHint?.trim();
+      const overallFeedback = fb?.overallFeedback?.trim();
+      const aiText =
+        [learnerHint, overallFeedback].filter(Boolean).join('\n\n') ||
+        'Mình đã nhận câu trả lời của bạn. Chúng ta sang câu tiếp theo nhé.';
+
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `user-${currentExerciseIndex}-${now}`,
+          role: 'user',
+          text: userText,
+          translation: activeScenario.exampleAnswerTranslation,
+          score: fb?.score,
+          timestamp: now,
+        },
+        {
+          id: `coach-${currentExerciseIndex}-${now}`,
+          role: 'ai',
+          text: aiText,
+          timestamp: now + 1,
+        },
+      ]);
+    }
+
+    if (exercises.length === 0) return;
+
+    // Hiện phản hồi bot xong thì chuyển câu hỏi tiếp theo ngay.
+    if (isLastExercise) {
+      setIsFinished(true);
+    } else {
+      const nextIndex = Math.min(exercises.length - 1, currentExerciseIndex + 1);
+      if (nextQuestionTimeoutRef.current) {
+        clearTimeout(nextQuestionTimeoutRef.current);
+      }
+      // Delay nhẹ để người dùng kịp đọc phản hồi trước khi sang câu kế.
+      nextQuestionTimeoutRef.current = setTimeout(() => {
+        setCurrentExerciseIndex(nextIndex);
+        setHasRecorded(false);
+        nextQuestionTimeoutRef.current = null;
+      }, 2500);
+    }
   };
 
-  const handleRetry = () => {
+  const handleRetry = async () => {
+    if (nextQuestionTimeoutRef.current) {
+      clearTimeout(nextQuestionTimeoutRef.current);
+      nextQuestionTimeoutRef.current = null;
+    }
+    const prevIndex = Math.max(0, currentExerciseIndex - 1);
+    setCurrentExerciseIndex(prevIndex);
+    setIsAwaitingCoachResponse(false);
     setHasRecorded(false);
-    setPronunciationFeedback(null);
-    setShowFeedbackDetails(false);
+    setChatMessages(prev =>
+      prev.filter(message => {
+        if (!message.id.startsWith('question-')) return false;
+        const turn = Number((message.id.split('-')[1] ?? '-1').trim());
+        return Number.isNaN(turn) || turn <= prevIndex;
+      })
+    );
+
+    const ok = await startPronunciationRecording();
+    if (ok) setIsRecording(true);
   };
+
+  useEffect(() => {
+    if (!scenario) return;
+    setChatMessages(prev => {
+      const hasQuestion = prev.some(m => m.id.startsWith(`question-${currentExerciseIndex}-`));
+      if (hasQuestion) return prev;
+      return [
+        ...prev,
+        {
+          id: `question-${currentExerciseIndex}-${Date.now()}`,
+          role: 'ai',
+          text: scenario.question,
+          translation: scenario.translation,
+          timestamp: Date.now(),
+        },
+      ];
+    });
+  }, [currentExerciseIndex, scenario]);
 
   // 🌟 NẾU ĐÃ BẤM HOÀN THÀNH: Render màn hình tổng kết đè lên luôn
   if (isFinished) {
@@ -246,48 +421,13 @@ export const PracticeSetupScreen: React.FC = () => {
         </View>
       </View>
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 20,
-          flexGrow: 1,
-        }}
-      >
-        {isWaitingForSpeaking ? (
-          <View className="min-h-[320px] flex-1 justify-start pt-2">
-            <ChatBubbleAI
-              message={{ id: 'loading', role: 'ai', text: '', timestamp: Date.now() }}
-              role="SPEAKING"
-              showTypingIndicator
-            />
-          </View>
-        ) : scenario ? (
-          <View>
-            <ScenarioCard
-              scenario={scenario}
-              mode="dual-explorer"
-              showUserBubble={hasRecorded}
-              showWordFeedback={hasRecorded}
-              onToggleFeedback={() => setShowFeedbackDetails(prev => !prev)}
-              isFeedbackVisible={showFeedbackDetails}
-            />
-            {hasRecorded && pronunciationFeedback && showFeedbackDetails && (
-              <PronunciationFeedbackCard
-                feedback={pronunciationFeedback}
-                textMain={COLORS.textMain}
-                textMuted={COLORS.textMuted}
-                borderColor={COLORS.border}
-                surfaceBg={isDark ? colors.surface : '#FFFFFF'}
-                accentColor={COLORS.primary}
-                mistakeRowBg={isDark ? 'rgba(255,255,255,0.08)' : '#F3F4F6'}
-                isDark={isDark}
-              />
-            )}
-          </View>
-        ) : null}
-      </ScrollView>
+      <ChatList
+        isWaitingForSpeaking={isWaitingForSpeaking}
+        hasScenario={!!scenario}
+        chatMessages={chatMessages}
+        isAwaitingCoachResponse={isAwaitingCoachResponse}
+        currentExerciseIndex={currentExerciseIndex}
+      />
 
       <View
         className={`border-t pt-4 ${isRecording ? 'px-0' : 'px-4'}`}
@@ -298,11 +438,8 @@ export const PracticeSetupScreen: React.FC = () => {
         }}
       >
         {!isRecording ? (
-          <View className="min-h-[140px] w-full justify-center px-2">
-            <View
-              className="flex-row items-center justify-center"
-              style={{ gap: 28, maxWidth: '100%' }}
-            >
+          <View className="relative min-h-[140px] w-full justify-center px-2">
+            <View className="absolute left-2 top-1/2 -translate-y-1/2 items-center">
               <View className="w-[76px] items-center">
                 <TouchableOpacity
                   onPress={goPrevExercise}
@@ -317,48 +454,41 @@ export const PracticeSetupScreen: React.FC = () => {
                 </TouchableOpacity>
                 <Text className="mt-1 text-[10px] font-medium text-gray-500">Câu trước</Text>
               </View>
+            </View>
 
-              <View className="items-center">
-                <TouchableOpacity
-                  onPress={() => void (hasRecorded ? handleRetry() : startRecording())}
-                  className="h-[72px] w-[72px] items-center justify-center rounded-full shadow-lg"
-                  style={{ backgroundColor: COLORS.primary, elevation: 8 }}
-                >
-                  {hasRecorded ? (
-                    <IconRepeat width={34} height={34} color="#FFFFFF" />
-                  ) : (
-                    <IconMicrophone width={30} height={30} color="#FFFFFF" />
-                  )}
-                </TouchableOpacity>
-                <Text className="mt-2 text-xs font-semibold text-gray-600">
-                  {hasRecorded ? 'Thử lại' : 'Nhấn để nói'}
-                </Text>
-              </View>
-
+            <View className="absolute right-2 top-1/2 -translate-y-1/2 items-center">
               <View className="w-[76px] items-center">
                 <TouchableOpacity
-                  onPress={() => {
-                    if (currentExerciseIndex >= exercises.length - 1) {
-                      // 🌟 THAY ĐỔI: SET FINISHED THAY VÌ NAVIGATE
-                      setIsFinished(true);
-                    } else {
-                      goNextExercise();
-                    }
-                  }}
-                  disabled={exercises.length === 0}
+                  onPress={() => void handleRetry()}
+                  disabled={isRetryDisabled}
                   className="h-14 w-14 items-center justify-center rounded-full"
-                  style={{ backgroundColor: COLORS.nextBlue }}
+                  style={{
+                    backgroundColor: COLORS.pinkSoft,
+                    opacity: isRetryDisabled ? 0.4 : 1,
+                  }}
                 >
-                  {currentExerciseIndex >= exercises.length - 1 ? (
-                    <Feather name="check" size={26} color="#FFFFFF" />
-                  ) : (
-                    <Feather name="chevron-right" size={26} color="#FFFFFF" />
-                  )}
+                  <IconRepeat width={28} height={28} color="#9CA3AF" />
                 </TouchableOpacity>
-                <Text className="mt-1 text-[10px] font-medium text-gray-500">
-                  {currentExerciseIndex >= exercises.length - 1 ? 'Hoàn thành' : 'Tiếp theo'}
-                </Text>
+                <Text className="mt-1 text-[10px] font-medium text-gray-500">Thử lại</Text>
               </View>
+            </View>
+
+            <View className="items-center self-center">
+              <TouchableOpacity
+                onPress={() => void startRecording()}
+                disabled={isMicDisabled}
+                className="h-[72px] w-[72px] items-center justify-center rounded-full shadow-lg"
+                style={{
+                  backgroundColor: COLORS.primary,
+                  elevation: 8,
+                  opacity: isMicDisabled ? 0.45 : 1,
+                }}
+              >
+                <IconMicrophone width={30} height={30} color="#FFFFFF" />
+              </TouchableOpacity>
+              <Text className="mt-2 text-xs font-semibold text-gray-600">
+                {isAwaitingCoachResponse ? 'Đang xử lý...' : 'Nhấn để nói'}
+              </Text>
             </View>
           </View>
         ) : (

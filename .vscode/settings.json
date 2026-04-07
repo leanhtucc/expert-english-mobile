@@ -31,5 +31,7 @@
   // Tailwind CSS IntelliSense
   "tailwindCSS.experimental.classRegex": [
     ["className\\s*[:=]\\s*['\"`]([^'\"`]*)['\"`]", "([^'\"`]*)"]
-  ]
+  ],
+  "java.compile.nullAnalysis.mode": "disabled",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }
