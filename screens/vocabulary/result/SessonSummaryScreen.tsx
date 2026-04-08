@@ -1,13 +1,16 @@
 import { Feather } from '@expo/vector-icons';
 
 import React from 'react';
-import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
+import { StatusBar } from 'expo-status-bar';
 
 import { useNavigation } from '@react-navigation/native';
 
 import { IMageSessionSummary } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 import { ResultStatCard } from '../components';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -36,6 +39,7 @@ export const SessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
+  const { isDark } = useAppTheme();
 
   const handleGoHome = () => {
     if (onClose) onClose();
@@ -44,7 +48,7 @@ export const SessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
 
   return (
     <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" translucent={false} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       <ScrollView
         className="w-full flex-1"

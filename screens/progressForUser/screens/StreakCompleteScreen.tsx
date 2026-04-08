@@ -1,20 +1,23 @@
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import React from 'react';
-import { StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { IconCongration7D, IconSalesWhite } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useProgress } from '../hooks/useProgress';
 
 export const StreakCompleteScreen = ({ navigation }: any) => {
   useProgress();
-
+  const { isDark } = useAppTheme();
   return (
     <SafeAreaView className="flex-1 bg-[#F6F3F2]">
-      <StatusBar barStyle="dark-content" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <View className="flex-1 justify-between px-6 pb-8 pt-4">
         {/* Hero Section */}
         <View className="relative mt-8 flex-1 items-center justify-center">

@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
@@ -470,6 +472,7 @@ export const PracticeSetupScreen: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.bg }} edges={['top']}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <View
         className="border-b px-4 pb-4 pt-2"
         style={{ borderBottomColor: COLORS.border, backgroundColor: COLORS.headerBg }}

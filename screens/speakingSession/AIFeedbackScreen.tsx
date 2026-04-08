@@ -1,5 +1,8 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { StatusBar } from 'expo-status-bar';
 
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -11,6 +14,7 @@ import {
   IconNextButton,
   IconRepeat,
 } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { RootStackParamList } from '@/navigation';
 import { HighlightedText } from '@/types/speaking.types';
 
@@ -43,6 +47,7 @@ const mockFeedback = {
 
 export const AIFeedbackScreen: React.FC = () => {
   const navigation = useNavigation<AIFeedbackScreenNavigationProp>();
+  const { isDark } = useAppTheme();
   // Future: Use route.params to get user answer and display actual feedback
   // const route = useRoute<RouteProp<RootStackParamList, 'AIFeedback'>>();
   // const userAnswer = route.params?.userAnswer || '';
@@ -58,6 +63,7 @@ export const AIFeedbackScreen: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       {/* Header */}
       <View className="mt-5 border-b border-gray-200 px-4 py-4">
         <View className="flex-row items-center justify-between">

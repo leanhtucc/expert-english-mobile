@@ -6,13 +6,14 @@ import {
   FlatList,
   LayoutAnimation,
   Platform,
-  StatusBar,
   Text,
   TouchableOpacity,
   UIManager,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { StatusBar } from 'expo-status-bar';
 
 import { useNavigation, useRoute } from '@react-navigation/native';
 
@@ -48,7 +49,6 @@ Header.displayName = 'Header';
 
 function useVocabPalette(): VocabPalette {
   const { colors, isDark } = useAppTheme();
-
   return useMemo(
     () => ({
       primary: '#D32F2F',
@@ -72,6 +72,7 @@ function useVocabPalette(): VocabPalette {
 
 export default function VocabularyListScreen() {
   const [isMeaningHidden, setIsMeaningHidden] = useState(false);
+  const { isDark } = useAppTheme();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { lessonId } = route.params || {};
@@ -104,7 +105,7 @@ export default function VocabularyListScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: palette.bg }}>
-      <StatusBar barStyle={palette.statusBarStyle} backgroundColor={palette.headerBg} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <Header onBack={handleBack} palette={palette} />
 
       <View className="px-5 py-4">

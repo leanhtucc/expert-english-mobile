@@ -55,6 +55,44 @@ export const TagBadge = memo(({ text }: { text: string; type?: 'pos' | 'status' 
 });
 TagBadge.displayName = 'TagBadge';
 
+// Bảng màu avatar — mỗi từ có màu riêng theo chữ cái đầu
+const AVATAR_COLORS = [
+  '#FF6B6B',
+  '#4ECDC4',
+  '#A78BFA',
+  '#F59E0B',
+  '#34D399',
+  '#60A5FA',
+  '#F472B6',
+  '#FB923C',
+  '#6EE7B7',
+  '#FCA5A5',
+];
+
+const WordAvatar = memo(
+  ({ word, size, borderRadius }: { word: string; size: number; borderRadius: number }) => {
+    const idx = word ? word.charCodeAt(0) % AVATAR_COLORS.length : 0;
+    const bg = AVATAR_COLORS[idx];
+    const letter = word ? word[0].toUpperCase() : '?';
+
+    return (
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius,
+          backgroundColor: bg,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ color: '#fff', fontWeight: '800', fontSize: size * 0.42 }}>{letter}</Text>
+      </View>
+    );
+  }
+);
+WordAvatar.displayName = 'WordAvatar';
+
 export const VocabularyItemCompact = memo(
   ({
     item,
@@ -65,20 +103,29 @@ export const VocabularyItemCompact = memo(
     onPlayAudio: (url: string | null | undefined) => void;
     palette: VocabPalette;
   }) => {
-    const seed = item.word ? (item.word.length % 10) + 1 : 1;
-    const fallbackImage = `https://picsum.photos/seed/${seed}10/200/200`;
-
     return (
       <View
         className="mb-3 flex-row items-center rounded-[16px] border p-3 shadow-sm"
         style={{ borderColor: palette.border, backgroundColor: palette.card }}
       >
-        <Image
-          source={{ uri: item.imageUrl || fallbackImage }}
-          className="mr-3 h-[60px] w-[60px] rounded-[12px] bg-gray-100"
-          transition={200}
-          cachePolicy="disk"
-        />
+        {item.imageUrl ? (
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: 12,
+              marginRight: 12,
+              backgroundColor: '#f3f4f6',
+            }}
+            transition={200}
+            cachePolicy="disk"
+          />
+        ) : (
+          <View style={{ marginRight: 12 }}>
+            <WordAvatar word={item.word} size={60} borderRadius={12} />
+          </View>
+        )}
         <View className="flex-1 justify-center">
           <Text className="text-[16px] font-bold" style={{ color: palette.textMain }}>
             {item.word}
@@ -116,21 +163,30 @@ export const VocabularyItemExpanded = memo(
     onPlayAudio: (url: string | null | undefined) => void;
     palette: VocabPalette;
   }) => {
-    const seed = item.word ? (item.word.length % 10) + 1 : 1;
-    const fallbackImage = `https://picsum.photos/seed/${seed}10/200/200`;
-
     return (
       <View
         className="mb-4 rounded-[20px] border p-4 shadow-sm"
         style={{ borderColor: palette.expandedBorder, backgroundColor: palette.card }}
       >
         <View className="flex-row">
-          <Image
-            source={{ uri: item.imageUrl || fallbackImage }}
-            className="mr-4 h-[60px] w-[60px] rounded-[14px] bg-gray-100"
-            transition={200}
-            cachePolicy="disk"
-          />
+          {item.imageUrl ? (
+            <Image
+              source={{ uri: item.imageUrl }}
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 14,
+                marginRight: 16,
+                backgroundColor: '#f3f4f6',
+              }}
+              transition={200}
+              cachePolicy="disk"
+            />
+          ) : (
+            <View style={{ marginRight: 16 }}>
+              <WordAvatar word={item.word} size={60} borderRadius={14} />
+            </View>
+          )}
           <View className="flex-1 justify-center pt-1">
             <Text className="text-[18px] font-bold" style={{ color: palette.textMain }}>
               {item.word}

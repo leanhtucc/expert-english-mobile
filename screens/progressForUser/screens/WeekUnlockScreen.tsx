@@ -4,7 +4,10 @@ import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { IconRoadmap, IconUpload, ImageMascoNewRoadmap } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { WeekTimeline } from '../components/WeekTimeline';
@@ -12,11 +15,13 @@ import { useProgress } from '../hooks/useProgress';
 
 export const WeekUnlockScreen = ({ navigation }: any) => {
   const { data, loading } = useProgress();
+  const { isDark } = useAppTheme();
 
   if (loading || !data) return null;
 
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8F7]">
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}

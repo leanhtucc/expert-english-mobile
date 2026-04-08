@@ -1,16 +1,20 @@
 import { Feather } from '@expo/vector-icons';
 
 import React, { useMemo, useState } from 'react';
-import { FlatList, Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Platform, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { IconMascoCertificates } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 import { CertificateCard } from '../components/CertificateCard';
 import { TabBar, TabType } from '../components/TabBar';
 import { MOCK_DATA } from '../constants/profile.constants';
 
 export default function CertificatesScreen() {
+  const { isDark } = useAppTheme();
   const [activeTab, setActiveTab] = useState<TabType>('Đã hoàn thành');
 
   // Logic lọc data theo tab
@@ -55,7 +59,7 @@ export default function CertificatesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8F7]" edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FEF9F9" translucent={false} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       {/* Fixed Header */}
       <View className="flex-row items-center justify-between border-b border-transparent px-5 pb-3 pt-2">

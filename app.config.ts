@@ -30,6 +30,10 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
   },
+  androidStatusBar: {
+    barStyle: 'dark-content',
+    translucent: true,
+  },
   web: {
     bundler: 'metro',
     output: 'static',

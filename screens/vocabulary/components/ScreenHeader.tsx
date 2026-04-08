@@ -1,7 +1,10 @@
 import React from 'react';
-import { StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
+
+import { StatusBar } from 'expo-status-bar';
 
 import { IconBackLession } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 interface ScreenHeaderProps {
   title: string;
@@ -20,9 +23,10 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   className = '',
   rightAction,
 }) => {
+  const { isDark } = useAppTheme();
   return (
     <View className={`flex-row items-center justify-between bg-white px-2 py-3 ${className}`}>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       {/* GỠ BỎ ĐIỀU KIỆN ẨN NÚT: Nút Back giờ sẽ luôn luôn hiện */}
       <View className="w-16 items-start justify-center pl-2">

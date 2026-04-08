@@ -4,6 +4,8 @@ import React from 'react';
 import { ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { ImageLinearBackground } from '@/components/icon';
 import { mockLeaderboard } from '@/data/mock-data';
 import { useAppTheme } from '@/hooks/useAppTheme';
@@ -29,6 +31,7 @@ export default function LeaderboardScreen() {
 
   return (
     <View className="flex-1" style={{ backgroundColor: bgColor }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       {/* Header */}
       <View
         className="flex-row items-center justify-between px-3"

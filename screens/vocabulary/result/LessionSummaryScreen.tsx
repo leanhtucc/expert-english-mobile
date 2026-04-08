@@ -1,11 +1,12 @@
 import { Feather } from '@expo/vector-icons';
 
 import React from 'react';
-import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 
 import {
   IconLearningGoal,
@@ -13,6 +14,7 @@ import {
   IconVoiceBlack,
   ImageResultLession,
 } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 import { ResultStatCard } from '../components';
 
@@ -44,10 +46,11 @@ export const LessonSummaryScreen: React.FC<LessonSummaryScreenProps> = ({
   showRadarChart = false,
 }) => {
   const insets = useSafeAreaInsets();
+  const { isDark } = useAppTheme();
 
   return (
     <View className="flex-1 bg-[#F9FAFB]">
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       <LinearGradient
         colors={['#FFE4E6', '#F9FAFB']}

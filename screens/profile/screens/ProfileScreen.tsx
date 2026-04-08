@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
+import { StatusBar } from 'expo-status-bar';
+
 import {
   IconCertificates,
   IconMoon,
@@ -43,6 +45,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <ProfileHeader title="Hồ sơ" onBack={() => navigation.goBack()} onShare={() => {}} />
       <ScrollView
         showsVerticalScrollIndicator={false}

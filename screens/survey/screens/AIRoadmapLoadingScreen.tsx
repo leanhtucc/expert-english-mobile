@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
@@ -14,6 +16,7 @@ import {
   IconUpcomming,
   ImageMasco,
 } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { RootStackParamList } from '@/navigation';
 
 type StepStatus = 'completed' | 'in_progress' | 'upcoming';
@@ -40,6 +43,7 @@ const STEP_SEQUENCE: StepStatus[][] = [
 export const AIRoadmapLoadingScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute<any>();
+  const { isDark } = useAppTheme();
 
   const duration = route.params?.duration || 'standard';
 
@@ -171,6 +175,7 @@ export const AIRoadmapLoadingScreen: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <View className="flex-row items-center border-b border-gray-100 px-5 py-3">
         <TouchableOpacity
           onPress={() => navigation.goBack()}

@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
@@ -15,6 +17,7 @@ import {
   IconNoteSuggesstion,
   IconVoice,
 } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { RootStackParamList } from '@/navigation';
 
 type Duration = 'fast' | 'standard' | 'long';
@@ -32,6 +35,7 @@ const SUGGESTED_PROMPTS = [
 
 export const LearningPathScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { isDark } = useAppTheme();
   const [focusText, setFocusText] = useState('');
   const [selectedDuration, setSelectedDuration] = useState<Duration>('standard');
 
@@ -39,6 +43,7 @@ export const LearningPathScreen: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       {/* Header */}
       <View className="flex-row items-center border-b border-gray-100 px-5 py-3">
         <TouchableOpacity

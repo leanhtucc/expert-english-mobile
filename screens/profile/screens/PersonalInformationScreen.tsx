@@ -1,23 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  SafeAreaView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { StatusBar } from 'expo-status-bar';
 
 import { IconPencilLine, IconUserCircle } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { useAuth } from '@/hooks/useAuth';
 
 import { ConfirmModal } from '../components/ConfirmModal';
 
 export default function PersonalInformationScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
+  const { isDark } = useAppTheme();
 
   // Lấy thêm deleteUserAccount từ useAuth
   const { fetchUserInfo, loading: apiLoading, updateProfile, deleteUserAccount } = useAuth();
@@ -97,6 +94,7 @@ export default function PersonalInformationScreen({ navigation }: { navigation: 
 
   return (
     <SafeAreaView className="flex-1 bg-[#F9FAFB]">
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <View className="flex-row items-center justify-between px-5 pt-7">
         <TouchableOpacity onPress={() => navigation.goBack()} className="-ml-2 p-2">
           <Ionicons name="arrow-back" size={26} color="#111827" />

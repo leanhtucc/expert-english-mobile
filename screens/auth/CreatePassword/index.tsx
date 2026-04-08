@@ -5,7 +5,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,10 +12,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import type { RouteProp } from '@react-navigation/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { useAuth } from '@/hooks/useAuth';
 
 import {
@@ -36,6 +38,7 @@ export const CreatePasswordScreen: React.FC = () => {
   const route = useRoute<CreatePasswordScreenRouteProp>();
   // Nhận email và verificationToken từ màn VerifyOTP truyền sang
   const { email = '' } = route.params || {};
+  const { isDark } = useAppTheme();
 
   const { loading, registerNewAccount } = useAuth(); // Gọi Hook
 
@@ -108,7 +111,7 @@ export const CreatePasswordScreen: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"

@@ -1,12 +1,13 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 
-// Thêm dòng này
-
 import React from 'react';
-import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { IconConceptVocab } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 // --- MÀU SẮC CHỦ ĐẠO TỪ THIẾT KẾ ---
 const COLORS = {
@@ -130,6 +131,7 @@ const LessonItem = ({
 // --- MÀN HÌNH CHÍNH ---
 
 export default function DetailedDayScreen({ navigation }: { navigation: any }) {
+  const { isDark } = useAppTheme();
   const handleBack = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
@@ -138,7 +140,7 @@ export default function DetailedDayScreen({ navigation }: { navigation: any }) {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.bg }}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       {/* Truyền hàm xử lý vào prop onBack */}
       <Header title="Day 1: Fundamentals" onBack={handleBack} />

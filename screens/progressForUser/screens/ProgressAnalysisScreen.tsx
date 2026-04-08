@@ -4,7 +4,10 @@ import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { IconCheckVocab, IconNextButtonBlack, IconSpeedSpeaking } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 import { PerformanceCard } from '../components/PerformanceCard';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -23,11 +26,13 @@ const SPEAKING_PERCENT_DATA = [
 
 export const ProgressAnalysisScreen = ({ navigation }: any) => {
   const { data, loading } = useProgress();
+  const { isDark } = useAppTheme();
 
   if (loading || !data) return null;
 
   return (
     <SafeAreaView className="flex-1 bg-[#F6F3F2]">
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <View className="flex-row items-center justify-between px-5 py-4">
         <TouchableOpacity onPress={() => navigation.goBack()} className="h-10 w-10 justify-center">
           <Feather name="arrow-left" size={24} color="#2B1D1D" />

@@ -1,11 +1,14 @@
 import React from 'react';
-import { Dimensions, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { StatusBar } from 'expo-status-bar';
 
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 import { SplashAndWelcomeScreen } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { RootStackParamList } from '@/navigation';
 
 import { OnboardingActions, OnboardingHeader, RobotWithIcons } from './components';
@@ -18,6 +21,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
  */
 export const OnboardingScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { isDark } = useAppTheme();
   const handleGoogleLogin = () => console.log('Google login');
   const handleEmailLogin = () => navigation.navigate('EnterEmail');
 
@@ -33,7 +37,7 @@ export const OnboardingScreen: React.FC = () => {
       </View>
 
       <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
 
         <View style={{ flex: 1 }}>
           <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>

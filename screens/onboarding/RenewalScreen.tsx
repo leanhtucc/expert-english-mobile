@@ -1,10 +1,13 @@
 import { Feather } from '@expo/vector-icons';
 
 import React from 'react';
-import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
 import { IconConceptVocab, IconExtendDeadline, IconMascoWelcomback } from '@/components/icon';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 import { PrimaryButton } from '../progressForUser/components/PrimaryButton';
 import { COLORS } from './onboarding.constants';
@@ -95,9 +98,10 @@ const SecondaryButton: React.FC<ButtonProps> = ({ title, onPress }) => (
 );
 
 export default function RenewalScreen() {
+  const { isDark } = useAppTheme();
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: COLORS.background }}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
       <Header onPress={() => console.log('Go back')} />
 

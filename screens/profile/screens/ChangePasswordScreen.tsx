@@ -1,16 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  SafeAreaView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
+
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/stores/auth.store';
 // Import thêm useAuthStore
@@ -38,6 +34,7 @@ const PasswordInput = ({ label, value, onChange, show, setShow }: any) => (
 
 export default function ChangePasswordScreen({ navigation }: { navigation: any }) {
   const insets = useSafeAreaInsets();
+  const { isDark } = useAppTheme();
 
   const { changeUserPassword } = useAuth();
   const showToast = useToastStore(state => state.showToast);
@@ -89,6 +86,7 @@ export default function ChangePasswordScreen({ navigation }: { navigation: any }
 
   return (
     <SafeAreaView className="flex-1 bg-[#F9FAFB]">
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       {/* Top Bar */}
       <View className="px-5 pt-4">
         <TouchableOpacity

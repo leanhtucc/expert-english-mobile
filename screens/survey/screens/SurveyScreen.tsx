@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Alert, Animated, Easing, StatusBar, View } from 'react-native';
+import { Alert, Animated, Easing, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { StatusBar } from 'expo-status-bar';
 
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 import { surveyApi } from '@/api';
+import { useAppTheme } from '@/hooks/useAppTheme';
 import { RootStackParamList } from '@/navigation';
 import { SubmitSurveyOptionRequest } from '@/types/api/survey.request';
 import { SurveyResponseData } from '@/types/api/survey.response';
@@ -33,6 +36,7 @@ const DEFAULT_ANSWERS: SurveyAnswers = {
 
 export const SurveyScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { isDark } = useAppTheme();
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<SurveyAnswers>(DEFAULT_ANSWERS);
   const [surveyData, setSurveyData] = useState<SurveyResponseData | null>(null);
@@ -179,7 +183,7 @@ export const SurveyScreen: React.FC = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={false} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <SafeAreaView edges={['top']} style={{ backgroundColor: 'white' }}>
         <SurveyHeader currentStep={step} totalSteps={TOTAL_STEPS} onBack={handleBack} />
       </SafeAreaView>
